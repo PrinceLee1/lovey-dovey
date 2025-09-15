@@ -4,6 +4,7 @@ import type { Game, GameResult } from "./types";
 import TruthDareRomantic from "./TruthDareRomantic";
 import EmojiChat from "./EmojiChat";
 import SpiceDice from "./SpiceDice";
+import MemoryMatchCouple from "./MemoryMatchCouple";
 export default function GameRunner({
   game,
   onClose,
@@ -67,6 +68,14 @@ export default function GameRunner({
                 onClose();
                 }}
             />
+            )}
+            {game.kind === "memory_match" && (
+                <MemoryMatchCouple
+                    onFinish={(res) => {
+                    onFinished(res); // your Dashboard persists history + XP
+                    onClose();
+                    }}
+                />
             )}
 
           {/* TODO: add other kinds here as you implement them */}
