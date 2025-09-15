@@ -5,6 +5,8 @@ import TruthDareRomantic from "./TruthDareRomantic";
 import EmojiChat from "./EmojiChat";
 import SpiceDice from "./SpiceDice";
 import MemoryMatchCouple from "./MemoryMatchCouple";
+import TriviaDuoVsDuo from "./TriviaDuoVsDuo";
+import CharadesAI from "./CharadesAI";
 export default function GameRunner({
   game,
   onClose,
@@ -76,6 +78,27 @@ export default function GameRunner({
                     onClose();
                     }}
                 />
+            )}
+            {game.kind === "trivia" && (
+                <TriviaDuoVsDuo
+                    count={10}
+                    secondsPerQ={30}
+                    category="General"
+                    difficulty="Medium"
+                    onFinish={(res) => {
+                    onFinished(res); // your Dashboard handles history + XP
+                    onClose();
+                    }}
+                />
+            )}
+            {game.kind === "charades_ai" && (
+            <CharadesAI
+                secondsPerRound={60}
+                roundsPerTeam={3}
+                category="General"
+                difficulty="Easy"
+                onFinish={(res) => { onFinished(res); onClose(); }}
+            />
             )}
 
           {/* TODO: add other kinds here as you implement them */}

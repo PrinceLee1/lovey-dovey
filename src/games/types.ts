@@ -4,7 +4,7 @@ export type GameKind =
   | "spice_dice"
   | "memory_match"
   | "trivia"
-  | "charades";
+  | "charades_ai";
 
 export type Game = {
   id: string;

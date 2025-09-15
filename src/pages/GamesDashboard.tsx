@@ -40,12 +40,13 @@ export default function GamesDashboard() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [activeGame, setActiveGame] = useState<Game | null>(null);
   const { user } = useAuth();
+  // console.log(user)
   const [xp, setXp] = useState(user?.xp); // replace the static XP chip if you want live updates
   const [previewGame, setPreviewGame] = useState<Game | null>(null);
   const [showCreateLobby, setShowCreateLobby] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
 const [historyLoading, setHistoryLoading] = useState(true);
-  const categories = ["All", "Romantic", "Playful", "Spicy", "Challenge"];
+  const categories = ["All", "Romantic", "Playful", "Spicy", "Challenge", "Erotic"];
   // console.log('User in dashboard:', user);
   const allGames = useMemo<Game[]>(
     () => [
@@ -101,7 +102,7 @@ const [historyLoading, setHistoryLoading] = useState(true);
       },
       {
         id: "g6",
-        kind: "charades",
+        kind: "charades_ai",
         title: "Charades with AI Prompts",
         category: "Playful",
         description: "Act it out, let the group guess!",

@@ -3,7 +3,7 @@ import { api } from '../libs/axios';
 
 type User = {
   id: number; name: string; email: string;
-  phone?: string | null; gender?: string | null; dob?: string | null;
+  phone?: string | null; gender?: string | null; dob?: string | null; xp?: number;
 };
 
 type RegisterPayload = {
