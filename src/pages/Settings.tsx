@@ -354,6 +354,7 @@ export default function Settings() {
                 value={profile.email || ""}
                 onChange={(v) => setProfile((p) => ({ ...p, email: v }))}
                 autoComplete="email"
+                disabled={!!user?.email} // disable if social login
               />
               <LabeledInput
                 label="Phone"
@@ -598,6 +599,7 @@ function LabeledInput({
   placeholder,
   icon,
   autoComplete,
+  disabled
 }: {
   label: string;
   type?: string;
@@ -606,6 +608,7 @@ function LabeledInput({
   placeholder?: string;
   icon?: React.ReactNode;
   autoComplete?: string;
+    disabled?: boolean;
 }) {
   return (
     <div className="space-y-2">
@@ -619,6 +622,7 @@ function LabeledInput({
           placeholder={placeholder}
           autoComplete={autoComplete}
           className={`w-full ${icon ? "pl-10" : "pl-4"} pr-4 py-3 rounded-xl border outline-none focus:ring-2 focus:ring-fuchsia-500`}
+            disabled={disabled}
         />
       </div>
     </div>

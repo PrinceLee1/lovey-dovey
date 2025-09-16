@@ -20,6 +20,8 @@ import { Link } from "react-router-dom";
 import GameRunner from "../games/GameRunner";
 import type { Game, HistoryItem } from "../games/types";
 import api from "../libs/axios";
+import CreateLobbyModal from "../components/lobbies/CreateLobbyModal";
+import UpcomingLobbies from "../components/lobbies/UpcomingLobbies";
 /**
  * GamesDashboard – Couples AI (Web)
  * --------------------------------------------------------------
@@ -238,12 +240,7 @@ useEffect(() => {
                 setActiveGame(pick);         // open the game directly
               }}
             />
-            <ActionCard
-              icon={<Plus className="w-5 h-5" />}
-              title="Create Lobby"
-              desc="Set rules & invite friends"
-              onClick={() => setShowCreateLobby(true)}
-            />
+            <LobbiesSection/>
             <ActionCard
               icon={<Share2 className="w-5 h-5" />}
               title="Invite Partner"
@@ -383,20 +380,8 @@ useEffect(() => {
           </motion.div>
 
           {/* Upcoming Lobbies */}
-          <motion.div {...variants} className="rounded-3xl bg-white shadow-xl border border-rose-100 p-6">
-            <div className="font-display font-semibold text-gray-900 mb-4">Upcoming Lobbies</div>
-            <div className="space-y-3">
-              {upcoming.map((u) => (
-                <div key={u.id} className="border rounded-2xl p-3 flex items-center justify-between">
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">{u.title}</div>
-                    <div className="text-xs text-gray-500">{u.when} • {u.players} players</div>
-                  </div>
-                  <button className="text-sm px-3 py-1.5 rounded-lg border hover:bg-gray-50">Join</button>
-                </div>
-              ))}
-            </div>
-          </motion.div>
+          <UpcomingLobbies variants={variants} />
+
 
           {/* Friends Online */}
           <motion.div {...variants} className="rounded-3xl bg-white shadow-xl border border-rose-100 p-6">
@@ -453,7 +438,7 @@ useEffect(() => {
         )}
 
         {showCreateLobby && (
-          <CreateLobbyModal onClose={() => setShowCreateLobby(false)} />
+          <CreateLobbyModal onClose={() => setShowCreateLobby(false)} open={false} />
         )}
       </AnimatePresence>
     </div>
@@ -526,39 +511,7 @@ function Modal({ children, onClose }: { children: React.ReactNode; onClose: () =
   );
 }
 
-function CreateLobbyModal({ onClose }: { onClose: () => void }) {
-  const [name, setName] = useState("");
-  const [maxPlayers, setMaxPlayers] = useState(4);
-  const [privacy, setPrivacy] = useState<"public" | "private">("public");
-  const [startAt, setStartAt] = useState("");
-  const [entry, setEntry] = useState(0);
 
-  return (
-    <Modal onClose={onClose}>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="font-display text-lg font-semibold text-gray-900">Create Lobby</div>
-          <button onClick={onClose} className="text-sm text-gray-500 hover:text-gray-700">Close</button>
-        </div>
-        <div className="grid grid-cols-1 gap-3">
-          <LabeledInput label="Lobby name" value={name} onChange={setName} placeholder="Game Night" />
-          <div className="grid grid-cols-2 gap-3">
-            <LabeledInput label="Max players" type="number" value={String(maxPlayers)} onChange={(v)=>setMaxPlayers(Number(v))} />
-            <LabeledInput label="Entry (coins)" type="number" value={String(entry)} onChange={(v)=>setEntry(Number(v))} />
-          </div>
-          <LabeledSelect label="Privacy" value={privacy} onChange={(v)=>setPrivacy(v as any)} options={["public","private"]} />
-          <LabeledInput label="Start time" type="datetime-local" value={startAt} onChange={setStartAt} />
-        </div>
-        <button
-          onClick={()=>{ console.log({ name, maxPlayers, privacy, startAt, entry }); onClose(); }}
-          className="w-full rounded-xl px-4 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white"
-        >
-          Create
-        </button>
-      </div>
-    </Modal>
-  );
-}
 
 function LabeledInput({ label, type = "text", value, onChange, placeholder }: { label: string; type?: string; value: string; onChange: (v: string) => void; placeholder?: string; }) {
   return (
@@ -671,3 +624,40 @@ const upcoming = [
 ];
 
 const friends = ["Sam", "Joy", "Liam", "Zoe", "Kai"];
+function LobbiesSection() {
+  const [open, setOpen] = useState(false);
+  const [invite, setInvite] = useState<{ code:string; invite_url:string } | null>(null);
+
+  return (
+    <>
+      <div className="rounded-3xl bg-white shadow-xl border border-rose-100 p-4 flex items-center gap-3 cursor-pointer" onClick={()=>setOpen(true)}>
+        <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-pink-500 to-fuchsia-600 grid place-items-center text-white">
+          <Plus className="w-6 h-6"/>
+        </div>
+        <div className="flex-1">
+          <div className="font-semibold text-gray-900">Create Lobby</div>
+          <div className="text-sm text-gray-500">Set rules & invite friends</div>
+        </div>
+        {/* <button onClick={()=>setOpen(true)} className="rounded-xl px-3 py-2 border hover:bg-gray-50 text-sm">Open</button> */}
+      </div>
+
+      <CreateLobbyModal
+        open={open}
+        onClose={()=>setOpen(false)}
+        onCreated={(p)=> setInvite(p)}
+      />
+
+      {invite && (
+        <div className="mt-3 rounded-2xl border p-3 flex items-center gap-2">
+          <div className="text-sm">Invite link:</div>
+          <code className="text-xs bg-gray-50 px-2 py-1 rounded">{invite.invite_url}</code>
+          <button
+            onClick={()=>navigator.clipboard.writeText(invite.invite_url)}
+            className="ml-auto rounded-lg border px-2 py-1 text-sm hover:bg-gray-50"
+          >Copy</button>
+          <a href={`/lobby/${invite.code}`} className="rounded-lg px-2 py-1 text-sm bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white">Open lobby</a>
+        </div>
+      )}
+    </>
+  );
+}

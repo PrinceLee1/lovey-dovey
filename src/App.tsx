@@ -5,6 +5,9 @@ import GamesDashboard from './pages/GamesDashboard';
 import SignIn from './pages/SignIn';
 import type { JSX } from 'react';
 import Settings from './pages/Settings';
+import LobbyRoom from './pages/LoobyRoom';
+import LobbyGameRunner from "../src/games/LobbyGameRunner";
+
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const { token } = useAuth();
   if (!token) return <Navigate to="/onboarding" replace />;
@@ -35,8 +38,18 @@ export default function App() {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/lobby/:code"
+            element={
+              <PrivateRoute>
+                <LobbyRoom />
+              </PrivateRoute>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
+                  <LobbyGameRunner />
+
       </BrowserRouter>
     </AuthProvider>
   );
