@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import Footer from '../components/Footer';
 
 export default function SignIn() {
   const { login, loading } = useAuth();
@@ -34,6 +35,7 @@ export default function SignIn() {
           Don’t have an account? <Link to="/onboarding" className="text-fuchsia-700">Create one</Link>
         </div>
       </form>
+      <Footer variant="simple" className="mt-6" />
     </div>
   );
 }

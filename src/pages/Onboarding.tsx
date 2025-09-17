@@ -12,6 +12,7 @@ import {
   Phone,
   Calendar as CalIcon,
 } from "lucide-react";
+import Footer from "../components/Footer";
 
 /* ---------- Shell / Layout ---------- */
 
@@ -698,6 +699,8 @@ const [err, setErr] = useState<string|null>(null);
           </AnimatePresence>
         </div>
       </div>
+      <Footer variant="simple" />
+
     </Page>
   );
 }

@@ -22,6 +22,7 @@ import type { Game, HistoryItem } from "../games/types";
 import api from "../libs/axios";
 import CreateLobbyModal from "../components/lobbies/CreateLobbyModal";
 import UpcomingLobbies from "../components/lobbies/UpcomingLobbies";
+import Footer from "../components/Footer";
 /**
  * GamesDashboard – Couples AI (Web)
  * --------------------------------------------------------------
@@ -441,6 +442,8 @@ useEffect(() => {
           <CreateLobbyModal onClose={() => setShowCreateLobby(false)} open={false} />
         )}
       </AnimatePresence>
+      <Footer variant="full" />
+
     </div>
   );
 }
@@ -630,8 +633,8 @@ function LobbiesSection() {
 
   return (
     <>
-      <div className="rounded-3xl bg-white shadow-xl border border-rose-100 p-4 flex items-center gap-3 cursor-pointer" onClick={()=>setOpen(true)}>
-        <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-pink-500 to-fuchsia-600 grid place-items-center text-white">
+      <div className="rounded-3xl bg-white shadow-xl border border-rose-100 p-4 flex items-center gap-3 cursor-pointer  hover:shadow-2xl transition" onClick={()=>setOpen(true)}>
+        <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-pink-500 to-fuchsia-600 grid place-items-center text-white">
           <Plus className="w-6 h-6"/>
         </div>
         <div className="flex-1">

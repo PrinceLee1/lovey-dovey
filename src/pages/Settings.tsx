@@ -21,6 +21,7 @@ import {
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../libs/axios";
+import Footer from "../components/Footer";
 
 /* -------------------------------- Types -------------------------------- */
 
@@ -315,7 +316,15 @@ export default function Settings() {
                   {avatarPreview ? (
                     <img src={avatarPreview} className="h-full w-full object-cover" />
                   ) : (
-                    (user?.name || "U")[0]
+                    (user?.avatar_url ? <img src={user.avatar_url} className="h-full w-full object-cover" /> : null) ||
+                    (user?.name
+                      ? user.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .slice(0, 2)
+                          .join("")
+                          .toUpperCase()
+                      : "?")
                   )}
                 </div>
                 <button
@@ -585,6 +594,7 @@ export default function Settings() {
           </motion.div>
         </div>
       </div>
+      <Footer variant="full" />
     </div>
   );
 }
