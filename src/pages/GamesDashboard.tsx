@@ -10,7 +10,6 @@ import {
   Trophy,
   Share2,
   Play,
-  Clock,
   Settings,
   Plus,
   Search,
@@ -23,6 +22,12 @@ import api from "../libs/axios";
 import CreateLobbyModal from "../components/lobbies/CreateLobbyModal";
 import UpcomingLobbies from "../components/lobbies/UpcomingLobbies";
 import Footer from "../components/Footer";
+import PartnerCard from "../components/partners/PartnerCard";
+import { usePartner } from "../hooks/usePartner";
+import DailyChallengeCard from "../components/DailyChallengeCard";
+import LeaderboardCard from "../components/LeaderboardCard";
+import StreakBadge from "../components/StreakBadge";
+import ProgressCard from "../components/ProgressCard";
 /**
  * GamesDashboard – Couples AI (Web)
  * --------------------------------------------------------------
@@ -48,8 +53,26 @@ export default function GamesDashboard() {
   const [previewGame, setPreviewGame] = useState<Game | null>(null);
   const [showCreateLobby, setShowCreateLobby] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
-const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(true);
   const categories = ["All", "Romantic", "Playful", "Spicy", "Challenge", "Erotic"];
+  const { partner, link, loading: partnerLoading } = usePartner();
+  const partnerActive = !!partner && link?.status === "active";
+  const partnerId = partner?.id ?? null;
+  
+  const [showPartnerModal, setShowPartnerModal] = useState(false);
+  const partnerOnlyKinds = new Set(["truth_dare","emoji_chat","spice_dice","memory_match"]);
+
+  // helper
+  const needsPartner = (g: Game) =>
+    partnerOnlyKinds.has(g.kind) || (g.players ?? 2) <= 2;
+
+  function tryStartGame(g: Game) {
+    if (needsPartner(g) && !partnerActive) {
+      setShowPartnerModal(true);
+      return;
+    }
+    setActiveGame(g);
+  }
   // console.log('User in dashboard:', user);
   const allGames = useMemo<Game[]>(
     () => [
@@ -117,16 +140,20 @@ const [historyLoading, setHistoryLoading] = useState(true);
     []
   );
 
-
+//run effect every 4secs
 useEffect(() => {
-  (async () => {
+  const interval = setInterval(async () => {
     try {
       const { data } = await api.get("/history?limit=6");
+      const userData = await api.get("/me");
       setHistory(data.data ?? []);
-    } finally {
-      setHistoryLoading(false);
+      setXp(userData.data.xp ?? 0);
+    } catch (error) {
+      console.error("Error fetching history:", error);
     }
-  })();
+  }, 4000);
+  setHistoryLoading(false);
+  return () => clearInterval(interval);
 }, []);
 
   const filtered = useMemo(() => {
@@ -179,11 +206,13 @@ useEffect(() => {
           <motion.div {...variants} className="rounded-3xl bg-white shadow-xl border border-rose-100 p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h1 className="font-display text-2xl font-semibold text-gray-900">Hey {user?.name} 👋</h1> {/* Later will change it to "Hey Hey {user?.name} & {partnerName}" */}
-                <p className="text-gray-600">Ready for a little fun? Invite your {user?.gender == 'Male' ? 'girlfriend' : 'boyfriend'} to join the fun 🥰!</p>
+                <h1 className="font-display text-2xl font-semibold text-gray-900">Hey { user?.name} 👋</h1> {/* Later will change it to "Hey Hey {user?.name} & {partnerName}" */}
+                <p className="text-gray-600">
+                  Ready for a little fun? Invite your {user?.gender === 'Male' ? 'girlfriend' : 'boyfriend'} to join the fun 🥰!
+                </p>
               </div>
               <div className="flex items-center gap-3">
-                <span className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm">🔥 5‑day streak</span>
+                <StreakBadge kind="couple" />
                 <span className="bg-fuchsia-50 text-fuchsia-700 px-3 py-1 rounded-full text-sm">⭐ {xp} XP</span>
               </div>
             </div>
@@ -248,27 +277,33 @@ useEffect(() => {
               desc="Share a join link"
               onClick={() => navigator.clipboard.writeText("https://lovely.ai/join/abcd1234")}
             />
-            <ActionCard
-              icon={<Flame className="w-5 h-5" />}
-              title="Daily Challenge"
-              desc="+50 XP if completed"
-              onClick={generateGame}
-            />
+            <DailyChallengeCard onXp={(xp)=>setXp(x=>x+xp)} />
+
           </motion.div>
 
           {/* Featured games */}
           <SectionTitle icon={<Play className="w-4 h-4" />} title="Featured" />
           <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            {filtered.map((g) => (
-              <GameCard
-                key={g.id}
-                game={g}
-                isFavorite={favorites.includes(g.id)}
-                onFavorite={() => toggleFavorite(g.id)}
-                onPreview={() => setPreviewGame(g)}
-              />
-            ))}
+              {filtered.map((g) => {
+                const disabled = needsPartner(g) && !partnerActive;
+                return (
+                  <GameCard
+                    key={g.id}
+                    game={g}
+                    isFavorite={favorites.includes(g.id)}
+                    onFavorite={() => toggleFavorite(g.id)}
+                    // let preview show as usual
+                    onPreview={() => setPreviewGame(g)}
+                    // new explicit onPlay — wire your "Play now" button in GameCard to call this
+                    onPlay={() => tryStartGame(g)}
+                    disabled={disabled}           // (see GameCard change below)
+                    disabledReason="Partner required"
+                  />
+                );
+              })}
           </div>
+
+          {/* Your runner (unchanged) but tweak onFinished payload */}
           {activeGame && (
             <GameRunner
               game={activeGame}
@@ -276,6 +311,7 @@ useEffect(() => {
               onFinished={async (res) => {
                 setXp((x) => x + res.xpEarned);
 
+                const isPartnerGame = needsPartner(activeGame);
                 const payload = {
                   game_id: activeGame.id,
                   game_title: activeGame.title,
@@ -288,26 +324,49 @@ useEffect(() => {
                   skipped: res.skipped,
                   xp_earned: res.xpEarned,
                   meta: res.meta ?? {},
+                  // 🚩 tell backend this is a shared 2-player game
+                  with_partner: isPartnerGame,
+                  partner_id: isPartnerGame ? partnerId : null,
+                  user_id: user?.id,
                 };
 
                 try {
                   const { data } = await api.post("/history", payload);
-                  // Update recent list
                   setHistory((h) => [data.history, ...h].slice(0, 10));
-                  // Update XP using server value (authoritative)
-                  if (data.user?.xp !== undefined) {
-                    setXp(data.user.xp);
-                  } else {
-                    // fallback if backend didn't send xp (shouldn't happen)
-                    setXp((x) => x + payload.xp_earned);
-                  }
+                  if (data.user?.xp !== undefined) setXp(data.user.xp);
                 } catch (e) {
-                  // optional: toast error
                   console.error("Failed to save history", e);
                 }
               }}
             />
           )}
+
+          {/* Partner required modal */}
+          {showPartnerModal && (
+            <div className="fixed inset-0 bg-black/30 grid place-items-center z-50">
+              <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl">
+                <div className="text-lg font-semibold text-gray-900">Partner required</div>
+                <p className="text-sm text-gray-600 mt-1">
+                  This game is for two players. Link your partner to play and save progress together.
+                </p>
+                <div className="mt-4 flex items-center justify-end gap-2">
+                  <button
+                    onClick={() => setShowPartnerModal(false)}
+                    className="px-3 py-2 rounded-xl border text-sm hover:bg-gray-50"
+                  >
+                    Close
+                  </button>
+                  <a
+                    href="/games#partner"
+                    className="px-3 py-2 rounded-xl text-sm text-white bg-gradient-to-r from-pink-500 to-fuchsia-600"
+                  >
+                    Invite / Link partner
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* History */}
           <SectionTitle icon={<History className="w-4 h-4" />} title="Recently Played" />
 
@@ -345,40 +404,17 @@ useEffect(() => {
               ))
             )}
           </div>
+          <PartnerCard />
+
         </div>
 
         {/* SIDEBAR */}
         <div className="space-y-6">
           {/* Streak & XP */}
-          <motion.div {...variants} className="rounded-3xl bg-white shadow-xl border border-rose-100 p-6">
-            <div className="flex items-center justify-between">
-              <div className="font-display font-semibold text-gray-900">Your Progress</div>
-              <Trophy className="w-5 h-5 text-amber-500" />
-            </div>
-            <div className="mt-4 space-y-3">
-              <Progress label="XP" value={62} />
-              <Progress label="Weekly Streak" value={71} color="amber" />
-            </div>
-          </motion.div>
+          <ProgressCard />
 
           {/* Leaderboard mini */}
-          <motion.div {...variants} className="rounded-3xl bg-white shadow-xl border border-rose-100 p-6">
-            <div className="font-display font-semibold text-gray-900 mb-4">Leaderboard</div>
-            <div className="space-y-3">
-              {leaderboard.map((u, i) => (
-                <div key={u.name} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Avatar seed={u.name} />
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">{i + 1}. {u.name}</div>
-                      <div className="text-xs text-gray-500">{u.xp} XP</div>
-                    </div>
-                  </div>
-                  <Star className="w-4 h-4 text-amber-500" />
-                </div>
-              ))}
-            </div>
-          </motion.div>
+            <LeaderboardCard />
 
           {/* Upcoming Lobbies */}
           <UpcomingLobbies variants={variants} />
@@ -414,16 +450,26 @@ useEffect(() => {
                 <span className="px-2 py-1 rounded-full border">{previewGame.duration} min</span>
               </div>
               <div className="flex gap-3 pt-2">
-                <button
-                  onClick={() => {
-                    if (!previewGame) return;
-                    setActiveGame(previewGame);
-                    setPreviewGame(null);
-                  }}
-                  className="flex-1 rounded-xl px-4 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white"
+                {/* Show button if user have a partner or the game doesn't need a partner */}
+                {(!needsPartner(previewGame) || partnerActive) ?
+                  <button
+                    onClick={() => {
+                      if (!previewGame) return;
+                      setActiveGame(previewGame);
+                      setPreviewGame(null);
+                    }}
+                    className="flex-1 rounded-xl px-4 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white"
+                  >
+                    Play Now
+                  </button>
+                : 
+                  <button
+                  className='rounded-xl px-3 py-2 text-sm bg-gray-200 text-gray-500 cursor-not-allowed'
                 >
-                  Play Now
+                 Partner Required
                 </button>
+                }
+
                 <button
                   onClick={() => {
                     toggleFavorite(previewGame.id);
@@ -476,29 +522,50 @@ function ActionCard({ icon, title, desc, onClick }: { icon: React.ReactNode; tit
     </button>
   );
 }
-
-function GameCard({ game, isFavorite, onFavorite, onPreview }: { game: Game; isFavorite: boolean; onFavorite: () => void; onPreview: () => void; }) {
+type Props = {
+  game: Game;
+  isFavorite: boolean;
+  onFavorite: () => void;
+  onPreview: () => void;
+  onPlay?: () => void;                 // NEW
+  disabled?: boolean;                  // NEW
+  disabledReason?: string;             // NEW
+};
+function GameCard({
+  game, isFavorite, onFavorite, onPreview, onPlay, disabled, disabledReason
+}: Props)  {
   return (
-    <div className="rounded-3xl bg-white shadow-xl border border-rose-100 overflow-hidden flex flex-col">
-      <div className="h-28 bg-gradient-to-br from-rose-100 to-fuchsia-100 grid place-items-center">
-        <Play className="w-8 h-8 text-fuchsia-600" />
-      </div>
-      <div className="p-4 flex-1 flex flex-col">
-        <div className="font-medium text-gray-900">{game.title}</div>
-        <div className="text-xs text-gray-500 mt-1 line-clamp-2">{game.description}</div>
-        <div className="flex items-center gap-2 text-xs text-gray-600 mt-3">
-          <span className="px-2 py-1 rounded-full border">{game.category}</span>
-          <span className="px-2 py-1 rounded-full border">{game.difficulty}</span>
-          <span className="px-2 py-1 rounded-full border">{game.duration} min</span>
-        </div>
-        <div className="mt-auto flex items-center gap-2 pt-4">
-          <button onClick={onPreview} className="flex-1 rounded-xl px-3 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm">
-            Preview
-          </button>
-          <button onClick={onFavorite} className={`rounded-xl px-3 py-2 text-sm border ${isFavorite ? "bg-amber-50 border-amber-300 text-amber-700" : "hover:bg-gray-50"}`}>
-            {isFavorite ? "Favorited" : "Favorite"}
-          </button>
-        </div>
+    <div className="rounded-2xl border p-4 bg-white">
+      <div className="font-medium text-gray-900">{game.title}</div>
+      <div className="text-xs text-gray-500">{game.category} • {game.duration} min</div>
+
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          onClick={onPreview}
+          className="rounded-xl px-3 py-2 border text-sm hover:bg-gray-50"
+        >
+          Preview
+        </button>
+
+        <button
+          onClick={() => onPlay?.()}
+          disabled={disabled}
+          title={disabled ? (disabledReason || "Unavailable") : "Play now"}
+          className={`rounded-xl px-3 py-2 text-sm ${
+            disabled
+              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+              : "text-white bg-gradient-to-r from-pink-500 to-fuchsia-600"
+          }`}
+        >
+          {disabled ? (disabledReason || "Locked") : "Play now"}
+        </button>
+
+        <button
+          onClick={onFavorite}
+          className="ml-auto text-xs text-gray-500 hover:text-gray-900"
+        >
+          {isFavorite ? "★ Favorite" : "☆ Favorite"}
+        </button>
       </div>
     </div>
   );
