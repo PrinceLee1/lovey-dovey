@@ -20,7 +20,6 @@ type TriviaQ = {
 };
 
 export default function TriviaDuoVsDuo({
-  couple,
   count = 10,
   secondsPerQ = 30,
   category = "General",

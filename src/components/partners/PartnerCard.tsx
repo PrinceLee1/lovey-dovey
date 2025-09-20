@@ -57,14 +57,10 @@ export default function PartnerCard() {
     load();
 
     // Optional realtime
-    if (meId) {
-      const off = subscribePartnerNotifications(meId, {
-        onAccepted: load,
-        onRejected: load,
-        onStatus: load,
-      });
-      return off;
-    }
+    // if (meId) {
+    //   const off = subscribePartnerNotifications(meId);
+    //   return off;
+    // }
   }, [meId]);
 
   // ----- invite actions -----
