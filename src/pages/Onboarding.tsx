@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -187,7 +187,7 @@ const [password, setPassword] = useState('');
 const [confirm, setConfirm] = useState('');
 const [err, setErr] = useState<string|null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const t = setTimeout(() => setStep(STEPS.ONB_1), 900);
     return () => clearTimeout(t);
   }, []);

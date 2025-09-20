@@ -29,8 +29,8 @@ export default function LobbyRoom() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [input, setInput] = useState("");
   const listRef = useRef<HTMLDivElement>(null);
-const lobbyIdRef = React.useRef<number | null>(null);
-const sessionIdsRef = React.useRef<Set<number>>(new Set());
+const lobbyIdRef = useRef<number | null>(null);
+const sessionIdsRef = useRef<Set<number>>(new Set());
 
   const isHost = lobby && String(user?.id) === String(lobby.host_id);
 

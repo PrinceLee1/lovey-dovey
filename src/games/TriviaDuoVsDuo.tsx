@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { GameResult } from "./types";
 import { api } from "../libs/axios";
-import { Clock, ChevronRight, Check, X, RotateCcw, Bolt } from "lucide-react";
+import { Clock, ChevronRight, Check, RotateCcw, Bolt } from "lucide-react";
 
 /*
   Trivia Night: Duo vs Duo
@@ -35,7 +35,6 @@ export default function TriviaDuoVsDuo({
   onFinish: (res: GameResult) => void;
 }) {
   // players are only for flavor in header
-  const players = useMemo<[string, string]>(() => couple ?? ["You", "Partner"], [couple]);
 
   // questions
   const [qs, setQs] = useState<TriviaQ[]>([]);

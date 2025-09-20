@@ -58,7 +58,7 @@ type SessionInfo = {
 
 export default function Settings() {
   const nav = useNavigate();
-  const { user, fetchMe, logout, loading } = useAuth();
+  const { user, fetchMe, logout } = useAuth();
 
   // profile state
   const [profile, setProfile] = useState<ProfilePayload>({

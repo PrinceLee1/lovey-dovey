@@ -1,6 +1,5 @@
 // src/games/LobbyGameRunner.tsx
 import { useEffect, useState } from "react";
-import { echo } from "../libs/echo";
 import { api } from "../libs/axios";
 import TriviaDuoVsDuo from "../games/TriviaDuoVsDuo";
 import CharadesAI from "../games/CharadesAI";
@@ -30,9 +29,6 @@ export default function LobbyGameRunner() {
     setOpen(false);
   }
 
-  function wrapUpdate(payload:any){
-    api.post(`/lobbies/${code}/games/${sessionId}/update`, payload); // broadcast to others
-  }
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 grid place-items-center p-4">

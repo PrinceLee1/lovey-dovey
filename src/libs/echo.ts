@@ -2,7 +2,8 @@ import Echo from "laravel-echo";
 import Pusher from "pusher-js";
 
 const API_BASE = import.meta.env.VITE_API_URL; // e.g. https://couples.test
-
+const pusher = Pusher;;
+(window as any).Pusher = pusher; // Laravel Echo expects it on window
 export const echo = new Echo({
   broadcaster: "pusher",
   key: import.meta.env.VITE_PUSHER_KEY,
