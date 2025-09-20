@@ -9,7 +9,7 @@ import {
   cancelUnpair,
 } from "../../libs/partner";
 import { Copy, Link as LinkIcon, Check, X, UserX, Clock } from "lucide-react";
-import { subscribePartnerNotifications } from "../../libs/notification";
+// import { subscribePartnerNotifications } from "../../libs/notification";
 import { useAuth } from "../../context/AuthContext";
 // (optional) live updates if you wired Echo private-user.{id}
 // import { subscribePartnerNotifications } from "@/lib/notifications";

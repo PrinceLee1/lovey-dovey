@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence, type Step } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useAuth } from '../context/AuthContext';
@@ -192,7 +192,7 @@ const [err, setErr] = useState<string|null>(null);
     return () => clearTimeout(t);
   }, []);
 
-  const go = (s: (typeof STEPS)[keyof typeof STEPS]) => setStep(s);
+  const go = (s: number) => setStep(s);
   const back = () => setStep(Math.max(0, step - 1) as (typeof STEPS)[keyof typeof STEPS]);
 
   const addOrRemoveInterest = (i: string) =>
