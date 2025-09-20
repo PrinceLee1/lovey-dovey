@@ -1,13 +1,10 @@
-import React, { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart,
   Sparkles,
   Users,
-  Flame,
-  Star,
   History,
-  Trophy,
   Share2,
   Play,
   Settings,
@@ -55,7 +52,7 @@ export default function GamesDashboard() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
   const categories = ["All", "Romantic", "Playful", "Spicy", "Challenge", "Erotic"];
-  const { partner, link, loading: partnerLoading } = usePartner();
+  const { partner, link} = usePartner();
   const partnerActive = !!partner && link?.status === "active";
   const partnerId = partner?.id ?? null;
   
@@ -177,11 +174,6 @@ useEffect(() => {
     setFavorites((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id]));
   }
 
-  function generateGame() {
-    const pool = filtered.length ? filtered : allGames;
-    const pick = pool[Math.floor(Math.random() * pool.length)];
-    setPreviewGame(pick);
-  }
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-rose-50 via-pink-50 to-white">
@@ -233,7 +225,7 @@ useEffect(() => {
               <div className="flex items-center gap-2">
                 <Segmented
                   value={mode}
-                  onChange={(v) => setMode(v as any)}
+                  onChange={(v) => setMode(v as never)}
                   options={[
                     { label: "Couple", value: "couple", icon: <Sparkles className="w-4 h-4" /> },
                     { label: "Group", value: "group", icon: <Users className="w-4 h-4" /> },
@@ -277,7 +269,7 @@ useEffect(() => {
               desc="Share a join link"
               onClick={() => navigator.clipboard.writeText("https://lovely.ai/join/abcd1234")}
             />
-            <DailyChallengeCard onXp={(xp)=>setXp(x=>x+xp)} />
+            <DailyChallengeCard onXp={(xp)=>setXp(x => (x ?? 0) + xp)} />
 
           </motion.div>
 
@@ -309,7 +301,7 @@ useEffect(() => {
               game={activeGame}
               onClose={() => setActiveGame(null)}
               onFinished={async (res) => {
-                setXp((x) => x + res.xpEarned);
+                setXp((x = 0) => x + res.xpEarned);
 
                 const isPartnerGame = needsPartner(activeGame);
                 const payload = {
@@ -571,7 +563,7 @@ function GameCard({
   );
 }
 
-function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+function Modal({ children }: { children: React.ReactNode; onClose: () => void }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
       <motion.div initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 16, opacity: 0 }} className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
@@ -583,37 +575,7 @@ function Modal({ children, onClose }: { children: React.ReactNode; onClose: () =
 
 
 
-function LabeledInput({ label, type = "text", value, onChange, placeholder }: { label: string; type?: string; value: string; onChange: (v: string) => void; placeholder?: string; }) {
-  return (
-    <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-gray-700">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full rounded-xl border px-4 py-2.5 outline-none focus:ring-2 focus:ring-fuchsia-500"
-      />
-    </div>
-  );
-}
 
-function LabeledSelect({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: string[]; }) {
-  return (
-    <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-gray-700">{label}</label>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border px-4 py-2.5 outline-none focus:ring-2 focus:ring-fuchsia-500 bg-white"
-      >
-        {options.map((o) => (
-          <option key={o} value={o}>{o[0].toUpperCase() + o.slice(1)}</option>
-        ))}
-      </select>
-    </div>
-  );
-}
 
 function Segmented({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: { label: string; value: string; icon?: React.ReactNode }[]; }) {
   return (
@@ -634,64 +596,10 @@ function Segmented({ value, onChange, options }: { value: string; onChange: (v: 
   );
 }
 
-function Progress({ label, value, color = "fuchsia" }: { label: string; value: number; color?: "fuchsia" | "amber" }) {
-  const bar = color === "amber" ? "bg-amber-500" : "bg-fuchsia-600";
-  return (
-    <div>
-      <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
-        <span>{label}</span>
-        <span>{value}%</span>
-      </div>
-      <div className="h-2.5 w-full rounded-full bg-gray-100 overflow-hidden">
-        <div className={`h-full ${bar}`} style={{ width: `${value}%` }} />
-      </div>
-    </div>
-  );
-}
 
-function Avatar({ seed }: { seed: string }) {
-  // Simple initials avatar
-  const initials = seed
-    .split(" ")
-    .map((p) => p[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-  return (
-    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-fuchsia-400 to-pink-500 grid place-items-center text-white text-xs font-semibold">
-      {initials}
-    </div>
-  );
-}
 
 /* ------------------------------ Mock Data ------------------------------ */
 
-type Game = {
-  id: string;
-  title: string;
-  category: string;
-  description: string;
-  duration: number; // minutes
-  players: number;
-  difficulty: "Easy" | "Medium" | "Hard";
-};
-
-const historyData = [
-  { id: "h1", title: "Truth or Dare – Romantic", when: "Yesterday 9:12 PM" },
-  { id: "h2", title: "Emoji-Only Chat", when: "Yesterday 8:03 PM" },
-  { id: "h3", title: "Memory Match – Couple Edition", when: "Fri 7:24 PM" },
-];
-
-const leaderboard = [
-  { name: "Alex & Maya", xp: 1240 },
-  { name: "Sam & Joy", xp: 1100 },
-  { name: "Liam & Zoe", xp: 980 },
-];
-
-const upcoming = [
-  { id: "u1", title: "Trivia Night", when: "Tonight 8:30 PM", players: 4 },
-  { id: "u2", title: "Charades", when: "Tue 7:00 PM", players: 5 },
-];
 
 const friends = ["Sam", "Joy", "Liam", "Zoe", "Kai"];
 function LobbiesSection() {

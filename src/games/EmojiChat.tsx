@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { GameResult } from "./types";
 import { Clock, Pause, Play as PlayIcon, Send, RotateCcw, Smile } from "lucide-react";
-import { api } from "../libs/axios"; // only if you were using it; safe to remove otherwise
 
 export default function EmojiChat({
   couple,

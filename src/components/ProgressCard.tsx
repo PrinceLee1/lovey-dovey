@@ -1,5 +1,5 @@
 // src/components/ProgressCard.tsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchProgress, type ProgressRes } from "../libs/progress";
 import { Trophy } from "lucide-react";
 

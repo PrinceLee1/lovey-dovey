@@ -1,10 +1,28 @@
 // src/components/DailyChallengeCard.tsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Flame } from "lucide-react";
 import { getDaily, completeDaily } from "../libs/daily";
 
+interface ChallengePayload {
+  description: string;
+  steps?: string[];
+  duration_minutes: number;
+  difficulty: string;
+}
+
+interface Challenge {
+  kind: string;
+  title: string;
+  status: string;
+  payload: ChallengePayload;
+}
+
+interface DailyData {
+  challenge: Challenge;
+}
+
 export default function DailyChallengeCard({ onXp }: { onXp?: (xp:number)=>void }) {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<DailyData | null>(null);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
 

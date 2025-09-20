@@ -1,5 +1,5 @@
 // src/games/LobbyGameRunner.tsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { echo } from "../libs/echo";
 import { api } from "../libs/axios";
 import TriviaDuoVsDuo from "../games/TriviaDuoVsDuo";

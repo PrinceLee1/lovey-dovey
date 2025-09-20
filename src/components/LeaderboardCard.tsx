@@ -1,5 +1,5 @@
 // src/components/LeaderboardCard.tsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { fetchLeaderboard, type LbEntry } from "../libs/leaderboard";
 import { Star } from "lucide-react";
 
@@ -12,17 +12,24 @@ function initialsPair(name: string) {
 
 export default function LeaderboardCard() {
   const [scope, setScope] = useState<"all_time"|"weekly"|"monthly">("all_time");
-  const [data, setData] = useState<{top:LbEntry[]; me:any} | null>(null);
+  const [data, setData] = useState<{top: LbEntry[]; me: LbEntry | null} | null>(null);
   const [loading, setLoading] = useState(true);
 
-  async function load(s = scope) {
-    setLoading(true);
-    try { const res = await fetchLeaderboard(s); setData({ top: res.top, me: res.me }); }
-    finally { setLoading(false); }
-  }
 
-  useEffect(()=>{ load(); }, []);
-  useEffect(()=>{ load(scope); }, [scope]);
+  const load = useCallback(async (s = scope) => {
+    setLoading(true);
+    try { 
+      const res = await fetchLeaderboard(s); 
+      setData({ 
+        top: res.top.map((entry: LbEntry) => ({ ...entry, users: entry.users ?? [] })), 
+        me: res.me ? { ...res.me, users: res.me.users ?? [] } : null 
+      }); 
+    }
+    finally { setLoading(false); }
+  }, [scope]);
+
+  useEffect(() => { load(); }, [load]);
+  useEffect(() => { load(scope); }, [scope, load]);
 
   return (
     <div className="rounded-3xl bg-white shadow-xl border border-rose-100 p-5">
@@ -31,7 +38,7 @@ export default function LeaderboardCard() {
         <select
           className="text-sm border rounded-lg px-2 py-1"
           value={scope}
-          onChange={e=>setScope(e.target.value as any)}
+          onChange={e=>setScope(e.target.value as "all_time" | "weekly" | "monthly")}
         >
           <option value="all_time">All-time</option>
           <option value="weekly">This week</option>
@@ -43,7 +50,7 @@ export default function LeaderboardCard() {
         <div className="text-sm text-gray-500">Loading…</div>
       ) : (
         <div className="space-y-4">
-          {data?.top?.map((row, idx) => (
+          {data?.top?.map((row) => (
             <div key={row.pair_id} className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-gradient-to-br from-pink-500 to-fuchsia-600 text-white grid place-items-center text-sm font-semibold">
                 {initialsPair(row.duo_name)}
@@ -59,7 +66,7 @@ export default function LeaderboardCard() {
           ))}
 
           {/* Your rank if not in top list */}
-          {data?.me && (data.top.findIndex(t=>t.pair_id===data.me.pair_id) === -1) && (
+          {data?.me && (data.me !== null) && (data.top.findIndex(t => t.pair_id === data.me!.pair_id) === -1) && (
             <div className="mt-2 pt-2 border-t">
               <div className="text-xs text-gray-500 mb-1">You</div>
               <div className="flex items-center gap-3">

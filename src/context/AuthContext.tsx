@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { api } from '../libs/axios';
 
 type User = {
@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function logout() {
     try {
       await api.post('/logout');
-    } catch {}
+    } catch { /* empty */ }
     localStorage.removeItem('auth_token');
     setToken(null);
     setUser(null);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   getPartnerStatus,
   createInvite,
@@ -18,13 +18,30 @@ export default function PartnerCard() {
     const { user } = useAuth();
   const meId = user?.id;
 
-  const [status, setStatus] = useState<any>(null); // { partner, link, shared }
+  type PartnerStatus = {
+    partner: { id: string; name: string } | null;
+    link: {
+      status?: string;
+      unpair_requested_by?: string;
+    } | null;
+    shared?: {
+      counts?: { total: number };
+      games?: unknown[];
+    };
+  } | null;
+
+  const [status, setStatus] = useState<PartnerStatus>(null); // { partner, link, shared }
   const [loading, setLoading] = useState<string | null>(null);
 
   // invite flow state
   const [gen, setGen] = useState<{ code: string; expires_at: string | null } | null>(null);
   const [code, setCode] = useState("");
-  const [lookup, setLookup] = useState<any>(null);
+  type LookupInfo = {
+    valid: boolean;
+    inviter?: { id: string; name: string };
+    expires_at?: string | null;
+  } | null;
+  const [lookup, setLookup] = useState<LookupInfo>(null);
   const [err, setErr] = useState<string | null>(null);
 
   async function load() {
@@ -48,7 +65,7 @@ export default function PartnerCard() {
       });
       return off;
     }
-  }, []);
+  }, [meId]);
 
   // ----- invite actions -----
   async function generate() {
@@ -57,8 +74,18 @@ export default function PartnerCard() {
       const res = await createInvite();
       setGen(res);
       navigator.clipboard.writeText(res.code).catch(() => {});
-    } catch (e: any) {
-      setErr(e?.response?.data?.message || "Unable to generate invite");
+    } catch (e: unknown) {
+      if (
+        typeof e === "object" &&
+        e !== null &&
+        "response" in e &&
+        typeof (e as { response?: { data?: { message?: string } } }).response === "object"
+      ) {
+        const errObj = e as { response?: { data?: { message?: string } } };
+        setErr(errObj.response?.data?.message || "Unable to generate invite");
+      } else {
+        setErr("Unable to generate invite");
+      }
     } finally { setLoading(null); }
   }
 
@@ -68,8 +95,18 @@ export default function PartnerCard() {
     try {
       const info = await lookupInvite(code.trim().toUpperCase());
       setLookup(info); // { valid:true, inviter:{id,name}, expires_at }
-    } catch (e: any) {
-      setErr(e?.response?.data?.message || e?.response?.data?.reason || "Code invalid");
+    } catch (e: unknown) {
+      if (
+        typeof e === "object" &&
+        e !== null &&
+        "response" in e &&
+        typeof (e as { response?: { data?: { message?: string; reason?: string } } }).response === "object"
+      ) {
+        const errObj = e as { response?: { data?: { message?: string; reason?: string } } };
+        setErr(errObj.response?.data?.message || errObj.response?.data?.reason || "Code invalid");
+      } else {
+        setErr("Code invalid");
+      }
     }
   }
 
@@ -79,8 +116,18 @@ export default function PartnerCard() {
       await acceptInvite(code.trim().toUpperCase());
       setLookup(null); setCode(""); setGen(null);
       await load();
-    } catch (e: any) {
-      setErr(e?.response?.data?.message || "Unable to accept");
+    } catch (e: unknown) {
+      if (
+        typeof e === "object" &&
+        e !== null &&
+        "response" in e &&
+        typeof (e as { response?: { data?: { message?: string } } }).response === "object"
+      ) {
+        const errObj = e as { response?: { data?: { message?: string } } };
+        setErr(errObj.response?.data?.message || "Unable to accept");
+      } else {
+        setErr("Unable to accept");
+      }
     }
   }
 
@@ -178,7 +225,7 @@ export default function PartnerCard() {
       ) : (
         <>
           <div className="text-sm text-gray-500">Your Partner</div>
-          <div className="text-xl font-semibold text-gray-900">{status.partner.name}</div>
+          <div className="text-xl font-semibold text-gray-900">{status.partner?.name}</div>
           <div className="text-xs text-gray-500">
             Shared games: {status.shared?.counts?.total ?? 0}
           </div>
@@ -199,7 +246,7 @@ export default function PartnerCard() {
               {iAmRequester ? (
                 <>
                   <span className="text-sm text-amber-700 inline-flex items-center gap-1">
-                    <Clock className="w-4 h-4" /> Waiting for {status.partner.name} to confirm…
+                    <Clock className="w-4 h-4" /> Waiting for {status.partner?.name} to confirm…
                   </span>
                   <button
                     disabled={loading === "cancel"}
@@ -212,7 +259,7 @@ export default function PartnerCard() {
               ) : (
                 <>
                   <span className="text-sm text-amber-700 inline-flex items-center gap-1">
-                    <Clock className="w-4 h-4" /> {status.partner.name} requested to unpair
+                    <Clock className="w-4 h-4" /> {status.partner?.name} requested to unpair
                   </span>
                   <button
                     disabled={loading === "confirm"}

@@ -17,7 +17,9 @@ type Lobby = {
   host_id: number;
 };
 
-export default function UpcomingLobbies({ variants }: { variants: any }) {
+import type { MotionProps } from "framer-motion";
+
+export default function UpcomingLobbies({ variants }: { variants: MotionProps }) {
   const nav = useNavigate();
   const [pub, setPub] = useState<Lobby[]>([]);
   const [mine, setMine] = useState<Lobby[]>([]);
@@ -35,8 +37,24 @@ export default function UpcomingLobbies({ variants }: { variants: any }) {
         ]);
         setPub(a.data || []);
         setMine(b.data || []);
-      } catch (e: any) {
-        setErr(e.response?.data?.message || e.message || "Unable to load lobbies");
+      } catch (e: unknown) {
+        if (
+          typeof e === "object" &&
+          e !== null &&
+          "response" in e &&
+          typeof (e as { response?: { data?: { message?: string } } }).response === "object"
+        ) {
+          const errObj = e as { response?: { data?: { message?: string }, message?: string } };
+          setErr(
+            errObj.response?.data?.message ||
+            errObj.response?.message ||
+            "Unable to load lobbies"
+          );
+        } else if (typeof e === "object" && e !== null && "message" in e) {
+          setErr((e as { message?: string }).message || "Unable to load lobbies");
+        } else {
+          setErr("Unable to load lobbies");
+        }
       } finally {
         setLoading(false);
       }
@@ -78,8 +96,22 @@ export default function UpcomingLobbies({ variants }: { variants: any }) {
     try {
       await api.post(`/lobbies/${l.code}/join`);
       nav(`/lobby/${l.code}`);
-    } catch (e: any) {
-      alert(e.response?.data?.message || "Failed to join lobby");
+    } catch (e: unknown) {
+      if (
+        typeof e === "object" &&
+        e !== null &&
+        "response" in e &&
+        typeof (e as { response?: { data?: { message?: string } } }).response === "object"
+      ) {
+        alert(
+          (e as { response?: { data?: { message?: string } } }).response?.data?.message ||
+          "Failed to join lobby"
+        );
+      } else if (typeof e === "object" && e !== null && "message" in e) {
+        alert((e as { message?: string }).message || "Failed to join lobby");
+      } else {
+        alert("Failed to join lobby");
+      }
     }
   }
 

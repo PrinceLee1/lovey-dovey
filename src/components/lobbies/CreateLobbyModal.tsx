@@ -1,5 +1,5 @@
 // src/components/lobbies/CreateLobbyModal.tsx
-import React, { useState } from "react";
+import { useState } from "react";
 import { api } from "../../libs/axios";
 import { X } from "lucide-react";
 
@@ -30,8 +30,20 @@ export default function CreateLobbyModal({ open, onClose, onCreated }: Props) {
       });
       onCreated?.({ code: data.code, invite_url: data.invite_url });
       onClose();
-    } catch (e:any) {
-      setErr(e.response?.data?.message || e.message || "Failed to create lobby");
+    } catch (e: unknown) {
+      interface AxiosError {
+        response?: {
+          data?: { message?: string };
+        };
+        message?: string;
+      }
+      if (typeof e === "object" && e !== null && "response" in e && typeof (e as AxiosError).response === "object") {
+        setErr((e as AxiosError).response?.data?.message || (e as AxiosError).message || "Failed to create lobby");
+      } else if (typeof e === "object" && e !== null && "message" in e) {
+        setErr((e as { message?: string }).message || "Failed to create lobby");
+      } else {
+        setErr("Failed to create lobby");
+      }
     } finally {
       setLoading(false);
     }
@@ -68,7 +80,9 @@ export default function CreateLobbyModal({ open, onClose, onCreated }: Props) {
 
           <div>
             <div className="text-sm text-gray-700 mb-1">Privacy</div>
-            <select value={privacy} onChange={(e)=>setPrivacy(e.target.value as any)}
+            <select
+              value={privacy}
+              onChange={(e) => setPrivacy(e.target.value as "Public" | "Private")}
               className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-fuchsia-500">
               <option>Public</option>
               <option>Private</option>

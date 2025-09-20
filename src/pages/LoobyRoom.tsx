@@ -1,5 +1,5 @@
 // src/pages/LobbyRoom.tsx
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../libs/axios";
 import { echo } from "../libs/echo";

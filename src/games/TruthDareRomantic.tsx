@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { GameResult } from "./types";
 import { api } from "../libs/axios";
 import { Sparkles, Heart, SkipForward, Check, RotateCcw } from "lucide-react";
