@@ -78,9 +78,9 @@ export default function Landing() {
           >
             <div className="grid gap-5">
               <div className="rounded-3xl bg-white shadow-xl border border-rose-100 p-6">
-                <div className="text-sm font-medium text-gray-500 mb-2">Onboarding</div>
+                {/* <div className="text-sm font-medium text-gray-500 mb-2">Onboarding</div> */}
                 <div className="h-40 md:h-56 rounded-2xl bg-gradient-to-br from-rose-100 to-fuchsia-100 grid place-items-center">
-                  <Heart className="w-10 h-10 text-fuchsia-600" />
+                  <img src="/images/onb-5.png" alt="Onboarding screen" className="object-fill w-55 h-50 md:h-64" />
                 </div>
                 <p className="mt-4 font-semibold">Find your perfect match</p>
                 <p className="text-sm text-gray-600">AI-tailored games to spark connection.</p>
