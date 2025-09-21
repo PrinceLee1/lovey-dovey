@@ -7,6 +7,7 @@ import type { JSX } from 'react';
 import Settings from './pages/Settings';
 import LobbyRoom from './pages/LoobyRoom';
 import LobbyGameRunner from "../src/games/LobbyGameRunner";
+import Landing from './pages/Landing';
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const { token } = useAuth();
@@ -19,7 +20,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/games" replace />} />
+          <Route path="/" element={<Landing />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/signin" element={<SignIn />} />
           <Route
