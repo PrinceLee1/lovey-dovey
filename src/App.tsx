@@ -11,7 +11,7 @@ import Landing from './pages/Landing';
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const { token } = useAuth();
-  if (!token) return <Navigate to="/onboarding" replace />;
+  if (!token) return <Navigate to="/" replace />;
   return children;
 }
 
