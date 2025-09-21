@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
-import { useAuth } from '../context/AuthContext';
-
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import {
   ChevronLeft,
   ChevronRight,
@@ -28,7 +26,9 @@ const TopNav = () => (
       <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-pink-500 to-fuchsia-600 grid place-items-center text-white">
         <Heart className="w-5 h-5" />
       </div>
-      <span className="font-semibold text-gray-800 tracking-tight">LoveyDovey</span>
+      <span className="font-semibold text-gray-800 tracking-tight">
+        LoveyDovey
+      </span>
     </div>
   </div>
 );
@@ -126,7 +126,7 @@ const HeroCard = () => (
     <img
       src="/images/onb-4.png"
       alt="Couple playing a game together"
-      className=" object-cover w-25 h-20 md:h-64"
+      className="object-contain w-55 h-50 md:h-64"
     />
     <p className="text-xs text-gray-400 text-center mt-auto pt-6">
       © {new Date().getFullYear()} LoveyDovey
@@ -152,12 +152,40 @@ const STEPS = {
   EMAIL_LOGIN: 12,
 } as const;
 
+type Step = (typeof STEPS)[keyof typeof STEPS];
+
+// keep the canonical step order to move safely
+const STEP_ORDER: Step[] = [
+  STEPS.SPLASH,
+  STEPS.ONB_1,
+  STEPS.ONB_2,
+  STEPS.ONB_3,
+  STEPS.AUTH_GATE,
+  STEPS.PHONE,
+  STEPS.OTP,
+  STEPS.PROFILE,
+  STEPS.DOB,
+  STEPS.GENDER,
+  STEPS.INTERESTS,
+  STEPS.REVIEW,
+  STEPS.EMAIL_LOGIN,
+];
+
+function nextStep(s: Step): Step {
+  const i = STEP_ORDER.indexOf(s);
+  return STEP_ORDER[Math.min(i + 1, STEP_ORDER.length - 1)];
+}
+function prevStep(s: Step): Step {
+  const i = STEP_ORDER.indexOf(s);
+  return STEP_ORDER[Math.max(i - 1, 0)];
+}
+
 type FormState = {
   name: string;
   partnerName: string;
   email: string;
   phone: string;
-  otp: string;
+  otp: string; // "      " padded while typing
   dob: string; // YYYY-MM-DD
   gender: "Male" | "Female" | "Other" | "";
   interests: string[];
@@ -178,22 +206,22 @@ const defaultState: FormState = {
 /* ---------- App ---------- */
 
 function Onboarding() {
-  const [step, setStep] = useState<(typeof STEPS)[keyof typeof STEPS]>(STEPS.SPLASH);
+  const [step, setStep] = useState<Step>(STEPS.SPLASH);
   const [data, setData] = useState<FormState>(defaultState);
   const [isLoading, setLoading] = useState(false);
-const { register, loading } = useAuth();
-const navigate = useNavigate();
-const [password, setPassword] = useState('');
-const [confirm, setConfirm] = useState('');
-const [err, setErr] = useState<string|null>(null);
+  const { register, loading } = useAuth();
+  const navigate = useNavigate();
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setStep(STEPS.ONB_1), 900);
     return () => clearTimeout(t);
   }, []);
 
-  const go = (s: number) => setStep(s);
-  const back = () => setStep(Math.max(0, step - 1) as (typeof STEPS)[keyof typeof STEPS]);
+  const go = (s: Step) => setStep(s);
+  const back = () => setStep((prev) => prevStep(prev));
 
   const addOrRemoveInterest = (i: string) =>
     setData((d) => {
@@ -279,17 +307,25 @@ const [err, setErr] = useState<string|null>(null);
             {step >= STEPS.ONB_1 && step <= STEPS.ONB_3 && (
               <motion.div key={`onb-${step}`} {...variants}>
                 <CardShell>
-                  {/* <Header title="Welcome" /> */}
                   <div className="text-center space-y-6">
                     <div className="h-40 md:h-56 rounded-2xl bg-gradient-to-br from-rose-100 to-fuchsia-100 grid place-items-center">
                       {step === STEPS.ONB_1 && (
-                      <img src="/images/onb-1.png" className="w-40 h-50 text-fuchsia-600 rounded-md" />
+                        <img
+                          src="/images/onb-1.png"
+                          className="w-40 h-50 text-fuchsia-600 rounded-md"
+                        />
                       )}
                       {step === STEPS.ONB_2 && (
-                      <img src="/images/onb-2.png" className="w-40 h-50 text-fuchsia-600 rounded-md" />
+                        <img
+                          src="/images/onb-2.png"
+                          className="w-40 h-50 text-fuchsia-600 rounded-md"
+                        />
                       )}
                       {step === STEPS.ONB_3 && (
-                      <img src="/images/onb-3.png" className="w-40 h-50 text-fuchsia-600 rounded-md" />
+                        <img
+                          src="/images/onb-3.png"
+                          className="w-40 h-50 text-fuchsia-600 rounded-md"
+                        />
                       )}
                     </div>
 
@@ -299,8 +335,8 @@ const [err, setErr] = useState<string|null>(null);
                           Find your perfect match
                         </h2>
                         <p className="text-gray-600 max-w-md mx-auto font-display">
-                          AI picks tailored games to spark deeper conversations and
-                          laughter.
+                          AI picks tailored games to spark deeper conversations
+                          and laughter.
                         </p>
                       </>
                     )}
@@ -310,7 +346,8 @@ const [err, setErr] = useState<string|null>(null);
                           Dating better than ever
                         </h2>
                         <p className="text-gray-600 max-w-md mx-auto font-display">
-                          Daily prompts, streaks and shared wins keep the vibe going.
+                          Daily prompts, streaks and shared wins keep the vibe
+                          going.
                         </p>
                       </>
                     )}
@@ -327,7 +364,7 @@ const [err, setErr] = useState<string|null>(null);
 
                     <NextBtn
                       onClick={() =>
-                        go(step < STEPS.ONB_3 ? step + 1 : STEPS.AUTH_GATE)
+                        setStep(step < STEPS.ONB_3 ? nextStep(step) : STEPS.AUTH_GATE)
                       }
                     >
                       Next
@@ -335,7 +372,7 @@ const [err, setErr] = useState<string|null>(null);
 
                     <div className="mt-3 flex items-center justify-between">
                       <SkipBtn onClick={() => go(STEPS.AUTH_GATE)} />
-                      <StepDots idx={step - STEPS.ONB_1} total={3} />
+                      <StepDots idx={Number(step) - STEPS.ONB_1} total={3} />
                     </div>
                   </div>
                 </CardShell>
@@ -352,26 +389,26 @@ const [err, setErr] = useState<string|null>(null);
                       onClick={() => go(STEPS.EMAIL_LOGIN)}
                       className="w-full border rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-gray-50 font-display"
                     >
-                      <Mail className="w-5 h-5 text-fuchsia-600" /> Continue with Email
+                      <Mail className="w-5 h-5 text-fuchsia-600" /> Continue with
+                      Email
                     </button>
                     <button
                       onClick={() => go(STEPS.PHONE)}
                       className="w-full border rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-gray-50 font-display"
                     >
-                      <Phone className="w-5 h-5 text-fuchsia-600" /> Continue with Phone
-                      Number
+                      <Phone className="w-5 h-5 text-fuchsia-600" /> Continue with
+                      Phone Number
                     </button>
                     <div className="text-xs text-gray-500 pt-2 font-display">
                       By continuing you agree to our Terms & Privacy.
                     </div>
-                    {/* //Already have an account? Sign in */}
                     <div className="text-sm text-gray-600 pt-2 font-display">
                       Already have an account?{" "}
                       <Link to="/signin" className="text-fuchsia-600">
                         Sign in
                       </Link>
                     </div>
-                    </div>
+                  </div>
                 </CardShell>
               </motion.div>
             )}
@@ -448,13 +485,16 @@ const [err, setErr] = useState<string|null>(null);
                           maxLength={1}
                           value={data.otp[i] || ""}
                           onChange={(e) => {
-                            const v = e.target.value.replace(/[^0-9]/g, "").slice(0, 1);
+                            const v = e.target.value
+                              .replace(/[^0-9]/g, "")
+                              .slice(0, 1);
                             setData((d) => ({
                               ...d,
-                              otp: (d.otp.substring(0, i) + v + d.otp.substring(i + 1)).padEnd(
-                                6,
-                                " "
-                              ),
+                              otp: (
+                                d.otp.substring(0, i) +
+                                v +
+                                d.otp.substring(i + 1)
+                              ).padEnd(6, " "),
                             }));
                           }}
                           className="h-12 rounded-xl border text-center text-lg focus:ring-2 focus:ring-fuchsia-500"
@@ -603,104 +643,116 @@ const [err, setErr] = useState<string|null>(null);
               </motion.div>
             )}
 
-            {/* Review */}
-              {step === STEPS.REVIEW && (
-                <motion.div key="review" {...variants}>
-                  <CardShell>
-                    <Header title="Review & Create Account" onBack={back} />
-                    <form
-                      className="space-y-4 flex-1"
-                        onSubmit={async (e) => {
-                            e.preventDefault();
-                            setErr(null);
-                            try {
-                            await register({
-                                name: data.name,
-                                email: data.email,
-                                password,
-                                password_confirmation: confirm,
-                                phone: data.phone || undefined,
-                                gender: (data.gender || undefined) as any,
-                                dob: data.dob || undefined,
-                            });
-                            navigate('/games');
-                            } catch (e:any) {
-                            setErr(e.message);
-                            }
-                        }}
-                    >
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Review / Create */}
+            {step === STEPS.REVIEW && (
+              <motion.div key="review" {...variants}>
+                <CardShell>
+                  <Header title="Review & Create Account" onBack={back} />
+                  <form
+                    className="space-y-4 flex-1"
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      setErr(null);
+                      try {
+                        await register({
+                          name: data.name,
+                          email: data.email,
+                          password,
+                          password_confirmation: confirm,
+                          phone: data.phone || undefined,
+                          gender: (data.gender || undefined) as any,
+                          dob: data.dob || undefined,
+                        });
+                        navigate("/games");
+                      } catch (e: any) {
+                        setErr(e.message);
+                      }
+                    }}
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <LabeledInput
+                        label="Name"
+                        value={data.name}
+                        onChange={(v) => setData((d) => ({ ...d, name: v }))}
+                        required
+                        autoComplete="name"
+                      />
+                      <LabeledInput
+                        label="Partner"
+                        value={data.partnerName}
+                        onChange={(v) =>
+                          setData((d) => ({ ...d, partnerName: v }))
+                        }
+                        autoComplete="name"
+                      />
+                      <LabeledInput
+                        label="Email"
+                        type="email"
+                        value={data.email}
+                        onChange={(v) => setData((d) => ({ ...d, email: v }))}
+                        autoComplete="email"
+                      />
+                      <LabeledInput
+                        label="Password"
+                        type="password"
+                        value={password}
+                        onChange={setPassword}
+                      />
+                      <LabeledInput
+                        label="Confirm Password"
+                        type="password"
+                        value={confirm}
+                        onChange={setConfirm}
+                      />
+                      <LabeledInput
+                        label="Phone"
+                        type="tel"
+                        value={data.phone}
+                        onChange={(v) => setData((d) => ({ ...d, phone: v }))}
+                        autoComplete="tel"
+                      />
+                      <LabeledInput
+                        label="DOB"
+                        type="date"
+                        value={data.dob}
+                        onChange={(v) => setData((d) => ({ ...d, dob: v }))}
+                      />
+                      <LabeledSelect
+                        label="Gender"
+                        value={data.gender}
+                        onChange={(v) =>
+                          setData((d) => ({ ...d, gender: v as any }))
+                        }
+                        options={["Male", "Female", "Other"]}
+                      />
+                      <div className="md:col-span-2">
                         <LabeledInput
-                          label="Name"
-                          value={data.name}
-                          onChange={(v) => setData((d) => ({ ...d, name: v }))}
-                          required
-                          autoComplete="name"
+                          label="Interests (comma separated)"
+                          value={data.interests.join(", ")}
+                          onChange={(v) =>
+                            setData((d) => ({
+                              ...d,
+                              interests: v
+                                .split(",")
+                                .map((s) => s.trim())
+                                .filter(Boolean),
+                            }))
+                          }
+                          placeholder="Books, Music, Cooking"
                         />
-                        <LabeledInput
-                          label="Partner"
-                          value={data.partnerName}
-                          onChange={(v) => setData((d) => ({ ...d, partnerName: v }))}
-                          autoComplete="name"
-                        />
-                        <LabeledInput
-                          label="Email"
-                          type="email"
-                          value={data.email}
-                          onChange={(v) => setData((d) => ({ ...d, email: v }))}
-                          autoComplete="email"
-                        />
-                        <LabeledInput label="Password" type="password" value={password} onChange={setPassword} />
-                        <LabeledInput label="Confirm Password" type="password" value={confirm} onChange={setConfirm} />
-                        <LabeledInput
-                          label="Phone"
-                          type="tel"
-                          value={data.phone}
-                          onChange={(v) => setData((d) => ({ ...d, phone: v }))}
-                          autoComplete="tel"
-                        />
-                        <LabeledInput
-                          label="DOB"
-                          type="date"
-                          value={data.dob}
-                          onChange={(v) => setData((d) => ({ ...d, dob: v }))}
-                        />
-                        <LabeledSelect
-                          label="Gender"
-                          value={data.gender}
-                          onChange={(v) => setData((d) => ({ ...d, gender: v as any }))}
-                          options={["Male", "Female", "Other"]}
-                        />
-                        <div className="md:col-span-2">
-                          <LabeledInput
-                            label="Interests (comma separated)"
-                            value={data.interests.join(", ")}
-                            onChange={(v) =>
-                              setData((d) => ({
-                                ...d,
-                                interests: v
-                                  .split(",")
-                                  .map((s) => s.trim())
-                                  .filter(Boolean),
-                              }))
-                            }
-                            placeholder="Books, Music, Cooking"
-                          />
-                        </div>
                       </div>
+                    </div>
                     {err && <div className="text-sm text-red-600">{err}</div>}
 
-                      {/* Submit */}
-                    <NextBtn>{loading ? 'Creating…' : 'Create Account'}</NextBtn>
-                    </form>
-                  </CardShell>
-                </motion.div>
-              )}
+                    <NextBtn>{loading ? "Creating…" : "Create Account"}</NextBtn>
+                  </form>
+                </CardShell>
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
       </div>
       <Footer variant="simple" />
-
     </Page>
   );
 }
