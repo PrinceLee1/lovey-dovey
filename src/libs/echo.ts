@@ -13,9 +13,9 @@ const CLUSTER =
   import.meta.env.VITE_PUSHER_APP_CLUSTER ?? import.meta.env.VITE_PUSHER_CLUSTER ?? "mt1";
 
 // TEMP: verify what the build embedded
-console.log("[Echo] VITE_PUSHER_APP_KEY:", KEY);
-console.log("[Echo] VITE_PUSHER_APP_CLUSTER:", CLUSTER);
-console.log("[Echo] VITE_API_URL:", API_BASE);
+// console.log("[Echo] VITE_PUSHER_APP_KEY:", KEY);
+// console.log("[Echo] VITE_PUSHER_APP_CLUSTER:", CLUSTER);
+// console.log("[Echo] VITE_API_URL:", API_BASE);
 
 // Hard fail early with a clear message if missing
 if (!KEY) {

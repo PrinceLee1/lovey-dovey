@@ -142,8 +142,8 @@ const STEPS = {
   ONB_2: 2,
   ONB_3: 3,
   AUTH_GATE: 4,
-  PHONE: 5,
-  OTP: 6,
+  // PHONE: 5,
+  // OTP: 6,
   PROFILE: 7,
   DOB: 8,
   GENDER: 9,
@@ -161,8 +161,8 @@ const STEP_ORDER: Step[] = [
   STEPS.ONB_2,
   STEPS.ONB_3,
   STEPS.AUTH_GATE,
-  STEPS.PHONE,
-  STEPS.OTP,
+  // STEPS.PHONE,
+  // STEPS.OTP,
   STEPS.PROFILE,
   STEPS.DOB,
   STEPS.GENDER,
@@ -235,7 +235,7 @@ function Onboarding() {
   const canContinueProfile =
     data.name.trim().length > 1 && data.partnerName.trim().length > 0;
   const canContinuePhone = /^\+?[0-9\-\s]{7,15}$/.test(data.phone);
-  const canContinueOtp = data.otp.trim().length === 6;
+  // const canContinueOtp = data.otp.trim().length === 6;
   const canContinueDob = !!data.dob;
   const canContinueGender = !!data.gender;
 
@@ -263,14 +263,14 @@ function Onboarding() {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 800));
     setLoading(false);
-    go(STEPS.OTP);
+    // go(STEPS.OTP);
   };
-  const verifyOtp = async () => {
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 700));
-    setLoading(false);
-    go(STEPS.PROFILE);
-  };
+  // const verifyOtp = async () => {
+  //   setLoading(true);
+  //   await new Promise((r) => setTimeout(r, 700));
+  //   setLoading(false);
+  //   go(STEPS.PROFILE);
+  // };
 
   return (
     <Page>
@@ -393,7 +393,10 @@ function Onboarding() {
                       Email
                     </button>
                     <button
-                      onClick={() => go(STEPS.PHONE)}
+                      onClick={() => { 
+                        alert("Coming soon!");
+                        // go(STEPS.PHONE);
+                      }}
                       className="w-full border rounded-xl px-4 py-3 flex items-center gap-3 hover:bg-gray-50 font-display"
                     >
                       <Phone className="w-5 h-5 text-fuchsia-600" /> Continue with
@@ -445,7 +448,7 @@ function Onboarding() {
             )}
 
             {/* Phone */}
-            {step === STEPS.PHONE && (
+            {/* {step === STEPS.PHONE && (
               <motion.div key="phone" {...variants}>
                 <CardShell>
                   <Header title="Enter Phone Number" onBack={back} />
@@ -470,10 +473,10 @@ function Onboarding() {
                   </div>
                 </CardShell>
               </motion.div>
-            )}
+            )} */}
 
             {/* OTP */}
-            {step === STEPS.OTP && (
+            {/* {step === STEPS.OTP && (
               <motion.div key="otp" {...variants}>
                 <CardShell>
                   <Header title="Enter Verification Code" onBack={back} />
@@ -507,7 +510,7 @@ function Onboarding() {
                   </div>
                 </CardShell>
               </motion.div>
-            )}
+            )} */}
 
             {/* Profile */}
             {step === STEPS.PROFILE && (
