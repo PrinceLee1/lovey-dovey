@@ -73,7 +73,7 @@ export default function AdminUsers() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50">
             <tr className="text-left">
-              <Th>Name</Th><Th>Email</Th><Th>XP</Th><Th>Status</Th><Th>Admin</Th><Th>Joined</Th><Th></Th>
+              <Th>Name</Th><Th>Email</Th><Th>XP</Th><Th>Status</Th><Th>Admin</Th><Th>Joined</Th><Th>Actions</Th>
             </tr>
           </thead>
           <tbody>

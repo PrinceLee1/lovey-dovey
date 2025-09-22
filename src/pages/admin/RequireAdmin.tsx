@@ -1,6 +1,6 @@
 // src/pages/admin/RequireAdmin.tsx
 import { Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type JSX } from "react";
 import api from "../../libs/axios";
 
 export default function RequireAdmin({ children }: { children: JSX.Element }) {
