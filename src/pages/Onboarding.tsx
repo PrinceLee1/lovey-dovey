@@ -208,7 +208,7 @@ const defaultState: FormState = {
 function Onboarding() {
   const [step, setStep] = useState<Step>(STEPS.SPLASH);
   const [data, setData] = useState<FormState>(defaultState);
-  const [isLoading, setLoading] = useState(false);
+  // const [isLoading, setLoading] = useState(false);
   const { register, loading } = useAuth();
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
@@ -234,7 +234,7 @@ function Onboarding() {
 
   const canContinueProfile =
     data.name.trim().length > 1 && data.partnerName.trim().length > 0;
-  const canContinuePhone = /^\+?[0-9\-\s]{7,15}$/.test(data.phone);
+  // const canContinuePhone = /^\+?[0-9\-\s]{7,15}$/.test(data.phone);
   // const canContinueOtp = data.otp.trim().length === 6;
   const canContinueDob = !!data.dob;
   const canContinueGender = !!data.gender;
@@ -259,12 +259,12 @@ function Onboarding() {
   };
 
   // Mock async
-  const sendOtp = async () => {
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setLoading(false);
-    // go(STEPS.OTP);
-  };
+  // const sendOtp = async () => {
+  //   setLoading(true);
+  //   await new Promise((r) => setTimeout(r, 800));
+  //   setLoading(false);
+  //   // go(STEPS.OTP);
+  // };
   // const verifyOtp = async () => {
   //   setLoading(true);
   //   await new Promise((r) => setTimeout(r, 700));
