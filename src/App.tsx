@@ -9,6 +9,12 @@ import LobbyRoom from './pages/LoobyRoom';
 import LobbyGameRunner from "../src/games/LobbyGameRunner";
 import Landing from './pages/Landing';
 
+// Admin imports
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminOverview from './pages/admin/AdminOverview';
+import AdminUsers from './pages/admin/AdminUsers';
+import RequireAdmin from './pages/admin/RequireAdmin';
+
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const { token } = useAuth();
   if (!token) return <Navigate to="/" replace />;
@@ -23,6 +29,7 @@ export default function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/signin" element={<SignIn />} />
+
           <Route
             path="/games"
             element={
@@ -47,14 +54,29 @@ export default function App() {
               </PrivateRoute>
             }
           />
+
+          {/* Admin area */}
+          <Route
+            path="/admin"
+            element={
+              <RequireAdmin>
+                <AdminLayout />
+              </RequireAdmin>
+            }
+          >
+            <Route index element={<AdminOverview />} />
+            <Route path="users" element={<AdminUsers />} />
+          </Route>
+
           <Route path="*" element={<NotFound />} />
         </Routes>
-        <LobbyGameRunner />
 
+        <LobbyGameRunner />
       </BrowserRouter>
     </AuthProvider>
   );
 }
+
 function NotFound() {
   return (
     <div className="min-h-screen grid place-items-center">

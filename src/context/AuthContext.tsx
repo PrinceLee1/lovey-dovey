@@ -3,7 +3,7 @@ import { api } from '../libs/axios';
 
 type User = {
   id: number; name: string; email: string;
-  phone?: string | null; gender?: string | null; dob?: string | null; xp?: number; avatar_url?: string | null; partner?: unknown[];
+  phone?: string | null; gender?: string | null; dob?: string | null; xp?: number; avatar_url?: string | null; partner?: unknown[]; is_admin?: boolean;
 };
 
 type RegisterPayload = {
@@ -48,6 +48,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     try {
       const { data } = await api.post('/login', { email, password });
+      //check if user is deactivated
+      if(data.user.status === 'deactivated'){
+        throw new Error('Your account has been deactivated. Please contact support.');
+      }
       localStorage.setItem('auth_token', data.token);
       setToken(data.token);
       setUser(data.user);

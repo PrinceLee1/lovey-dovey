@@ -435,6 +435,7 @@ export default function Settings() {
               <Link to="/games" className="rounded-xl border px-3 py-2 text-sm hover:bg-gray-50">
                 Back to games
               </Link>
+              {user?.is_admin && <Link to="/admin" className="rounded-xl border px-3 py-2 text-sm hover:bg-gray-50">Admin panel</Link>}
             </div>
           </motion.div>
         </div>

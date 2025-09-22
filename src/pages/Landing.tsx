@@ -2,10 +2,12 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Heart, Sparkles, Users, Shield, MessageSquare, Gamepad2, ArrowRight } from "lucide-react";
 import Footer from "../components/Footer";
+import { useAuth } from "../context/AuthContext";
 
 const fade = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 } };
 
 export default function Landing() {
+  const {user} = useAuth();
   return (
     <div className="min-h-screen bg-gradient-to-b from-rose-50 via-pink-50 to-white text-gray-900">
       {/* Nav */}
@@ -23,13 +25,26 @@ export default function Landing() {
             <a href="#faq" className="hover:text-fuchsia-600">FAQ</a>
           </nav>
           <div className="flex items-center gap-2">
-            <Link to="/signin" className="hidden sm:inline-block px-4 py-2 rounded-xl border hover:bg-gray-50">Sign in</Link>
-            <Link
-              to="/onboarding"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:brightness-105 shadow-sm"
-            >
-              Get started <ArrowRight className="w-4 h-4" />
-            </Link>
+            {user ? (
+              <Link to="/games" className="hidden sm:inline-block px-4 py-2 rounded-xl border hover:bg-gray-50">
+                Dashboard
+              </Link>
+            ) : (
+              <>
+              <Link to="/signin" className="hidden sm:inline-block px-4 py-2 rounded-xl border hover:bg-gray-50">
+                Sign in
+              </Link>
+              <Link
+                to="/onboarding"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-white bg-gradient-to-r from-pink-500 to-fuchsia-600 hover:brightness-105 shadow-sm"
+              >
+                Get started <ArrowRight className="w-4 h-4" />
+              </Link>
+              </>
+
+              
+            )}
+
           </div>
         </div>
       </header>
@@ -192,12 +207,22 @@ export default function Landing() {
             <p className="text-white/90">Join free. No credit card required.</p>
           </div>
           <div className="flex gap-3">
-            <Link to="/onboarding" className="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20">
-              Get started
-            </Link>
-            <Link to="/signin" className="px-5 py-3 rounded-xl bg-white text-fuchsia-700 hover:brightness-95">
-              Sign in
-            </Link>
+
+            {/* if logged in, go to dashboard */}
+            {user ? (
+              <Link to="/dashboard" className="px-5 py-3 rounded-xl bg-white text-fuchsia-700 hover:brightness-95">
+                Dashboard
+              </Link>
+            ) : (
+              <>
+              <Link to="/onboarding" className="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20">
+                Get started
+              </Link>
+              <Link to="/signin" className="px-5 py-3 rounded-xl bg-white text-fuchsia-700 hover:brightness-95">
+                Sign in
+              </Link>
+              </>
+            )}
           </div>
         </div>
       </section>
