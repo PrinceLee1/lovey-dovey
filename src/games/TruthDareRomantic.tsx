@@ -24,7 +24,10 @@ export default function TruthDareRomantic({ couple, category = "Romantic", onFin
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
     const { user } = useAuth();
-  const partnerName = user?.partner && user.partner[0]?.name ? user.partner[0].name : "Partner";
+  // Ensure partner is typed as an array of objects with a 'name' property
+  type Partner = { name: string };
+  const partnerArr = (user?.partner ?? []) as Partner[];
+  const partnerName = partnerArr[0]?.name ?? "Partner";
 
   const players = useMemo<[string, string]>(() => couple ?? [user?.name ?? "You", partnerName], [couple, user?.name]);
   async function fetchBatch() {

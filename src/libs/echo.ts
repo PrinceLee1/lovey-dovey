@@ -41,8 +41,15 @@ export const echo = new Echo({
         },
         body: JSON.stringify({ socket_id: socketId, channel_name: channel.name }),
       })
-        .then(async (r) => cb(r.ok, await r.json()))
-        .catch((err) => cb(false, err));
+        .then(async (r) => {
+          const data = await r.json();
+          if (r.ok) {
+            cb(null, data);
+          } else {
+            cb(new Error(data.message || 'Authorization failed'), data);
+          }
+        })
+        .catch((err) => cb(err, null));
     },
   }),
 });
