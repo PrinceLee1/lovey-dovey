@@ -14,6 +14,7 @@ import AdminLayout from './pages/admin/AdminLayout';
 import AdminOverview from './pages/admin/AdminOverview';
 import AdminUsers from './pages/admin/AdminUsers';
 import RequireAdmin from './pages/admin/RequireAdmin';
+import CoupleSession from './pages/Session';
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const { token } = useAuth();
@@ -51,6 +52,14 @@ export default function App() {
             element={
               <PrivateRoute>
                 <LobbyRoom />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/session/:code"
+            element={
+              <PrivateRoute>
+                <CoupleSession />
               </PrivateRoute>
             }
           />

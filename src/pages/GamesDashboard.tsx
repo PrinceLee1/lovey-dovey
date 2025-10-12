@@ -12,7 +12,7 @@ import {
   Search,
 } from "lucide-react";
 import { useAuth } from '../context/AuthContext';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import GameRunner from "../games/GameRunner";
 import type { Game, HistoryItem } from "../games/types";
 import api from "../libs/axios";
@@ -25,6 +25,7 @@ import DailyChallengeCard from "../components/DailyChallengeCard";
 import LeaderboardCard from "../components/LeaderboardCard";
 import StreakBadge from "../components/StreakBadge";
 import ProgressCard from "../components/ProgressCard";
+import { echo } from "../libs/echo";
 /**
  * GamesDashboard – Couples AI (Web)
  * --------------------------------------------------------------
@@ -55,7 +56,9 @@ export default function GamesDashboard() {
   const { partner, link} = usePartner();
   const partnerActive = !!partner && link?.status === "active";
   const partnerId = partner?.id ?? null;
-  
+  const navigate = useNavigate();
+  const [invite, setInvite] = useState<null | {code:string;kind:string;from:string;url:string}>(null);
+
   const [showPartnerModal, setShowPartnerModal] = useState(false);
   const partnerOnlyKinds = new Set(["truth_dare","emoji_chat","spice_dice","memory_match"]);
 
@@ -68,8 +71,19 @@ export default function GamesDashboard() {
       setShowPartnerModal(true);
       return;
     }
+    // if(needsPartner(g)){
+    //   startCoupleGame(g.kind);
+    //   return;
+    // }
     setActiveGame(g);
   }
+// async function startCoupleGame(kind: string) {
+//   // requires a partner server-side; API returns session { code }
+//   const { data } = await api.post('/couple-sessions/start', { kind });
+//   // open your session route; partner will receive broadcast invite
+//   navigate(`/session/${data.code}`);
+// }
+
   // console.log('User in dashboard:', user);
   const allGames = useMemo<Game[]>(
     () => [
@@ -133,6 +147,16 @@ export default function GamesDashboard() {
         players: 3,
         difficulty: "Easy",
       },
+      // {
+      //   id: "g7",
+      //   kind: "truth_dare",
+      //   title: "Truth or Dare – Erotic",
+      //   category: "Erotic",
+      //   description: "Sweet prompts to spark intimacy and laughter.",
+      //   duration: 10,
+      //   players: 2,
+      //   difficulty: "Hard",
+      // },
     ],
     []
   );
@@ -153,16 +177,16 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, []);
 
-  const filtered = useMemo(() => {
-    return allGames.filter((g) => {
-      const inMode = mode === "couple" ? g.players <= 2 : g.players >= 3;
-      const inCat = category === "All" ? true : g.category === category;
-      const inSearch = search
-        ? (g.title + g.description).toLowerCase().includes(search.toLowerCase())
-        : true;
-      return inMode && inCat && inSearch;
-    });
-  }, [allGames, mode, category, search]);
+const filtered = useMemo(() => {
+  return allGames.filter((g) => {
+    const inMode = mode === "couple" ? g.players <= 2 : g.players >= 3;
+    const inCat = category === "All" ? true : g.category === category;
+    const inSearch = search
+      ? (g.title + g.description).toLowerCase().includes(search.toLowerCase())
+      : true;
+    return inMode && inCat && inSearch;
+  });
+}, [allGames, mode, category, search]);
 
   const variants = {
     initial: { opacity: 0, y: 8 },
@@ -173,7 +197,18 @@ useEffect(() => {
   function toggleFavorite(id: string) {
     setFavorites((f) => (f.includes(id) ? f.filter((x) => x !== id) : [...f, id]));
   }
+  useEffect(() => {
+    if (!user?.id) return;
+    const ch = echo.private(`user.${user.id}`)
+      .listen('.couple.session.invited', (e: any) => {
+        // e = { code, kind, from, url, pairId }
+        setInvite(e);
+      });
 
+    return () => { try { ch.unsubscribe(); } catch {} };
+  }, [user?.id]);
+
+  // if (!invite) return null;
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-rose-50 via-pink-50 to-white">
@@ -330,6 +365,7 @@ useEffect(() => {
                   console.error("Failed to save history", e);
                 }
               }}
+              pg={activeGame.category === "Erotic" ? "PG-18+" : "PG-13"}  // set PG based on category
             />
           )}
 
@@ -358,7 +394,29 @@ useEffect(() => {
               </div>
             </div>
           )}
-
+          {invite !== null && (
+            <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 max-w-md w-[90%]">
+              <div className="rounded-2xl border bg-white shadow-xl p-4">
+                <div className="font-semibold text-gray-900">
+                  {invite.from} invited you to play <span className="capitalize">{invite.kind.replace('_',' ')}</span>
+                </div>
+              <div className="mt-2 flex gap-2 justify-end">
+                <button
+                  className="px-3 py-1.5 rounded-xl border hover:bg-gray-50"
+                  onClick={() => setInvite(null)}
+                >Dismiss</button>
+                <button
+                  className="px-3 py-1.5 rounded-xl text-white bg-gradient-to-r from-pink-500 to-fuchsia-600"
+                  onClick={() => {
+                    const url = `/session/${invite.code}`;
+                    setInvite(null);
+                    navigate(url);
+                  }}
+                >Join now</button>
+              </div>
+            </div>
+          </div>
+          )}
           {/* History */}
           <SectionTitle icon={<History className="w-4 h-4" />} title="Recently Played" />
 
@@ -480,6 +538,7 @@ useEffect(() => {
           <CreateLobbyModal onClose={() => setShowCreateLobby(false)} open={false} />
         )}
       </AnimatePresence>
+
       <Footer variant="full" />
 
     </div>

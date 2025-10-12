@@ -5,11 +5,12 @@ import { Sparkles, Heart, SkipForward, Check, RotateCcw } from "lucide-react";
 import { useAuth } from '../context/AuthContext';
 type Props = {
   couple?: [string, string];
-  category?: "Romantic" | "Playful" | "Spicy" | "Challenge";
+  category?: "Romantic" | "Playful" | "Spicy" | "Challenge" | "Wild" | "Extreme" | "Erotic";
   onFinish: (res: GameResult) => void;
+  pg: "PG-13" | "PG-18+" | "NC-17";
 };
 
-export default function TruthDareRomantic({ couple, category = "Romantic", onFinish }: Props) {
+export default function TruthDareRomantic({ couple, category = "Romantic", onFinish, pg }: Props) {
   const [pIdx, setPIdx] = useState(0);
   const [round, setRound] = useState(1);
   const [step, setStep] = useState<"choose" | "prompt">("choose");
@@ -23,19 +24,19 @@ export default function TruthDareRomantic({ couple, category = "Romantic", onFin
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
     const { user } = useAuth();
+  const partnerName = user?.partner && user.partner[0]?.name ? user.partner[0].name : "Partner";
 
-  const players = useMemo<[string, string]>(() => couple ?? [user?.name ?? "You", "Partner"], [couple, user?.name]);
-
+  const players = useMemo<[string, string]>(() => couple ?? [user?.name ?? "You", partnerName], [couple, user?.name]);
   async function fetchBatch() {
     try {
       setLoading(true);
       setErr(null);
       const { data } = await api.post('/ai/truth-dare', {
-        category: "Romantic",
-        tone: "PG-13",
+        category: category,
+        tone: pg,
         count_truths: 12,
         count_dares: 12,
-        names: [user?.name ?? "You", "Partner"],     // optional
+        names: [user?.name ?? "You", partnerName],     // optional
         personalize: true             // set false for better cache hit rate
         });
       if (Array.isArray(data.truths)) setTruths((t) => [...t, ...data.truths]);

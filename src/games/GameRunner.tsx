@@ -10,10 +10,12 @@ export default function GameRunner({
   game,
   onClose,
   onFinished,
+  pg = "PG-13",
 }: {
   game: Game;
   onClose: () => void;
   onFinished: (res: GameResult) => void;
+  pg?: "PG-13" | "PG-18+" | "NC-17";
 }) {
   return (
     <AnimatePresence>
@@ -51,6 +53,8 @@ export default function GameRunner({
                 onFinished(res);
                 onClose();
               }}
+              pg={pg}
+              category={game.category as "Romantic" | "Playful" | "Spicy" | "Challenge" | "Wild" | "Extreme" | "Erotic"}
             />
           )}
           {game.kind === "emoji_chat" && (

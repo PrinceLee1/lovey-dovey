@@ -1,56 +1,49 @@
-// src/echo.ts
-import Echo from "laravel-echo";
-import Pusher from "pusher-js";
+// src/lib/echo.ts
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
 
-// Required for Echo
-(window as any).Pusher = Pusher;
+declare global {
+  interface Window { Pusher: typeof Pusher }
+}
 
-const API_BASE = import.meta.env.VITE_API_URL;
+// Make Pusher available for laravel-echo
+window.Pusher = Pusher;
 
-// Read envs (Vite)
-const KEY = import.meta.env.VITE_PUSHER_APP_KEY ?? import.meta.env.VITE_PUSHER_KEY;
-const CLUSTER =
-  import.meta.env.VITE_PUSHER_APP_CLUSTER ?? import.meta.env.VITE_PUSHER_CLUSTER ?? "mt1";
+// ---- CONFIG (Pusher Cloud) ----
+// Make sure these are set in Vercel (or .env.local for dev):
+// VITE_PUSHER_APP_KEY, VITE_PUSHER_APP_CLUSTER, VITE_API_URL
+const KEY     = import.meta.env.VITE_PUSHER_KEY as string;
+const CLUSTER = (import.meta.env.VITE_PUSHER_APP_CLUSTER || 'mt1') as string;
+const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
-// TEMP: verify what the build embedded
-// console.log("[Echo] VITE_PUSHER_APP_KEY:", KEY);
-// console.log("[Echo] VITE_PUSHER_APP_CLUSTER:", CLUSTER);
-// console.log("[Echo] VITE_API_URL:", API_BASE);
-
-// Hard fail early with a clear message if missing
 if (!KEY) {
-  throw new Error(
-    "[Echo] Missing PUSHER APP KEY. Set VITE_PUSHER_APP_KEY in Vercel (Preview + Production) and redeploy."
-  );
-}
-if (!CLUSTER) {
-  throw new Error(
-    "[Echo] Missing PUSHER CLUSTER. Set VITE_PUSHER_APP_CLUSTER (e.g. mt1, eu, ap2) in Vercel and redeploy."
-  );
+  // Helps catch missing env at build/runtime
+  console.warn('[echo] VITE_PUSHER_APP_KEY is missing');
 }
 
-// If you DON'T use private/presence channels, you can remove authorizer.
 export const echo = new Echo({
-  broadcaster: "pusher",
+  broadcaster: 'pusher',
   key: KEY,
   cluster: CLUSTER,
-  forceTLS: true,
+  forceTLS: true,          // Cloud uses WSS
+  // If you prefer, you can pass a client explicitly:
+  // client: new Pusher(KEY, { cluster: CLUSTER, forceTLS: true }),
+
+  // Use bearer token for private/presence auth
   authorizer: (channel) => ({
-    authorize: (socketId: string, callback: any) => {
-      fetch(`${API_BASE}/broadcasting/auth`, {
-        method: "POST",
+    authorize: (socketId, cb) => {
+      fetch(`${API_URL}/broadcasting/auth`, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-          Authorization: `Bearer ${localStorage.getItem("auth_token") || ""}`,
-          "X-Socket-Id": socketId,
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
         },
-        body: JSON.stringify({ channel_name: channel.name, socket_id: socketId }),
+        body: JSON.stringify({ socket_id: socketId, channel_name: channel.name }),
       })
-        .then((res) => (res.ok ? res.json() : Promise.reject(res)))
-        .then((data) => callback(false, data))
-        .catch((err) => callback(true, err));
+        .then(async (r) => cb(r.ok, await r.json()))
+        .catch((err) => cb(false, err));
     },
   }),
 });
+
