@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../libs/axios";
-import { Globe, Lock, Users, CalendarClock } from "lucide-react";
+import { Globe, Lock, Users, CalendarClock, TrashIcon } from "lucide-react";
 
 type Lobby = {
   id: number;
@@ -18,6 +18,7 @@ type Lobby = {
 };
 
 import type { MotionProps } from "framer-motion";
+import { useAuth } from "../../context/AuthContext";
 
 export default function UpcomingLobbies({ variants }: { variants: MotionProps }) {
   const nav = useNavigate();
@@ -25,6 +26,7 @@ export default function UpcomingLobbies({ variants }: { variants: MotionProps })
   const [mine, setMine] = useState<Lobby[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     (async () => {
@@ -62,7 +64,30 @@ export default function UpcomingLobbies({ variants }: { variants: MotionProps })
   }, []);
 
   const mineIds = useMemo(() => new Set(mine.map((l) => l.id)), [mine]);
-
+  const deleteLobby = async (id: number) => {
+    try {
+      await api.delete(`/lobbies/${id}`);
+      setMine((prev) => prev.filter((l) => l.id !== id));
+      //refresh public lobbies as well
+      setPub((prev) => prev.filter((l) => l.id !== id));
+    } catch (e: unknown) {
+      if (
+        typeof e === "object" &&
+        e !== null &&
+        "response" in e &&
+        typeof (e as { response?: { data?: { message?: string } } }).response === "object"
+      ) {
+        alert(
+          (e as { response?: { data?: { message?: string } } }).response?.data?.message ||
+          "Failed to delete lobby"
+        );
+      } else if (typeof e === "object" && e !== null && "message" in e) {
+        alert((e as { message?: string }).message || "Failed to delete lobby");
+      } else {
+        alert("Failed to delete lobby");
+      }
+    }
+  };
   const list = useMemo(() => {
     const map = new Map<number, Lobby>();
     [...pub, ...mine].forEach((l) => map.set(l.id, l)); // de-dupe
@@ -166,7 +191,7 @@ export default function UpcomingLobbies({ variants }: { variants: MotionProps })
                 {mineIds.has(l.id) ? (
                   <button
                     onClick={() => nav(`/lobby/${l.code}`)}
-                    className="text-sm px-3 py-1.5 rounded-lg bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white"
+                    className="text-sm px-2 py-1.5 rounded-lg bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white -mt-5"
                   >
                     Open
                   </button>
@@ -174,11 +199,23 @@ export default function UpcomingLobbies({ variants }: { variants: MotionProps })
                   <button
                     onClick={() => join(l)}
                     disabled={l.status !== "open"}
-                    className="text-sm px-3 py-1.5 rounded-lg border hover:bg-gray-50 disabled:opacity-50"
+                    className="text-sm px-2 py-1.5 rounded-lg border hover:bg-gray-50 disabled:opacity-50 -mt-2"
                   >
                     {l.status === "open" ? "Join" : l.status.replace("_", " ")}
                   </button>
                 )}
+                {
+                  l.host_id == user?.id && (
+                    <div title="Delete Lobby" className="-mt-5">
+                      <button
+                        onClick={() => deleteLobby(l.id)}
+                        className="text-sm px-3 py-1.5 rounded-lg border hover:bg-gray-50"
+                      >
+                        <TrashIcon className="w-4 h-4" color="red" />
+                      </button>
+                    </div>
+                  )
+                }
               </div>
             );
           })}

@@ -28,6 +28,8 @@ export default function CreateLobbyModal({ open, onClose, onCreated }: Props) {
         privacy,
         start_at: iso,
       });
+      //refresh list
+      window.location.reload();
       onCreated?.({ code: data.code, invite_url: data.invite_url });
       onClose();
     } catch (e: unknown) {
