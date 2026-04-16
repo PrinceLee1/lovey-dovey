@@ -26,7 +26,7 @@ import LeaderboardCard from "../components/LeaderboardCard";
 import StreakBadge from "../components/StreakBadge";
 import ProgressCard from "../components/ProgressCard";
 import { echo } from "../libs/echo";
-import AnimatedLoveBackground from "../components/AnimatedLoveBackground";
+// import AnimatedLoveBackground from "../components/AnimatedLoveBackground";
 import FloatingHearts from "../components/FloatingHearts";
 /**
  * GamesDashboard – Couples AI (Web)
