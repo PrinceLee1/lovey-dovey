@@ -104,7 +104,7 @@ export default function Settings() {
   const [sessionsLoading, setSessionsLoading] = useState(false);
 
   // partner link
-  const [pairLink, setPairLink] = useState<string>("https://lovely.ai/join/abcd1234");
+  const [pairLink, setPairLink] = useState<string>(window.location.origin + "/join/abcd1234");
   const [pairRefreshing, setPairRefreshing] = useState(false);
 
   useEffect(() => {
@@ -238,7 +238,7 @@ export default function Settings() {
       setPairLink(data.url || pairLink);
     } catch {
       // fallback demo
-      setPairLink(`https://lovely.ai/join/${Math.random().toString(36).slice(2, 8)}`);
+      setPairLink(`${window.location.origin}/join/${Math.random().toString(36).slice(2, 8)}`);
     } finally {
       setPairRefreshing(false);
     }

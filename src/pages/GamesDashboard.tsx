@@ -26,6 +26,8 @@ import LeaderboardCard from "../components/LeaderboardCard";
 import StreakBadge from "../components/StreakBadge";
 import ProgressCard from "../components/ProgressCard";
 import { echo } from "../libs/echo";
+import AnimatedLoveBackground from "../components/AnimatedLoveBackground";
+import FloatingHearts from "../components/FloatingHearts";
 /**
  * GamesDashboard – Couples AI (Web)
  * --------------------------------------------------------------
@@ -211,8 +213,11 @@ const filtered = useMemo(() => {
   // if (!invite) return null;
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-rose-50 via-pink-50 to-white">
-      {/* Top bar */}
+    <div className="relative min-h-screen w-full bg-gradient-to-b from-rose-50 via-pink-50 to-white">
+    {/* <AnimatedLoveBackground /> */}
+    <FloatingHearts />
+        {/* Top bar */}
+    <div className="relative z-10">
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-pink-500 to-fuchsia-600 grid place-items-center text-white">
@@ -235,7 +240,7 @@ const filtered = useMemo(() => {
               <div>
                 <h1 className="font-display text-2xl font-semibold text-gray-900">Hey { user?.name} 👋</h1> {/* Later will change it to "Hey Hey {user?.name} & {partnerName}" */}
                 <p className="text-gray-600">
-                  Ready for a little fun? Invite your {user?.gender === 'Male' ? 'girlfriend' : 'boyfriend'} to join the fun 🥰!
+                  Ready for a little fun? Invite your {user?.gender === 'Male' ? 'girlfriend/spouse' : 'boyfriend/spouse'} to join the fun 🥰!
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -262,7 +267,7 @@ const filtered = useMemo(() => {
                   value={mode}
                   onChange={(v) => setMode(v as never)}
                   options={[
-                    { label: "Couple", value: "couple", icon: <Sparkles className="w-4 h-4" /> },
+                    { label: "Couple", value: "couple", icon: <Heart className="w-4 h-4" /> },
                     { label: "Group", value: "group", icon: <Users className="w-4 h-4" /> },
                   ]}
                 />
@@ -292,6 +297,14 @@ const filtered = useMemo(() => {
               title="Generate Game"
               desc="AI picks a perfect game"
               onClick={() => {
+                //check if user have a partner first, if not show the partner required modal if the generated game needs a partner
+                if (!partnerActive) {
+                  const needsP = filtered.some(g => needsPartner(g));
+                  if (needsP) {
+                    setShowPartnerModal(true);
+                    return;
+                  }
+                }
                 const pool = filtered.length ? filtered : allGames;
                 const pick = pool[Math.floor(Math.random() * pool.length)];
                 setActiveGame(pick);         // open the game directly
@@ -302,7 +315,7 @@ const filtered = useMemo(() => {
               icon={<Share2 className="w-5 h-5" />}
               title="Invite Partner"
               desc="Share a join link"
-              onClick={() => navigator.clipboard.writeText("https://lovely.ai/join/abcd1234")}
+              onClick={() => navigator.clipboard.writeText(window.location.origin + "/join/abcd1234")}
             />
             <DailyChallengeCard onXp={(xp)=>setXp(x => (x ?? 0) + xp)} />
 
@@ -471,16 +484,20 @@ const filtered = useMemo(() => {
 
 
           {/* Friends Online */}
-          <motion.div {...variants} className="rounded-3xl bg-white shadow-xl border border-rose-100 p-6">
-            <div className="font-display font-semibold text-gray-900 mb-4">Friends Online</div>
+
+            <motion.div {...variants} className="rounded-3xl bg-white shadow-xl border border-rose-100 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="font-display font-semibold text-gray-900">Friends Online</div>
+              <span className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full font-medium">Coming Soon</span>
+            </div>
             <div className="flex -space-x-2 overflow-hidden">
               {friends.map((f) => (
-                <div key={f} className="h-9 w-9 rounded-full ring-2 ring-white bg-gradient-to-br from-fuchsia-400 to-pink-500 grid place-items-center text-white text-xs font-semibold">
-                  {f[0]}
-                </div>
+              <div key={f} className="h-9 w-9 rounded-full ring-2 ring-white bg-gradient-to-br from-fuchsia-400 to-pink-500 grid place-items-center text-white text-xs font-semibold">
+                {f[0]}
+              </div>
               ))}
             </div>
-          </motion.div>
+            </motion.div>
         </div>
       </div>
 
@@ -540,7 +557,7 @@ const filtered = useMemo(() => {
       </AnimatePresence>
 
       <Footer variant="full" />
-
+</div>
     </div>
   );
 }

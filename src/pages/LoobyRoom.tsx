@@ -205,6 +205,35 @@ async function sendMessage() {
         {/* Start buttons for host */}
         {isHost && (
           <div className="flex items-center gap-2 mb-4">
+            {lobby?.start_at && new Date(lobby.start_at) > new Date() ? (
+              <>
+                <button onClick={() => start("trivia")}
+                  className="rounded-xl px-3 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm inline-flex items-center gap-1">
+                  <PlayCircle className="w-4 h-4"/> Start Early
+                </button>
+                <button disabled
+                  className="rounded-xl px-3 py-2 border text-sm text-gray-400 cursor-not-allowed">
+                  Wait for Start Time
+                </button>
+              </>
+            ) : (
+              <>
+                <button onClick={() => start("trivia")}
+                  className="rounded-xl px-3 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm inline-flex items-center gap-1">
+                  <PlayCircle className="w-4 h-4"/> Start Trivia
+                </button>
+                <button onClick={() => start("charades_ai")}
+                  className="rounded-xl px-3 py-2 border text-sm hover:bg-gray-50">
+                  Start Charades
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* If not host but game time have reached, show start buttons as well */}
+        {!isHost && lobby?.start_at && new Date(lobby.start_at) <= new Date() && (
+          <div className="flex items-center gap-2 mb-4">
             <button onClick={() => start("trivia")}
               className="rounded-xl px-3 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm inline-flex items-center gap-1">
               <PlayCircle className="w-4 h-4"/> Start Trivia

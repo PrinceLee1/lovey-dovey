@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://couples.test/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://loveydovey.test/api',
   timeout: 15000,
 });
 

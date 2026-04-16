@@ -3,14 +3,17 @@ import { motion } from "framer-motion";
 import { Heart, Sparkles, Users, Shield, MessageSquare, Gamepad2, ArrowRight } from "lucide-react";
 import Footer from "../components/Footer";
 import { useAuth } from "../context/AuthContext";
+import FloatingHearts from "../components/FloatingHearts";
 
 const fade = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 } };
 
 export default function Landing() {
   const {user} = useAuth();
   return (
-    <div className="min-h-screen bg-gradient-to-b from-rose-50 via-pink-50 to-white text-gray-900">
+    <div className="relative min-h-screen w-full bg-gradient-to-b from-rose-50 via-pink-50 to-white">
+      <FloatingHearts />
       {/* Nav */}
+      <div className="relative z-10">
       <header className="sticky top-0 z-40 backdrop-blur bg-white/70 border-b border-rose-100">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
@@ -239,6 +242,7 @@ export default function Landing() {
       </section>
 
       <Footer variant="simple" />
+      </div>
     </div>
   );
 }
