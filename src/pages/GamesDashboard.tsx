@@ -478,6 +478,7 @@ export default function GamesDashboard() {
                 onClose={() => setActiveGame(null)}
                 onFinished={(res) => onGameFinished(activeGame, res)}
                 pg={activeGame.category === "Erotic" ? "PG-18+" : "PG-13"}
+                isPlus={user?.is_plus}
               />
             )}
 

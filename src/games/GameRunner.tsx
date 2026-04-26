@@ -22,13 +22,15 @@ export default function GameRunner({
   onClose,
   onFinished,
   pg = "PG-13",
+  isPlus = false,
 }: {
   game: Game;
   onClose: () => void;
   onFinished: (res: GameResult) => void;
   pg?: "PG-13" | "PG-18+" | "NC-17";
+  isPlus?: boolean;
 }) {
-  const isPlus = pg === "PG-18+" || pg === "NC-17";
+  // const isPlus = pg === "PG-18+" || pg === "NC-17";
 
   function finish(res: GameResult) {
     onFinished(res);

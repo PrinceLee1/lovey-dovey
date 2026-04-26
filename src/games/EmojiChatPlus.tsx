@@ -69,13 +69,14 @@ export default function EmojiChatPlus({
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [running, phase]);
+  }, [running, phase, goToGuessPhase]);
 
   // ── XP tracking ───────────────────────────────────────────────────────────
   const [score, setScore] = useState(0);
 
   // ── AI story interpretation ────────────────────────────────────────────────
   const [aiStory, setAiStory] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [aiLoading, setAiLoading] = useState(false);
 
   async function interpretStory() {
@@ -135,6 +136,7 @@ export default function EmojiChatPlus({
     inputRef.current?.focus();
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   function goToGuessPhase() {
     setRunning(false);
     setPhase("airead");
