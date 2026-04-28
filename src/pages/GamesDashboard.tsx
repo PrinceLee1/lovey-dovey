@@ -199,10 +199,14 @@ export default function GamesDashboard() {
   }
 
   // ─── GREETING ─────────────────────────────────────────────────────────────
-  const partnerWord =
-    user?.gender === 'Male' ? 'girlfriend/spouse' :
-    user?.gender === 'Female' ? 'boyfriend/spouse' :
-    'partner/spouse';
+  //greet 'Good morning/afternoon/evening' based on user's local time + name + partner name if linked
+  const partnerWord = partnerActive ? partner?.name+ "❤️" || "partner" : "partner";
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return `Good morning, ${user?.name}!`;
+    if (hour < 18) return `Good afternoon, ${user?.name}!`;
+    return `Good evening, ${user?.name}!`;
+  }, [user?.name]);
 
   // ─── ON GAME FINISHED ────────────────────────────────────────────────────
   async function onGameFinished(game: Game, res: GameResult) {
@@ -340,7 +344,7 @@ export default function GamesDashboard() {
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h1 className="font-display text-2xl font-semibold text-gray-900">
-                    Hey {user?.name} 👋
+                    {greeting} 👋
                   </h1>
                   <p className="text-gray-600">
                     Ready for a little fun? Invite your {partnerWord} to join the fun 🥰!
