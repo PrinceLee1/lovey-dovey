@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../libs/axios";
 import { Globe, Lock, Users, CalendarClock, TrashIcon } from "lucide-react";
-
+import { useToast } from "../../context/ToastContext";
 type Lobby = {
   id: number;
   code: string;
@@ -27,7 +27,7 @@ export default function UpcomingLobbies({ variants }: { variants: MotionProps })
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const { user } = useAuth();
-
+  const { toast } = useToast();
   useEffect(() => {
     (async () => {
       try {
@@ -77,14 +77,14 @@ export default function UpcomingLobbies({ variants }: { variants: MotionProps })
         "response" in e &&
         typeof (e as { response?: { data?: { message?: string } } }).response === "object"
       ) {
-        alert(
+        toast.error(
           (e as { response?: { data?: { message?: string } } }).response?.data?.message ||
           "Failed to delete lobby"
         );
       } else if (typeof e === "object" && e !== null && "message" in e) {
-        alert((e as { message?: string }).message || "Failed to delete lobby");
+        toast.error((e as { message?: string }).message || "Failed to delete lobby");
       } else {
-        alert("Failed to delete lobby");
+        toast.error("Failed to delete lobby");
       }
     }
   };
@@ -128,14 +128,14 @@ export default function UpcomingLobbies({ variants }: { variants: MotionProps })
         "response" in e &&
         typeof (e as { response?: { data?: { message?: string } } }).response === "object"
       ) {
-        alert(
+        toast.error(
           (e as { response?: { data?: { message?: string } } }).response?.data?.message ||
           "Failed to join lobby"
         );
       } else if (typeof e === "object" && e !== null && "message" in e) {
-        alert((e as { message?: string }).message || "Failed to join lobby");
+        toast.error((e as { message?: string }).message || "Failed to join lobby");
       } else {
-        alert("Failed to join lobby");
+        toast.error("Failed to join lobby");
       }
     }
   }

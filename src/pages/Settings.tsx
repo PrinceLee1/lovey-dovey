@@ -22,7 +22,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../libs/axios";
 import Footer from "../components/Footer";
-
+import { useToast } from "../context/ToastContext";
 /* -------------------------------- Types -------------------------------- */
 
 type ProfilePayload = {
@@ -59,6 +59,7 @@ type SessionInfo = {
 export default function Settings() {
   const nav = useNavigate();
   const { user, fetchMe, logout } = useAuth();
+  const { toast } = useToast();
 
   // profile state
   const [profile, setProfile] = useState<ProfilePayload>({
@@ -173,7 +174,7 @@ export default function Settings() {
       setAvatarPreview(data.url); // use returned URL
       await fetchMe();
     } catch (e: any) {
-      alert(e.message || "Avatar upload failed");
+      toast.error(e.message || "Avatar upload failed");
     } finally {
       setAvatarUploading(false);
     }
@@ -227,7 +228,7 @@ export default function Settings() {
     // Implement on Laravel: POST /api/logout-others
     if (!confirm("Log out of other devices?")) return;
     await api.post("/logout-others");
-    alert("Other sessions revoked");
+    toast.success("Other sessions revoked");
   }
 
   async function refreshPairLink() {

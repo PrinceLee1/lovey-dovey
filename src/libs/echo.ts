@@ -1,11 +1,4 @@
-// src/libs/echo.ts — FIXED
-// ─────────────────────────────────────────────────────────────────────────────
-// FIXES:
-//  1. VITE_PUSHER_KEY → VITE_PUSHER_APP_KEY (was silently undefined, breaking all presence)
-//  2. Added connection state logging so you can see in DevTools what's happening
-//  3. Auth error now logs the full response so you can debug 403s
-//  4. forceTLS driven by VITE_PUSHER_SCHEME env var (consistent with other files)
-
+// src/libs/echo.ts — FULLY FIXED
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 
@@ -15,45 +8,45 @@ declare global {
 
 window.Pusher = Pusher;
 
-const KEY     = import.meta.env.VITE_PUSHER_APP_KEY as string;   // ← FIXED (was VITE_PUSHER_KEY)
+const KEY     = import.meta.env.VITE_PUSHER_APP_KEY as string;
 const CLUSTER = (import.meta.env.VITE_PUSHER_APP_CLUSTER || 'mt1') as string;
+
+// IMPORTANT: VITE_API_URL must be the base URL with NO /api suffix
+// e.g.  VITE_API_URL=https://yourapi.com
+// The broadcasting/auth endpoint sits at: https://yourapi.com/broadcasting/auth
+// NOT at: https://yourapi.com/api/broadcasting/auth
+//
+// If your broadcasting/auth IS under /api prefix, set:
+// VITE_API_URL=https://yourapi.com/api
 const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
-// ── Dev-time guard so you know immediately if env is misconfigured ─────────
-if (!KEY) {
-  console.error(
-    '[LoveyDovey Echo] ❌ VITE_PUSHER_APP_KEY is missing from your .env file.\n' +
-    'Presence channels will NOT work. Add it and restart Vite.'
-  );
-}
-if (!API_URL) {
-  console.error(
-    '[LoveyDovey Echo] ❌ VITE_API_URL is missing. Broadcasting auth will fail.'
-  );
-}
-
-// ── Enable Pusher logging in development only ─────────────────────────────
 if (import.meta.env.DEV) {
+  // Full Pusher logging in development
   Pusher.logToConsole = true;
+  // console.info('[Echo] KEY:', KEY ? `${KEY.slice(0, 6)}…` : '❌ MISSING');
+  // console.info('[Echo] CLUSTER:', CLUSTER);
+  // console.info('[Echo] AUTH URL:', `${API_URL}/broadcasting/auth`);
 }
 
 export const echo = new Echo({
-  broadcaster : 'pusher',
-  key         : KEY,
-  cluster     : CLUSTER,
-  forceTLS    : import.meta.env.VITE_PUSHER_SCHEME !== 'http', // true unless explicitly http
+  broadcaster: 'pusher',
+  key        : KEY,
+  cluster    : CLUSTER,
+  forceTLS   : import.meta.env.VITE_PUSHER_SCHEME !== 'http',
 
   authorizer: (channel) => ({
     authorize: (socketId, cb) => {
       const token = localStorage.getItem('auth_token') || '';
 
       if (!token) {
-        console.error('[Echo auth] No auth_token in localStorage — user not logged in?');
+        console.error('[Echo auth] ❌ No auth_token in localStorage');
         cb(new Error('No auth token'), null);
         return;
       }
 
-      fetch(`${API_URL}/broadcasting/auth`, {
+      const authUrl = `${API_URL}/broadcasting/auth`;
+
+      fetch(authUrl, {
         method : 'POST',
         headers: {
           'Content-Type'    : 'application/json',
@@ -67,34 +60,53 @@ export const echo = new Echo({
         }),
       })
         .then(async (r) => {
-          const data = await r.json();
-          console.log(`Auth for "${channel.name}":`, r.status, data);
+          const text = await r.text(); // read as text first — catches empty body
+
+          if (!text || text.trim() === '') {
+            // Empty body = channel name doesn't match channels.php
+            // Check: Broadcast::channel('lobby.{code}') in channels.php
+            // The "presence-" prefix is stripped by Laravel before lookup
+            console.error(
+              `[Echo auth] ❌ EMPTY response for "${channel.name}"\n` +
+              `→ Your channels.php doesn't have a matching Broadcast::channel() entry.\n` +
+              `→ Laravel strips "presence-" prefix, so for channel "${channel.name}"\n` +
+              `  channels.php needs: Broadcast::channel('${channel.name.replace(/^presence-/, '')}', ...)`
+            );
+            cb(new Error('Empty auth response — check channels.php'), null);
+            return;
+          }
+
+          let data: any;
+          try {
+            data = JSON.parse(text);
+          } catch {
+            console.error('[Echo auth] ❌ Non-JSON response:', text.slice(0, 200));
+            cb(new Error('Non-JSON auth response'), null);
+            return;
+          }
+
           if (r.ok) {
             cb(null, data);
           } else {
-            // Log the full error so you can debug 403s in DevTools
-            console.error(
-              `[Echo auth] ❌ ${r.status} on channel "${channel.name}":`,
-              data
-            );
-            cb(new Error(data.message || `Auth failed (${r.status})`), null);
+            console.error(`[Echo auth] ❌ ${r.status} for "${channel.name}":`, data);
+            cb(new Error(data.message || `Auth failed ${r.status}`), null);
           }
         })
         .catch((err) => {
-          console.error('[Echo auth] Network error during auth:', err);
+          console.error('[Echo auth] ❌ Network error:', err);
           cb(err, null);
         });
     },
   }),
 });
 
-// ── Connection state logging (visible in DevTools console) ────────────────
+// Connection lifecycle logging
 echo.connector.pusher.connection.bind('connected', () => {
-  console.info('[Echo] ✅ Pusher connected — socket ID:', echo.socketId());
+  console.info('[Echo]  Connected — socket:', echo.socketId());
 });
 echo.connector.pusher.connection.bind('error', (err: any) => {
-  console.error('[Echo] ❌ Pusher connection error:', err);
+  console.error('[Echo]  Connection error:', err);
 });
 echo.connector.pusher.connection.bind('disconnected', () => {
-  console.warn('[Echo] ⚠️ Pusher disconnected');
+  console.warn('[Echo] ⚠️ Disconnected');
 });

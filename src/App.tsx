@@ -5,9 +5,10 @@ import GamesDashboard from './pages/GamesDashboard';
 import SignIn from './pages/SignIn';
 import type { JSX } from 'react';
 import Settings from './pages/Settings';
-import LobbyRoom from './pages/LoobyRoom';
+import LobbyRoom from './pages/LobbyRoom';
 import LobbyGameRunner from "../src/games/LobbyGameRunner";
 import Landing from './pages/Landing';
+import { ToastProvider } from "./components/Toast";
 
 // Admin imports
 import AdminLayout from './pages/admin/AdminLayout';
@@ -25,63 +26,65 @@ function PrivateRoute({ children }: { children: JSX.Element }) {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/signin" element={<SignIn />} />
+      <ToastProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/signin" element={<SignIn />} />
 
-          <Route
-            path="/games"
-            element={
-              <PrivateRoute>
-                <GamesDashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <PrivateRoute>
-                <Settings />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/lobby/:code"
-            element={
-              <PrivateRoute>
-                <LobbyRoom />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/session/:code"
-            element={
-              <PrivateRoute>
-                <CoupleSession />
-              </PrivateRoute>
-            }
-          />
+            <Route
+              path="/games"
+              element={
+                <PrivateRoute>
+                  <GamesDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <PrivateRoute>
+                  <Settings />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/lobby/:code"
+              element={
+                <PrivateRoute>
+                  <LobbyRoom />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/session/:code"
+              element={
+                <PrivateRoute>
+                  <CoupleSession />
+                </PrivateRoute>
+              }
+            />
 
-          {/* Admin area */}
-          <Route
-            path="/admin"
-            element={
-              <RequireAdmin>
-                <AdminLayout />
-              </RequireAdmin>
-            }
-          >
-            <Route index element={<AdminOverview />} />
-            <Route path="users" element={<AdminUsers />} />
-          </Route>
+            {/* Admin area */}
+            <Route
+              path="/admin"
+              element={
+                <RequireAdmin>
+                  <AdminLayout />
+                </RequireAdmin>
+              }
+            >
+              <Route index element={<AdminOverview />} />
+              <Route path="users" element={<AdminUsers />} />
+            </Route>
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
 
-        <LobbyGameRunner />
-      </BrowserRouter>
+          <LobbyGameRunner />
+        </BrowserRouter>
+      </ToastProvider>
     </AuthProvider>
   );
 }

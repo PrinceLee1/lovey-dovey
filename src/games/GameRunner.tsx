@@ -8,7 +8,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import type { Game, GameResult } from "./types";
 import TruthDareRomantic from "./TruthDareRomantic";
-import TruthDarePlus from "./Truthdareplus";
+import TruthDarePlus from "./TruthDarePlus";
 import EmojiChat from "./EmojiChat";
 import EmojiChatPlus from "./EmojiChatPlus";
 import SpiceDice from "./SpiceDice";
