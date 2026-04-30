@@ -16,6 +16,9 @@ import AdminOverview from './pages/admin/AdminOverview';
 import AdminUsers from './pages/admin/AdminUsers';
 import RequireAdmin from './pages/admin/RequireAdmin';
 import CoupleSession from './pages/Session';
+import AdminSettings from './pages/admin/AdminSettings';
+import AdminReports from './pages/admin/AdminReports';
+import AdminGames from './pages/admin/AdminGames';
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const { token } = useAuth();
@@ -77,6 +80,9 @@ export default function App() {
             >
               <Route index element={<AdminOverview />} />
               <Route path="users" element={<AdminUsers />} />
+              <Route path="games"    element={<AdminGames />} />
+              <Route path="reports"  element={<AdminReports />} />
+              <Route path="settings" element={<AdminSettings />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
