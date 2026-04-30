@@ -146,7 +146,7 @@ function SyncedWouldYouRather({ sessionId, lobbyCode, hostId, players, onFinish 
 function SyncedGroupDareDice({ sessionId, lobbyCode, hostId, players, onFinish }: Omit<Props, "kind">) {
   const { user } = useAuth();
   const isHost   = String(user?.id) === String(hostId);
-  const [, setRemoteState] = useState<any>(null);
+  const [remoteState, setRemoteState] = useState<any>(null);
 
   const onHostReceive = useCallback((e: any) => {
     // Host receives vote events from non-host players
