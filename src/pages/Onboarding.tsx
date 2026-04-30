@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Heart, Mail, ArrowRight, ArrowLeft, Sparkles, Users, Zap, Calendar, ChevronDown } from "lucide-react";
+import { Heart, Mail, ArrowRight, ArrowLeft, Sparkles, Users, Zap, Calendar } from "lucide-react";
 
 /* ─── Types ───────────────────────────────────────────────────────────────── */
 type Step = "splash" | "onb1" | "onb2" | "onb3" | "auth" | "profile" | "dob" | "gender" | "interests" | "review";
@@ -56,7 +56,7 @@ const slide = {
   initial: { opacity: 0, x: 40 },
   animate: { opacity: 1, x: 0 },
   exit:    { opacity: 0, x: -40 },
-  transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as number[] },
+  transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] },
 };
 
 /* ─── Progress bar ────────────────────────────────────────────────────────── */
