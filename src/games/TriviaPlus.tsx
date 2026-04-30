@@ -247,7 +247,7 @@ export default function TriviaPlus({
                   {players[0]}: What will {players[1]} answer?
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {kyQ.options.map((opt, i) => (
+                  {kyQ.options.map((_opt, i) => (
                     <button key={i} onClick={() => setP0Prediction(i)}
                       className={`rounded-xl px-3 py-1.5 text-xs border ${p0Prediction === i ? "bg-fuchsia-600 text-white" : "hover:bg-gray-50"}`}>
                       {["A","B","C","D"][i]}

@@ -98,8 +98,7 @@ export default function HotSeat({ players, lobbyCode, sessionId, hostId, onFinis
 
   // ── Listen for state from host ────────────────────────────────────────────
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const ch = echo.channel(`lobby-game.${sessionId}`)
+    echo.channel(`lobby-game.${sessionId}`)
       .listen(".LobbyGameUpdate", (e: any) => {
         if (e.type === "state") {
           setGs(e.data);

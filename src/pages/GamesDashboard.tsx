@@ -127,7 +127,7 @@ export default function GamesDashboard() {
       .listen('.couple.session.invited', (e: any) => {
         setInvite(e);
       });
-    return () => { try { ch.unsubscribe(); } catch { } };
+    return () => { try { ch.unsubscribe(); } catch { /* empty */ } };
   }, [user?.id]);
 
   // ─── HELPERS ──────────────────────────────────────────────────────────────
@@ -586,7 +586,7 @@ export default function GamesDashboard() {
 
           {/* ── SIDEBAR ─────────────────────────────────────────────────────── */}
           <div className="space-y-6">
-            <ProgressCard isPlus={user?.is_plus} onUpgrade={() => { setPlusModalReason('general'); setShowPlusModal(true); }} />
+            <ProgressCard  />
             <LeaderboardCard />
             <UpcomingLobbies variants={variants} />
 

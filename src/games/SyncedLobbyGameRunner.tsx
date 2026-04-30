@@ -63,7 +63,7 @@ function useGameSync(
   useEffect(() => {
     console.log(`[GameSync] Subscribing to lobby-game.${sessionId} as ${isHost ? 'HOST' : 'PLAYER'}`);
 
-    const ch = echo.channel(`lobby-game.${sessionId}`)
+    echo.channel(`lobby-game.${sessionId}`)
       .listen(".LobbyGameUpdate", (e: any) => {
         console.log(`[GameSync] Received event:`, e.type, e.data, `isHost:${isHost}`);
 
@@ -146,7 +146,7 @@ function SyncedWouldYouRather({ sessionId, lobbyCode, hostId, players, onFinish 
 function SyncedGroupDareDice({ sessionId, lobbyCode, hostId, players, onFinish }: Omit<Props, "kind">) {
   const { user } = useAuth();
   const isHost   = String(user?.id) === String(hostId);
-  const [remoteState, setRemoteState] = useState<any>(null);
+  const [, setRemoteState] = useState<any>(null);
 
   const onHostReceive = useCallback((e: any) => {
     // Host receives vote events from non-host players
@@ -185,9 +185,10 @@ function SyncedGroupDareDice({ sessionId, lobbyCode, hostId, players, onFinish }
 function SyncedTrivia({ sessionId, lobbyCode, hostId, players, onFinish }: Omit<Props, "kind">) {
   const { user } = useAuth();
   const isHost   = String(user?.id) === String(hostId);
-  const [remoteState, setRemoteState] = useState<any>(null);
+  const [, setRemoteState] = useState<any>(null);
 
   const onHostReceive = useCallback((e: any) => {
+    // Store buzz/answer events from players for host to process
     if (e.type === "buzz" && e.data?.team) {
       setRemoteState((prev: any) => ({ ...prev, _buzz: e.data.team }));
     }
@@ -200,10 +201,13 @@ function SyncedTrivia({ sessionId, lobbyCode, hostId, players, onFinish }: Omit<
     if (e.type === "state" && e.data) setRemoteState(e.data);
   }, []);
 
-  const { broadcast, sendAction } = useGameSync(sessionId, lobbyCode, isHost, onHostReceive, onPlayerReceive);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { broadcast: _broadcast, sendAction: _sendAction } = useGameSync(sessionId, lobbyCode, isHost, onHostReceive, onPlayerReceive);
 
   if (players.length === 0) return <PlayersNotReady />;
 
+  // TriviaDuoVsDuo doesn't yet accept sync props — runs independently on each device
+  // Full sync can be added once TriviaDuoVsDuo is updated to accept isHost/remoteState
   return (
     <TriviaDuoVsDuo
       count={10}
@@ -211,11 +215,6 @@ function SyncedTrivia({ sessionId, lobbyCode, hostId, players, onFinish }: Omit<
       category="General"
       difficulty="Medium"
       onFinish={onFinish}
-      isHost={isHost}
-      remoteState={remoteState}
-      onStateChange={(state: any) => broadcast("state", state)}
-      onBuzz={(team: "A"|"B") => sendAction("buzz", { team })}
-      onAnswer={(idx: number) => sendAction("answer", { idx })}
     />
   );
 }
@@ -224,20 +223,20 @@ function SyncedTrivia({ sessionId, lobbyCode, hostId, players, onFinish }: Omit<
 function SyncedCharades({ sessionId, lobbyCode, hostId, players, onFinish }: Omit<Props, "kind">) {
   const { user } = useAuth();
   const isHost   = String(user?.id) === String(hostId);
-  const [remoteState, setRemoteState] = useState<any>(null);
+  const [, setRemoteState] = useState<any>(null);
 
-  const onHostReceive = useCallback((_e: any) => {
-    // No actions from players needed for Charades — host controls everything
-  }, []);
+  const onHostReceive = useCallback((_e: any) => {}, []);
 
   const onPlayerReceive = useCallback((e: any) => {
     if (e.type === "state" && e.data) setRemoteState(e.data);
   }, []);
 
-  const { broadcast } = useGameSync(sessionId, lobbyCode, isHost, onHostReceive, onPlayerReceive);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { broadcast: _broadcast } = useGameSync(sessionId, lobbyCode, isHost, onHostReceive, onPlayerReceive);
 
   if (players.length === 0) return <PlayersNotReady />;
 
+  // CharadesAI doesn't yet accept sync props — runs independently on each device
   return (
     <CharadesAI
       secondsPerRound={60}
@@ -245,9 +244,6 @@ function SyncedCharades({ sessionId, lobbyCode, hostId, players, onFinish }: Omi
       category="General"
       difficulty="Easy"
       onFinish={onFinish}
-      isHost={isHost}
-      remoteState={remoteState}
-      onStateChange={(state: any) => broadcast("state", state)}
     />
   );
 }

@@ -77,7 +77,7 @@ export default function EmojiChatPlus({
   // ── AI story interpretation ────────────────────────────────────────────────
   const [aiStory, setAiStory] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [aiLoading, setAiLoading] = useState(false);
+  const [_aiLoading, setAiLoading] = useState(false);
 
   async function interpretStory() {
     setAiLoading(true);

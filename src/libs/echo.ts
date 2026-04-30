@@ -23,9 +23,9 @@ const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 if (import.meta.env.DEV) {
   // Full Pusher logging in development
   Pusher.logToConsole = true;
-  // console.info('[Echo] KEY:', KEY ? `${KEY.slice(0, 6)}…` : '❌ MISSING');
-  // console.info('[Echo] CLUSTER:', CLUSTER);
-  // console.info('[Echo] AUTH URL:', `${API_URL}/broadcasting/auth`);
+  console.info('[Echo] KEY:', KEY ? `${KEY.slice(0, 6)}…` : '❌ MISSING');
+  console.info('[Echo] CLUSTER:', CLUSTER);
+  console.info('[Echo] AUTH URL:', `${API_URL}/broadcasting/auth`);
 }
 
 export const echo = new Echo({
@@ -100,13 +100,16 @@ export const echo = new Echo({
   }),
 });
 
-// Connection lifecycle logging
-echo.connector.pusher.connection.bind('connected', () => {
-  console.info('[Echo]  Connected — socket:', echo.socketId());
-});
-echo.connector.pusher.connection.bind('error', (err: any) => {
-  console.error('[Echo]  Connection error:', err);
-});
-echo.connector.pusher.connection.bind('disconnected', () => {
-  console.warn('[Echo] ⚠️ Disconnected');
-});
+// Connection lifecycle logging — cast connector to any to avoid union type narrowing issue
+const pusherConnector = (echo.connector as any).pusher;
+if (pusherConnector?.connection) {
+  pusherConnector.connection.bind('connected', () => {
+    console.info('[Echo] ✅ Connected — socket:', echo.socketId());
+  });
+  pusherConnector.connection.bind('error', (err: any) => {
+    console.error('[Echo] ❌ Connection error:', err);
+  });
+  pusherConnector.connection.bind('disconnected', () => {
+    console.warn('[Echo] ⚠️ Disconnected');
+  });
+}
