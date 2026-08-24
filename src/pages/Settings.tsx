@@ -86,12 +86,18 @@ export default function Settings() {
   const [pwdSaving, setPwdSaving] = useState(false);
   const [pwdMsg, setPwdMsg] = useState<string | null>(null);
 
-  // prefs
-  const [prefs, setPrefs] = useState<PrefsPayload>({
-    email_news: true,
-    email_reminders: true,
-    weekly_summary: true,
-    private_profile: false,
+  // prefs — no backend storage yet, persisted locally (see savePrefs below)
+  const [prefs, setPrefs] = useState<PrefsPayload>(() => {
+    try {
+      const saved = localStorage.getItem("prefs");
+      if (saved) return JSON.parse(saved);
+    } catch { /* ignore malformed storage */ }
+    return {
+      email_news: true,
+      email_reminders: true,
+      weekly_summary: true,
+      private_profile: false,
+    };
   });
   const [prefsSaving, setPrefsSaving] = useState(false);
 
@@ -209,10 +215,14 @@ export default function Settings() {
   }
 
   async function savePrefs() {
+    // No backend storage for these preferences yet — persist locally rather
+    // than calling a non-existent endpoint or silently doing nothing.
     setPrefsSaving(true);
     try {
-      // Implement on Laravel: PUT /api/user/prefs
-      await api.put("/user/prefs", prefs);
+      localStorage.setItem("prefs", JSON.stringify(prefs));
+      toast.success("Preferences saved on this device");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to save preferences");
     } finally {
       setPrefsSaving(false);
     }
@@ -225,21 +235,24 @@ export default function Settings() {
   }
 
   async function revokeOtherSessions() {
-    // Implement on Laravel: POST /api/logout-others
     if (!confirm("Log out of other devices?")) return;
-    await api.post("/logout-others");
-    toast.success("Other sessions revoked");
+    try {
+      await api.post("/logout-others");
+      toast.success("Other sessions revoked");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to revoke other sessions");
+    }
   }
 
   async function refreshPairLink() {
     setPairRefreshing(true);
     try {
-      // Implement on Laravel: POST /api/pairing-link/refresh
-      const { data } = await api.post("/pairing-link/refresh");
-      setPairLink(data.url || pairLink);
-    } catch {
-      // fallback demo
-      setPairLink(`${window.location.origin}/join/${Math.random().toString(36).slice(2, 8)}`);
+      // Reuses the existing partner-invite endpoint (generates or returns
+      // the current pending invite code) rather than a separate route.
+      const { data } = await api.post("/partner/invite");
+      setPairLink(`${window.location.origin}/join/${data.code}`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to refresh pairing link");
     } finally {
       setPairRefreshing(false);
     }
@@ -253,13 +266,16 @@ export default function Settings() {
   async function deleteAccount() {
     const typed = prompt('Type "DELETE" to confirm account deletion');
     if (typed !== "DELETE") return;
+    const password = prompt("Enter your password to confirm:");
+    if (!password) return;
     try {
-      // Implement on Laravel: DELETE /api/user
-      await api.delete("/user");
-    } finally {
-      await logout();
-      nav("/onboarding");
+      await api.delete("/user", { data: { password } });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to delete account");
+      return;
     }
+    await logout();
+    nav("/onboarding");
   }
 
   /* --------------------------------- UI --------------------------------- */

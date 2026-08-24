@@ -45,11 +45,15 @@ export default function PartnerCard() {
   const [err, setErr] = useState<string | null>(null);
 
   async function load() {
-    const s = await getPartnerStatus();
-    setStatus(s);
-    // if you want to force “not paired” view when link ended:
-    if (s?.link?.status === "ended") {
-      setStatus({ partner: null, link: null, shared: s.shared ?? { counts: { total: 0 }, games: [] } });
+    try {
+      const s = await getPartnerStatus();
+      setStatus(s);
+      // if you want to force “not paired” view when link ended:
+      if (s?.link?.status === "ended") {
+        setStatus({ partner: null, link: null, shared: s.shared ?? { counts: { total: 0 }, games: [] } });
+      }
+    } catch (e: any) {
+      setErr(e?.message ?? "Failed to load partner status");
     }
   }
 

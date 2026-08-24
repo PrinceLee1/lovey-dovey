@@ -154,7 +154,7 @@ export default function GamesDashboard() {
   // ─── INVITE PARTNER (calls real API) ─────────────────────────────────────
   async function handleInvitePartner() {
     try {
-      const { data } = await api.post('/partner/invites');
+      const { data } = await api.post('/partner/invite');
       const link = `${window.location.origin}/join/${data.code}`;
       await navigator.clipboard.writeText(link);
       showToast('✅ Invite link copied to clipboard!');
@@ -200,7 +200,7 @@ export default function GamesDashboard() {
 
   // ─── GREETING ─────────────────────────────────────────────────────────────
   //greet 'Good morning/afternoon/evening' based on user's local time + name + partner name if linked
-  const partnerWord = partnerActive ? partner?.name+ "❤️" || "partner" : "partner";
+  const partnerWord = partnerActive && partner?.name ? `${partner.name} ❤️` : "partner";
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
     if (hour < 12) return `Good morning, ${user?.name}!`;

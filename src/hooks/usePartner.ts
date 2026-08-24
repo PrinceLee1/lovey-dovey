@@ -10,15 +10,19 @@ export type PartnerStatus = {
 export function usePartner() {
   const [data, setData] = useState<PartnerStatus | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   async function refresh() {
     setLoading(true);
+    setError(null);
     try {
       const { data } = await api.get("/partner/status");
       setData(data);
+    } catch (e: any) {
+      setError(e?.message ?? "Failed to load partner status");
     } finally { setLoading(false); }
   }
 
   useEffect(() => { refresh(); }, []);
-  return { partner: data?.partner ?? null, link: data?.link ?? null, loading, refresh };
+  return { partner: data?.partner ?? null, link: data?.link ?? null, loading, error, refresh };
 }
