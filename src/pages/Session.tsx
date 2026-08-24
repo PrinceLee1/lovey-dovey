@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Sparkles, SkipForward, Dices, Send, X, Trophy } from "lucide-react";
+import { Heart, Sparkles, SkipForward, Dices, Send, X, Trophy, MessageCircle } from "lucide-react";
 import { echo } from "../libs/echo";
 import { api } from "../libs/axios";
 import { useAuth } from "../context/AuthContext";
@@ -20,6 +20,7 @@ type SessionState = {
   xp?: number;
   messages?: ChatMessage[];
   endsAt?: string | null;
+  chatLog?: ChatMessage[];
   deck?: MatchCard[];
   flipped?: number[];
   matches?: number;
@@ -58,7 +59,7 @@ function FullscreenShell({ children, wide }: { children: React.ReactNode; wide?:
       <motion.div
         initial={{ opacity: 0, y: 16, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        className={`w-full ${wide ? "max-w-xl" : "max-w-sm"} rounded-3xl bg-white dark:bg-gray-900 shadow-2xl border border-rose-100 dark:border-gray-800 overflow-hidden my-8`}
+        className={`relative w-full ${wide ? "max-w-xl" : "max-w-sm"} rounded-3xl bg-white dark:bg-gray-900 shadow-2xl border border-rose-100 dark:border-gray-800 overflow-hidden my-8`}
       >
         {children}
       </motion.div>
@@ -144,6 +145,12 @@ export default function CoupleSession() {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const finishedTimeoutRef = useRef(false);
 
+  // Side chat — separate from Emoji Chat's own in-game messaging.
+  const [sideChatOpen, setSideChatOpen] = useState(false);
+  const [sideChatInput, setSideChatInput] = useState("");
+  const [sideChatSeen, setSideChatSeen] = useState(0);
+  const sideChatEndRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     (async () => {
       try {
@@ -202,6 +209,13 @@ export default function CoupleSession() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [s?.state?.messages?.length]);
 
+  useEffect(() => {
+    if (sideChatOpen) {
+      setSideChatSeen(s?.state?.chatLog?.length ?? 0);
+      sideChatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [sideChatOpen, s?.state?.chatLog?.length]);
+
   async function accept() {
     setAccepting(true);
     try {
@@ -238,6 +252,13 @@ export default function CoupleSession() {
     }
     setChatInput("");
     send("message", { text });
+  }
+
+  function sendSideChat() {
+    const text = sideChatInput.trim();
+    if (!text) return;
+    setSideChatInput("");
+    send("chat", { text });
   }
 
   function flip(index: number) {
@@ -370,7 +391,117 @@ export default function CoupleSession() {
       ) : (
         <div className="p-8 text-center text-sm text-gray-500 dark:text-gray-400">Unsupported game.</div>
       )}
+
+      {/* Emoji Chat already IS a chat — the side chat would be redundant there. */}
+      {s.kind !== "emoji_chat" && (
+        <SideChatDrawer
+          open={sideChatOpen}
+          onToggle={() => setSideChatOpen((o) => !o)}
+          log={s.state?.chatLog ?? []}
+          unread={sideChatOpen ? 0 : Math.max(0, (s.state?.chatLog?.length ?? 0) - sideChatSeen)}
+          meId={meId}
+          meName={meName}
+          partnerName={partnerName}
+          input={sideChatInput}
+          setInput={setSideChatInput}
+          onSend={sendSideChat}
+          endRef={sideChatEndRef}
+        />
+      )}
     </FullscreenShell>
+  );
+}
+
+// ── Side chat drawer (any game except Emoji Chat) ───────────────────────────
+function SideChatDrawer({
+  open, onToggle, log, unread, meId, meName, partnerName, input, setInput, onSend, endRef,
+}: {
+  open: boolean; onToggle: () => void; log: ChatMessage[]; unread: number;
+  meId?: number; meName: string; partnerName: string;
+  input: string; setInput: (v: string) => void; onSend: () => void;
+  endRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  return (
+    <>
+      <button
+        onClick={onToggle}
+        className="absolute bottom-4 right-4 h-12 w-12 rounded-full bg-gradient-to-br from-pink-500 to-fuchsia-600 text-white shadow-lg grid place-items-center z-10 hover:opacity-90 transition"
+        title={open ? "Close chat" : "Chat with your partner"}
+      >
+        {open ? <X className="w-5 h-5" /> : <MessageCircle className="w-5 h-5" />}
+        {!open && unread > 0 && (
+          <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-[10px] font-bold grid place-items-center">
+            {unread > 9 ? "9+" : unread}
+          </span>
+        )}
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 28, stiffness: 300 }}
+            className="absolute inset-x-0 bottom-0 h-72 bg-white dark:bg-gray-900 border-t border-rose-100 dark:border-gray-800 rounded-t-3xl shadow-2xl z-10 flex flex-col"
+          >
+            <div className="px-4 py-3 border-b border-rose-50 dark:border-gray-800 flex items-center justify-between flex-shrink-0">
+              <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 inline-flex items-center gap-1.5">
+                <MessageCircle className="w-4 h-4 text-fuchsia-500" /> Chat with {partnerName}
+              </div>
+              <button onClick={onToggle} className="text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+              {log.length === 0 ? (
+                <div className="h-full grid place-items-center text-xs text-gray-400 dark:text-gray-500">
+                  Say something while you play 💬
+                </div>
+              ) : (
+                log.map((msg, i) => {
+                  const mine = msg.from === meId;
+                  return (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`max-w-[75%] px-3 py-1.5 rounded-2xl text-sm leading-snug ${
+                        mine
+                          ? "bg-gradient-to-br from-pink-500 to-fuchsia-600 text-white ml-auto rounded-br-sm"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-sm"
+                      }`}
+                      title={mine ? meName : partnerName}
+                    >
+                      {msg.text}
+                    </motion.div>
+                  );
+                })
+              )}
+              <div ref={endRef} />
+            </div>
+
+            <div className="p-3 border-t border-rose-50 dark:border-gray-800 flex-shrink-0 flex items-center gap-2">
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && onSend()}
+                placeholder="Type a message…"
+                className="flex-1 rounded-xl border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
+              />
+              <button
+                onClick={onSend}
+                disabled={!input.trim()}
+                className="h-9 w-9 rounded-xl bg-gradient-to-br from-pink-500 to-fuchsia-600 text-white grid place-items-center disabled:opacity-40 flex-shrink-0"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
