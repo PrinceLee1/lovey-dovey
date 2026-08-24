@@ -14,6 +14,7 @@ type User = {
   is_admin?: boolean;
   is_plus?: boolean;           // ← NEW: Plus subscription flag
   plus_expires_at?: string | null; // ← NEW: when Plus expires
+  trial_ends_at?: string | null; // ← NEW: free trial end date (Plus features until then)
   status?: 'active' | 'deactivated' | 'deleted';
   email_news?: boolean;
   email_reminders?: boolean;

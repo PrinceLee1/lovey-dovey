@@ -15,7 +15,7 @@ import { useMemo, useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart, Sparkles, Users, History, Share2, Play,
-  Settings, Plus, Search, Crown,
+  Settings, Plus, Search, Crown, MessageSquare,
 } from "lucide-react";
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -25,6 +25,7 @@ import api from "../libs/axios";
 import CreateLobbyModal from "../components/lobbies/CreateLobbyModal";
 import UpcomingLobbies from "../components/lobbies/UpcomingLobbies";
 import Footer from "../components/Footer";
+import { FeedbackModalPortal } from "../components/FeedbackModal";
 import PartnerCard from "../components/partners/PartnerCard";
 import { usePartner } from "../hooks/usePartner";
 import DailyChallengeCard from "../components/DailyChallengeCard";
@@ -55,6 +56,17 @@ export default function GamesDashboard() {
   const [historyLoading, setHistoryLoading] = useState(true);
   const { partner, link } = usePartner();
   const partnerActive = !!partner && link?.status === "active";
+
+  // Free trial: user.is_plus is already true while this is in the future
+  // (the backend's accessor grants Plus access for the trial automatically),
+  // this is just for showing how many days are left.
+  const trialDaysLeft = useMemo(() => {
+    if (!user?.trial_ends_at) return null;
+    const ms = new Date(user.trial_ends_at).getTime() - Date.now();
+    if (ms <= 0) return null;
+    return Math.max(1, Math.ceil(ms / 86400000));
+  }, [user?.trial_ends_at]);
+  const onTrial = trialDaysLeft !== null;
   const partnerId = partner?.id ?? null;
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -62,6 +74,7 @@ export default function GamesDashboard() {
   // ─── MODAL STATE ───────────────────────────────────────────────────────────
   const [showPartnerModal, setShowPartnerModal] = useState(false);
   const [showPlusModal, setShowPlusModal] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [plusModalReason, setPlusModalReason] = useState<'spicy' | 'erotic' | 'general'>('general');
   const [invite, setInvite] = useState<null | { code: string; kind: string; from: string; url: string }>(null);
 
@@ -340,15 +353,27 @@ export default function GamesDashboard() {
             {/* Plus badge in nav */}
             {user?.is_plus && (
               <span className="flex items-center gap-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs px-2.5 py-1 rounded-full font-semibold">
-                <Crown className="w-3 h-3" /> Plus
+                <Crown className="w-3 h-3" /> {onTrial ? `Plus Trial · ${trialDaysLeft}d left` : "Plus"}
               </span>
             )}
           </div>
-          <Link to="/settings" className="rounded-xl border dark:border-gray-700 px-3 py-2 text-sm flex items-center gap-2 text-gray-800 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-800">
-            <Settings className="w-4 h-4" />
-            Settings
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowFeedbackModal(true)}
+              title="Send feedback"
+              className="rounded-xl border dark:border-gray-700 px-3 py-2 text-sm flex items-center gap-2 text-gray-800 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-800"
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span className="hidden sm:inline">Feedback</span>
+            </button>
+            <Link to="/settings" className="rounded-xl border dark:border-gray-700 px-3 py-2 text-sm flex items-center gap-2 text-gray-800 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-800">
+              <Settings className="w-4 h-4" />
+              Settings
+            </Link>
+          </div>
         </div>
+
+        <FeedbackModalPortal open={showFeedbackModal} onClose={() => setShowFeedbackModal(false)} />
 
         <div className="max-w-7xl mx-auto grid lg:grid-cols-4 gap-6 px-4 md:px-6 pb-16">
           {/* ── MAIN ────────────────────────────────────────────────────────── */}
@@ -440,8 +465,33 @@ export default function GamesDashboard() {
               <DailyChallengeCard onXp={(earned) => setXp((x) => (x ?? 0) + earned)} />
             </motion.div>
 
-            {/* Plus upsell banner (free users only) */}
-            {!user?.is_plus && (
+            {/* Free trial banner — every new user gets 14 days of full Plus access */}
+            {onTrial && (
+              <motion.div {...variants}>
+                <button
+                  onClick={() => { setPlusModalReason('general'); setShowPlusModal(true); }}
+                  className="w-full rounded-2xl bg-gradient-to-r from-amber-400 to-orange-500 p-4 flex items-center justify-between text-white hover:opacity-90 transition"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-xl bg-white/20 grid place-items-center">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-semibold text-sm">
+                        You're on your free Plus trial 🎉 — {trialDaysLeft} day{trialDaysLeft === 1 ? "" : "s"} left
+                      </div>
+                      <div className="text-xs text-white/80">All Spicy & Erotic games and unlimited AI prompts are unlocked, on us.</div>
+                    </div>
+                  </div>
+                  <div className="text-xs bg-white text-orange-600 font-semibold px-3 py-1.5 rounded-full flex-shrink-0">
+                    Keep Plus
+                  </div>
+                </button>
+              </motion.div>
+            )}
+
+            {/* Plus upsell banner (free users only, i.e. not on trial and not subscribed) */}
+            {!user?.is_plus && !onTrial && (
               <motion.div {...variants}>
                 <button
                   onClick={() => { setPlusModalReason('general'); setShowPlusModal(true); }}

@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import {
   LayoutDashboard, Users, Gamepad2, BarChart3,
-  Settings, Heart, LogOut, Bell, ChevronRight, Shield,
+  Settings, Heart, LogOut, Bell, ChevronRight, Shield, MessageSquare,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -11,6 +11,7 @@ const NAV = [
   { to: "/admin",          label: "Overview",  icon: LayoutDashboard, end: true },
   { to: "/admin/users",    label: "Users",     icon: Users            },
   { to: "/admin/games",    label: "Games",     icon: Gamepad2         },
+  { to: "/admin/feedback", label: "Feedback",  icon: MessageSquare    },
   { to: "/admin/reports",  label: "Reports",   icon: BarChart3        },
   { to: "/admin/settings", label: "Settings",  icon: Settings         },
 ];
