@@ -3,6 +3,8 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Onboarding from './pages/Onboarding';
 import GamesDashboard from './pages/GamesDashboard';
 import SignIn from './pages/SignIn';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import type { JSX } from 'react';
 import Settings from './pages/Settings';
 import LobbyRoom from './pages/LobbyRoom';
@@ -35,6 +37,8 @@ export default function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/signin" element={<SignIn />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/password-reset/:token" element={<ResetPassword />} />
 
             <Route
               path="/games"

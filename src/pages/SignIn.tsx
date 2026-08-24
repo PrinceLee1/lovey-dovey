@@ -147,9 +147,9 @@ export default function SignIn() {
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-widest">Password</label>
-                <button type="button" className="text-xs text-fuchsia-600 hover:text-fuchsia-700 font-medium">
+                <Link to="/forgot-password" className="text-xs text-fuchsia-600 hover:text-fuchsia-700 font-medium">
                   Forgot password?
-                </button>
+                </Link>
               </div>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
