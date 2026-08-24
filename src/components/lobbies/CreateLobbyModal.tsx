@@ -72,9 +72,9 @@ export default function CreateLobbyModal({ open, onClose, onCreated }: Props) {
                 className="w-full rounded-xl border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-3 py-2 outline-none focus:ring-2 focus:ring-fuchsia-500" />
             </div>
             <div>
-              <div className="text-sm text-gray-700 dark:text-gray-300 mb-1">Entry (coins)</div>
+              <div className="text-sm text-gray-700 dark:text-gray-300 mb-1">Entry (coins) <span className="text-xs text-gray-500 dark:text-gray-400">(Coming soon)</span></div>
               <input type="number" min={0} value={entry} onChange={(e)=>setEntry(parseInt(e.target.value||"0"))}
-                className="w-full rounded-xl border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-3 py-2 outline-none focus:ring-2 focus:ring-fuchsia-500" />
+                className="w-full rounded-xl border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-3 py-2 outline-none focus:ring-2 focus:ring-fuchsia-500" disabled/>
             </div>
           </div>
 
