@@ -39,7 +39,7 @@ function Brand() {
       <span className="h-8 w-8 rounded-2xl bg-gradient-to-br from-pink-500 to-fuchsia-600 grid place-items-center text-white shadow-sm">
         <Heart className="w-4 h-4" />
       </span>
-      <span className="font-semibold tracking-tight text-gray-900 group-hover:text-gray-950">
+      <span className="font-semibold tracking-tight text-gray-900 dark:text-gray-100 group-hover:text-gray-950 dark:group-hover:text-white">
         LoveyDovey
       </span>
     </a>
@@ -59,7 +59,7 @@ function Socials() {
     <a
       href={href}
       aria-label={label}
-      className="h-9 w-9 grid place-items-center rounded-xl border hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition"
+      className="h-9 w-9 grid place-items-center rounded-xl border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition"
       target="_blank"
       rel="noreferrer"
     >
@@ -89,14 +89,14 @@ export default function Footer({ variant = "simple", className }: FooterProps) {
   return (
     <footer className={clsx("mt-10", className)}>
       {/* soft gradient divider */}
-      <div className="h-px w-full bg-gradient-to-r from-transparent via-rose-200 to-transparent" />
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-rose-200 dark:via-gray-800 to-transparent" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {variant === "full" ? (
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             {/* left: brand + blurb + newsletter */}
             <div className="md:col-span-5">
               <Brand />
-              <p className="text-sm text-gray-600 mt-3 max-w-md">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-3 max-w-md">
                 AI-generated games, lobbies, and playful moments for couples and
                 friends. Join in seconds—spark deeper connection every day.
               </p>
@@ -109,7 +109,7 @@ export default function Footer({ variant = "simple", className }: FooterProps) {
                 <input
                   type="email"
                   placeholder="Get tips & updates"
-                  className="w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
+                  className="w-full rounded-xl border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
                 />
                 <button
                   className="rounded-xl px-3 py-2 text-sm text-white bg-gradient-to-r from-pink-500 to-fuchsia-600"
@@ -128,7 +128,7 @@ export default function Footer({ variant = "simple", className }: FooterProps) {
             <div className="md:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-6">
               {Object.entries(nav).map(([group, items]) => (
                 <div key={group}>
-                  <div className="text-sm font-semibold text-gray-900 mb-2">
+                  <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
                     {group}
                   </div>
                   <ul className="space-y-1.5">
@@ -136,7 +136,7 @@ export default function Footer({ variant = "simple", className }: FooterProps) {
                       <li key={it.label}>
                         <a
                           href={it.href}
-                          className="text-sm text-gray-600 hover:text-gray-900"
+                          className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
                         >
                           {it.label}
                         </a>
@@ -148,20 +148,20 @@ export default function Footer({ variant = "simple", className }: FooterProps) {
             </div>
 
             {/* bottom row */}
-            <div className="md:col-span-12 border-t mt-6 pt-4 flex flex-col sm:flex-row items-center gap-2 justify-between">
-              <p className="text-xs text-gray-500">
+            <div className="md:col-span-12 border-t dark:border-gray-800 mt-6 pt-4 flex flex-col sm:flex-row items-center gap-2 justify-between">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 © {YEAR} LoveyDovey. Made with ♥ for couples & friends.
               </p>
-              <div className="text-xs text-gray-500">
-                <a href="/privacy" className="hover:text-gray-800">
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                <a href="/privacy" className="hover:text-gray-800 dark:hover:text-gray-200">
                   Privacy
                 </a>{" "}
                 ·{" "}
-                <a href="/terms" className="hover:text-gray-800">
+                <a href="/terms" className="hover:text-gray-800 dark:hover:text-gray-200">
                   Terms
                 </a>{" "}
                 ·{" "}
-                <a href="/status" className="hover:text-gray-800">
+                <a href="/status" className="hover:text-gray-800 dark:hover:text-gray-200">
                   Status
                 </a>
               </div>
@@ -171,17 +171,17 @@ export default function Footer({ variant = "simple", className }: FooterProps) {
           // simple variant
           <div className="flex flex-col items-center gap-4 text-center">
             <Brand />
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
               Playful games to spark connection.
             </div>
             <Socials />
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-gray-500 dark:text-gray-400">
               © {YEAR} LoveyDovey ·{" "}
-              <a href="/privacy" className="hover:text-gray-800">
+              <a href="/privacy" className="hover:text-gray-800 dark:hover:text-gray-200">
                 Privacy
               </a>{" "}
               ·{" "}
-              <a href="/terms" className="hover:text-gray-800">
+              <a href="/terms" className="hover:text-gray-800 dark:hover:text-gray-200">
                 Terms
               </a>
             </div>
