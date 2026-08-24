@@ -137,10 +137,9 @@ export default function GamesDashboard() {
   const isPlusLocked = (g: Game) =>
     PLUS_CATEGORIES.has(g.category) && !user?.is_plus;
 
-  // Couple games that have a real synced, turn-gated session on the backend
-  // (invite → partner accepts → live real-time play). Other partner-required
-  // games still fall back to local pass-and-play via GameRunner for now.
-  const SYNCED_COUPLE_KINDS = new Set(['truth_dare', 'truth_dare_erotic']);
+  // Couple games that have a real synced session on the backend (invite →
+  // partner accepts → live real-time play at /session/:code).
+  const SYNCED_COUPLE_KINDS = new Set(['truth_dare', 'truth_dare_erotic', 'spice_dice', 'emoji_chat', 'memory_match']);
 
   async function tryStartGame(g: Game) {
     // 1. Plus gate (Spicy / Erotic)
