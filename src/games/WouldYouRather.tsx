@@ -10,7 +10,7 @@
  * When used standalone (no sync props), falls back to original local behavior.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { GameResult } from "./types";
 import { api } from "../libs/axios";
@@ -40,6 +40,8 @@ type SyncProps = {
   isHost?: boolean;
   remoteChoices?: Record<string, "A" | "B">;
   remotePhase?: string | null;
+  remoteQIdx?: number;
+  incomingVote?: { player: string; choice: "A" | "B"; seq: number } | null;
   onStateChange?: (state: any) => void;
   onVote?: (player: string, choice: "A" | "B") => void;
 };
@@ -53,7 +55,7 @@ type Props = SyncProps & {
 export default function WouldYouRather({
   players, onFinish, category = "Playful",
   isHost: isHostProp,
-  remoteChoices, remotePhase,
+  remoteChoices, remotePhase, remoteQIdx, incomingVote,
   onStateChange, onVote,
 }: Props) {
   const { user } = useAuth();
@@ -87,18 +89,34 @@ export default function WouldYouRather({
     })();
   }, []);
 
-  // ── Apply remote state patches (non-host) ─────────────────────────────────
+  // ── Apply remote state patches (non-host only — the host's own `choices`/
+  // `qIdx` are the source of truth and must not be clobbered by a stale prop) ──
   useEffect(() => {
-    if (remoteChoices && Object.keys(remoteChoices).length > 0) {
-      setChoices(remoteChoices);
-    }
-  }, [remoteChoices]);
+    if (isHost || remoteChoices === undefined) return;
+    setChoices(remoteChoices);
+  }, [isHost, remoteChoices]);
 
   useEffect(() => {
-    if (remotePhase && remotePhase !== phase) {
-      setPhase(remotePhase as any);
-    }
-  }, [remotePhase]);
+    if (isHost || !remotePhase || remotePhase === phase) return;
+    setPhase(remotePhase as any);
+  }, [isHost, remotePhase]);
+
+  useEffect(() => {
+    if (isHost || remoteQIdx === undefined || remoteQIdx === qIdx) return;
+    setQIdx(remoteQIdx);
+  }, [isHost, remoteQIdx]);
+
+  // ── Apply incoming votes from non-host players (host only) ────────────────
+  const lastVoteSeqRef = useRef(0);
+  useEffect(() => {
+    if (!isHost || !incomingVote || incomingVote.seq <= lastVoteSeqRef.current) return;
+    lastVoteSeqRef.current = incomingVote.seq;
+    setChoices(c => {
+      const next = { ...c, [incomingVote.player]: incomingVote.choice };
+      broadcastState(next, phase);
+      return next;
+    });
+  }, [isHost, incomingVote]);
 
   // ── Broadcast state (host only) ───────────────────────────────────────────
   const broadcastState = useCallback((newChoices: Record<string, "A"|"B">, newPhase: string) => {
@@ -210,7 +228,7 @@ export default function WouldYouRather({
         {phase === "vote" && (
           <motion.div key={`vote-${qIdx}`} initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} exit={{opacity:0}} className="space-y-4">
             <div className="text-center">
-              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Round {rounds+1} • Would You Rather…</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Round {qIdx+1} • Would You Rather…</div>
               <div className="text-xs text-gray-400 dark:text-gray-500">{players.length - Object.keys(choices).length} players haven't voted</div>
             </div>
             <div className="grid grid-cols-2 gap-3">

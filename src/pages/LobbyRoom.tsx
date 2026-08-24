@@ -148,6 +148,18 @@ export default function LobbyRoom() {
   useEffect(() => {
     (async () => {
       try {
+        // Route through the same capacity/status-checked join used by the
+        // dashboard's "Join" button — visiting an invite link directly must
+        // not bypass it. Idempotent for existing members (including host).
+        try {
+          await api.post(`/lobbies/${code}/join`);
+        } catch (e: any) {
+          const message = e?.response?.data?.message ?? "Unable to join this lobby";
+          toast.error(message);
+          nav("/games");
+          return;
+        }
+
         const [metaRes, msgRes, sessRes] = await Promise.all([
           api.get(`/lobbies/${code}`),
           api.get(`/lobbies/${code}/messages`),

@@ -110,20 +110,26 @@ function SyncedHotSeat({ sessionId, lobbyCode, hostId, players, onFinish }: Omit
 function SyncedWouldYouRather({ sessionId, lobbyCode, hostId, players, onFinish }: Omit<Props, "kind">) {
   const { user }   = useAuth();
   const isHost     = String(user?.id) === String(hostId);
-  const [remoteChoices, setRemoteChoices] = useState<Record<string, "A"|"B">>({});
+  const [remoteChoices, setRemoteChoices] = useState<Record<string, "A"|"B"> | null>(null);
   const [remotePhase, setRemotePhase]     = useState<string | null>(null);
+  const [remoteQIdx, setRemoteQIdx]       = useState<number | undefined>(undefined);
+  const [incomingVote, setIncomingVote]   = useState<{ player: string; choice: "A"|"B"; seq: number } | null>(null);
+  const seqRef = useRef(0);
 
   const onHostReceive = useCallback((e: any) => {
     // Host receives votes from players: { type: "vote", data: { player, choice } }
     if (e.type === "vote" && e.data?.player && e.data?.choice) {
-      setRemoteChoices(prev => ({ ...prev, [e.data.player]: e.data.choice }));
+      seqRef.current += 1;
+      setIncomingVote({ player: e.data.player, choice: e.data.choice, seq: seqRef.current });
     }
   }, []);
 
   const onPlayerReceive = useCallback((e: any) => {
     if (e.type === "state" && e.data) {
-      if (e.data.choices) setRemoteChoices(e.data.choices);
-      if (e.data.phase)   setRemotePhase(e.data.phase);
+      // Always apply — including an empty {} choices reset when a new round starts.
+      if (e.data.choices !== undefined) setRemoteChoices(e.data.choices);
+      if (e.data.phase)                 setRemotePhase(e.data.phase);
+      if (e.data.qIdx !== undefined)    setRemoteQIdx(e.data.qIdx);
     }
   }, []);
 
@@ -136,8 +142,10 @@ function SyncedWouldYouRather({ sessionId, lobbyCode, hostId, players, onFinish 
       players={players}
       onFinish={onFinish}
       isHost={isHost}
-      remoteChoices={remoteChoices}
+      remoteChoices={remoteChoices ?? undefined}
       remotePhase={remotePhase}
+      remoteQIdx={remoteQIdx}
+      incomingVote={incomingVote}
       onStateChange={(state: any) => broadcast("state", state)}
       onVote={(player: string, choice: "A"|"B") => sendAction("vote", { player, choice })}
     />
