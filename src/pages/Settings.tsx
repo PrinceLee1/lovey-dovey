@@ -490,7 +490,7 @@ export default function Settings() {
             <div className="space-y-3">
               <ToggleRow
                 label="Game reminders (email)"
-                hint="Email me when someone starts a public game night"
+                hint="Email me when someone starts a public game I'm eligible to join"
                 checked={prefs.email_reminders}
                 onChange={(v) => setPrefs((p) => ({ ...p, email_reminders: v }))}
               />
