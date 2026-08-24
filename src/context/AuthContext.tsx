@@ -10,10 +10,15 @@ type User = {
   dob?: string | null;
   xp?: number;
   avatar_url?: string | null;
-  partner?: unknown[];
+  partner?: { id: number; name: string }[];
   is_admin?: boolean;
   is_plus?: boolean;           // ← NEW: Plus subscription flag
   plus_expires_at?: string | null; // ← NEW: when Plus expires
+  status?: 'active' | 'deactivated' | 'deleted';
+  email_news?: boolean;
+  email_reminders?: boolean;
+  weekly_summary?: boolean;
+  private_profile?: boolean;
 };
 
 type RegisterPayload = {
@@ -58,10 +63,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function login(email: string, password: string) {
     setLoading(true);
     try {
+      // Deactivated/deleted accounts are rejected server-side (403, before a
+      // token is even issued) — the api.post rejection carries that message
+      // through to the caller via the axios interceptor.
       const { data } = await api.post('/login', { email, password });
-      if (data.user.status === 'deactivated') {
-        throw new Error('Your account has been deactivated. Please contact support.');
-      }
       localStorage.setItem('auth_token', data.token);
       setToken(data.token);
       setUser(data.user);

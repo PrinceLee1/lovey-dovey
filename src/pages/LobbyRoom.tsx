@@ -352,7 +352,7 @@ export default function LobbyRoom() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-rose-50 via-pink-50 to-white p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-b from-rose-50 via-pink-50 to-white dark:from-[#0b0b12] dark:via-[#100c17] dark:to-[#0b0b12] p-4 md:p-6">
 
       {/* Join toast */}
       <AnimatePresence>

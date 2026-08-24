@@ -9,6 +9,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..900&family=Sora:wght@300..800&display=swap" rel="stylesheet">
 
     <title>LoveyDovey | Your Perfect Games for Couples Awaits</title>
+    <script>
+      // Apply the saved theme before first paint, so there's no flash of the
+      // wrong theme while React boots. Settings.tsx is the only writer of
+      // localStorage "theme"; this mirrors its class name exactly.
+      (function () {
+        try {
+          if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body class="font-sans antialiased">
     <div id="root"></div>

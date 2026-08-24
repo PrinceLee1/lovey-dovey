@@ -32,11 +32,11 @@ export default function LeaderboardCard() {
   useEffect(() => { load(scope); }, [scope, load]);
 
   return (
-    <div className="rounded-3xl bg-white shadow-xl border border-rose-100 p-5">
+    <div className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 p-5">
       <div className="flex items-center justify-between mb-4">
-        <div className="font-display font-semibold text-gray-900">Leaderboard</div>
+        <div className="font-display font-semibold text-gray-900 dark:text-gray-100">Leaderboard</div>
         <select
-          className="text-sm border rounded-lg px-2 py-1"
+          className="text-sm border dark:border-gray-700 rounded-lg px-2 py-1 bg-white dark:bg-gray-800 dark:text-gray-100"
           value={scope}
           onChange={e=>setScope(e.target.value as "all_time" | "weekly" | "monthly")}
         >
@@ -47,7 +47,7 @@ export default function LeaderboardCard() {
       </div>
 
       {loading ? (
-        <div className="text-sm text-gray-500">Loading…</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">Loading…</div>
       ) : (
         <div className="space-y-4">
           {data?.top?.map((row) => (
@@ -56,10 +56,10 @@ export default function LeaderboardCard() {
                 {initialsPair(row.duo_name)}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-gray-900 font-medium truncate">
+                <div className="text-gray-900 dark:text-gray-100 font-medium truncate">
                   {row.rank}. {row.duo_name}
                 </div>
-                <div className="text-xs text-gray-500">{row.xp} XP</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">{row.xp} XP</div>
               </div>
               {row.rank <= 3 && <Star className="w-5 h-5 text-amber-500 fill-amber-500" />}
             </div>
@@ -67,24 +67,24 @@ export default function LeaderboardCard() {
 
           {/* Your rank if not in top list */}
           {data?.me && (data.me !== null) && (data.top.findIndex(t => t.pair_id === data.me!.pair_id) === -1) && (
-            <div className="mt-2 pt-2 border-t">
-              <div className="text-xs text-gray-500 mb-1">You</div>
+            <div className="mt-2 pt-2 border-t dark:border-gray-800">
+              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">You</div>
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-gray-200 grid place-items-center text-sm font-semibold">
+                <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 grid place-items-center text-sm font-semibold dark:text-gray-100">
                   {initialsPair(data.me.duo_name)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-gray-900 font-medium truncate">
+                  <div className="text-gray-900 dark:text-gray-100 font-medium truncate">
                     {data.me.rank}. {data.me.duo_name}
                   </div>
-                  <div className="text-xs text-gray-500">{data.me.xp} XP</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{data.me.xp} XP</div>
                 </div>
               </div>
             </div>
           )}
 
           {!data?.top?.length && (
-            <div className="text-sm text-gray-500">No couples on the board yet. Play games to earn XP!</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">No couples on the board yet. Play games to earn XP!</div>
           )}
         </div>
       )}

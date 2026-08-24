@@ -31,6 +31,7 @@ import DailyChallengeCard from "../components/DailyChallengeCard";
 import LeaderboardCard from "../components/LeaderboardCard";
 import StreakBadge from "../components/StreakBadge";
 import ProgressCard from "../components/ProgressCard";
+import WeeklySummaryCard from "../components/WeeklySummaryCard";
 import { echo } from "../libs/echo";
 import FloatingHearts from "../components/FloatingHearts";
 import PlusModal from "../components/PlusModal";
@@ -246,7 +247,7 @@ export default function GamesDashboard() {
 
   // ─── RENDER ───────────────────────────────────────────────────────────────
   return (
-    <div className="relative min-h-screen w-full bg-gradient-to-b from-rose-50 via-pink-50 to-white">
+    <div className="relative min-h-screen w-full bg-gradient-to-b from-rose-50 via-pink-50 to-white dark:from-[#0b0b12] dark:via-[#100c17] dark:to-[#0b0b12]">
       <FloatingHearts />
 
       {/* ── Toast ─────────────────────────────────────────────────────────── */}
@@ -321,7 +322,7 @@ export default function GamesDashboard() {
             <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-pink-500 to-fuchsia-600 grid place-items-center text-white">
               <Heart className="w-5 h-5" />
             </div>
-            <span className="font-display font-semibold text-gray-800 tracking-tight">LoveyDovey</span>
+            <span className="font-display font-semibold text-gray-800 dark:text-gray-100 tracking-tight">LoveyDovey</span>
             {/* Plus badge in nav */}
             {user?.is_plus && (
               <span className="flex items-center gap-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs px-2.5 py-1 rounded-full font-semibold">
@@ -329,7 +330,7 @@ export default function GamesDashboard() {
               </span>
             )}
           </div>
-          <Link to="/settings" className="rounded-xl border px-3 py-2 text-sm flex items-center gap-2 hover:bg-white">
+          <Link to="/settings" className="rounded-xl border dark:border-gray-700 px-3 py-2 text-sm flex items-center gap-2 text-gray-800 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-800">
             <Settings className="w-4 h-4" />
             Settings
           </Link>
@@ -587,6 +588,7 @@ export default function GamesDashboard() {
           {/* ── SIDEBAR ─────────────────────────────────────────────────────── */}
           <div className="space-y-6">
             <ProgressCard  />
+            <WeeklySummaryCard />
             <LeaderboardCard />
             <UpcomingLobbies variants={variants} />
 
