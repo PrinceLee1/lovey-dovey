@@ -137,7 +137,12 @@ export default function GamesDashboard() {
   const isPlusLocked = (g: Game) =>
     PLUS_CATEGORIES.has(g.category) && !user?.is_plus;
 
-  function tryStartGame(g: Game) {
+  // Couple games that have a real synced, turn-gated session on the backend
+  // (invite → partner accepts → live real-time play). Other partner-required
+  // games still fall back to local pass-and-play via GameRunner for now.
+  const SYNCED_COUPLE_KINDS = new Set(['truth_dare', 'truth_dare_erotic']);
+
+  async function tryStartGame(g: Game) {
     // 1. Plus gate (Spicy / Erotic)
     if (isPlusLocked(g)) {
       setPlusModalReason(g.category === 'Erotic' ? 'erotic' : 'spicy');
@@ -147,6 +152,16 @@ export default function GamesDashboard() {
     // 2. Partner gate
     if (needsPartner(g) && !partnerActive) {
       setShowPartnerModal(true);
+      return;
+    }
+    // 3. Real-time synced couple session — invite partner, wait for accept
+    if (needsPartner(g) && SYNCED_COUPLE_KINDS.has(g.kind)) {
+      try {
+        const { data } = await api.post('/sessions', { kind: g.kind });
+        navigate(`/session/${data.code}`);
+      } catch {
+        showToast('❌ Failed to start the game. Try again.');
+      }
       return;
     }
     setActiveGame(g);
@@ -414,13 +429,15 @@ export default function GamesDashboard() {
                 }}
               />
               <LobbiesSection />
-              {/* Fixed: calls real API instead of hardcoded link */}
-              <ActionCard
-                icon={<Share2 className="w-5 h-5" />}
-                title="Invite Partner"
-                desc="Share a join link"
-                onClick={handleInvitePartner}
-              />
+              {/* Only relevant before you're paired — hide once a partner is linked */}
+              {!partnerActive && (
+                <ActionCard
+                  icon={<Share2 className="w-5 h-5" />}
+                  title="Invite Partner"
+                  desc="Share a join link"
+                  onClick={handleInvitePartner}
+                />
+              )}
               <DailyChallengeCard onXp={(earned) => setXp((x) => (x ?? 0) + earned)} />
             </motion.div>
 
@@ -656,8 +673,9 @@ export default function GamesDashboard() {
                   ) : (!needsPartner(previewGame) || partnerActive) ? (
                     <button
                       onClick={() => {
-                        setActiveGame(previewGame);
+                        const g = previewGame;
                         setPreviewGame(null);
+                        tryStartGame(g);
                       }}
                       className="flex-1 rounded-xl px-4 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white"
                     >
@@ -840,22 +858,42 @@ function LobbiesSection() {
       <CreateLobbyModal open={open} onClose={() => setOpen(false)} onCreated={(p) => setLobbyInvite(p)} />
 
       {lobbyInvite && (
-        <div className="mt-3 rounded-2xl border dark:border-gray-800 p-3 flex items-center gap-2 dark:text-gray-200">
-          <div className="text-sm">Invite link:</div>
-          <code className="text-xs bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded">{lobbyInvite.invite_url}</code>
-          <button
-            onClick={() => navigator.clipboard.writeText(lobbyInvite.invite_url)}
-            className="ml-auto rounded-lg border dark:border-gray-700 px-2 py-1 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
-          >
-            Copy
-          </button>
-          <a
-            href={`/lobby/${lobbyInvite.code}`}
-            className="rounded-lg px-2 py-1 text-sm bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white"
-          >
-            Open lobby
-          </a>
-        </div>
+        <Modal onClose={() => setLobbyInvite(null)}>
+          <div className="text-center space-y-4">
+            <div className="h-12 w-12 mx-auto rounded-2xl bg-gradient-to-br from-pink-500 to-fuchsia-600 grid place-items-center text-white">
+              <Plus className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">Lobby created!</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">Share this link to invite friends</div>
+            </div>
+            <div className="flex items-center gap-2 rounded-xl border dark:border-gray-700 p-2">
+              <code className="flex-1 text-xs text-left truncate text-gray-700 dark:text-gray-300 px-1">
+                {lobbyInvite.invite_url}
+              </code>
+              <button
+                onClick={() => navigator.clipboard.writeText(lobbyInvite.invite_url)}
+                className="rounded-lg border dark:border-gray-700 dark:text-gray-200 px-2 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 flex-shrink-0"
+              >
+                Copy
+              </button>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setLobbyInvite(null)}
+                className="flex-1 rounded-xl px-4 py-2 text-sm border dark:border-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                Close
+              </button>
+              <a
+                href={`/lobby/${lobbyInvite.code}`}
+                className="flex-1 rounded-xl px-4 py-2 text-sm bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white"
+              >
+                Open lobby
+              </a>
+            </div>
+          </div>
+        </Modal>
       )}
     </>
   );

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { GameResult } from "./types";
-import { Sparkles, Clock, RotateCcw, Check } from "lucide-react";
+import { Sparkles, Clock, RotateCcw, Check, Flag } from "lucide-react";
 
 type Card = {
   id: string;
@@ -159,37 +159,47 @@ export default function MemoryMatchCouple({
     }
   }
 
+  function buildResult(): GameResult {
+    stopTimer();
+    const ms = elapsed;
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    const timeNice = `${minutes}:${String(seconds).padStart(2, "0")}`;
+
+    // client-estimated XP (server will clamp/compute)
+    const speedBonus = matches === PAIRS ? Math.max(0, Math.round((PAIRS * 20 * 60_000 - ms) / 60_000)) : 0;
+    const accuracy = Math.max(0.3, Math.min(1, matches / Math.max(1, moves)));
+    const xp = Math.round(matches * 15 * accuracy + speedBonus);
+
+    return {
+      xpEarned: xp,
+      rounds: moves, // "attempts"
+      skipped: 0,
+      meta: {
+        boardSize: `${size}x${size}`,
+        timeMs: ms,
+        timeNice,
+        moves,
+        matches,
+        accuracy,
+        completed: matches === PAIRS,
+      },
+    };
+  }
+
   // finish when all matched
   useEffect(() => {
     if (matches === PAIRS && deck.length) {
-      stopTimer();
-      const ms = elapsed;
-      const minutes = Math.floor(ms / 60000);
-      const seconds = Math.floor((ms % 60000) / 1000);
-      const timeNice = `${minutes}:${String(seconds).padStart(2, "0")}`;
-
-      // client-estimated XP (server will clamp/compute)
-      const speedBonus = Math.max(0, Math.round((PAIRS * 20 * 60_000 - ms) / 60_000)); // small bonus for speed
-      const accuracy = Math.max(0.3, Math.min(1, PAIRS / Math.max(1, moves)));
-      const xp = Math.round(PAIRS * 15 * accuracy + speedBonus);
-
-      onFinish({
-        xpEarned: xp,
-        rounds: moves,   // "attempts"
-        skipped: 0,
-        meta: {
-          boardSize: `${size}x${size}`,
-          timeMs: ms,
-          timeNice,
-          moves,
-          accuracy,
-        },
-      });
+      onFinish(buildResult());
     }
   }, [matches]); // eslint-disable-line
 
   function restart() {
     buildDeck();
+  }
+
+  function finishNow() {
+    onFinish(buildResult());
   }
 
   // -------------------- Render --------------------
@@ -274,8 +284,15 @@ export default function MemoryMatchCouple({
         >
           <RotateCcw className="w-4 h-4" /> Restart
         </button>
-        {/* When all pairs matched, onFinish will close via GameRunner's handler */}
-        <span className="text-xs text-gray-500 dark:text-gray-400">Match all pairs to finish</span>
+        {matches < PAIRS && (
+          <button
+            onClick={finishNow}
+            disabled={setupOpen}
+            className="text-sm text-white bg-gradient-to-r from-pink-500 to-fuchsia-600 rounded-xl px-4 py-2 inline-flex items-center gap-1 disabled:opacity-50"
+          >
+            <Flag className="w-4 h-4" /> Finish & Save
+          </button>
+        )}
       </div>
 
       {/* Setup modal */}
