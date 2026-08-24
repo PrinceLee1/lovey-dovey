@@ -319,8 +319,13 @@ export default function LobbyRoom() {
         return next;
       });
     }
-    await api.post(`/lobbies/${code}/games/${activeGame.id}/end`, { result });
-    setActiveGame(null);
+    try {
+      await api.post(`/lobbies/${code}/games/${activeGame.id}/end`, { result });
+      setActiveGame(null);
+    } catch (e: any) {
+      // Only the host can end a session server-side — surface anything else.
+      toast.error(e?.message ?? "Couldn't end the game");
+    }
   }
 
   const modeInfo     = (kind: string) => GAME_MODES.find(m => m.kind === kind);

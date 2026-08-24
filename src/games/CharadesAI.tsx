@@ -5,6 +5,39 @@ import { Clock, Eye, EyeOff, SkipForward, RotateCcw, Users, Sparkles } from "luc
 
 type Card = { title: string; hint?: string | null; taboo: string[]; category?: string; difficulty?: string };
 
+/*
+  Sync (lobby mode): when `isHost` is passed, the host is the sole authority
+  over the round — it draws cards, runs the timer, and computes scores,
+  broadcasting a full snapshot via onStateChange after every change (same
+  pattern as HotSeat/WouldYouRather/GroupDareDice/TriviaDuoVsDuo). Non-host
+  clients render the broadcast snapshot and forward Guessed!/Skip taps via
+  onGuess/onSkip for the host to apply. The "reveal" peek stays a local,
+  per-device toggle (not synced) — same honor-system as the original
+  pass-the-phone version. With no sync props (standalone/GameRunner usage),
+  isHost defaults to true and the component behaves exactly as before.
+*/
+
+type CharadesSyncState = {
+  roundIndex: number;
+  teamTurn: "A" | "B";
+  running: boolean;
+  skipsLeft: number;
+  current: Card | null;
+  remain: number;
+  scoreA: number;
+  scoreB: number;
+  totalCorrect: number;
+  totalSkips: number;
+};
+
+type SyncProps = {
+  isHost?: boolean;
+  remoteState?: any; // CharadesSyncState fields, plus optional _incomingGuess / _incomingSkip
+  onStateChange?: (state: CharadesSyncState) => void;
+  onGuess?: () => void;
+  onSkip?: () => void;
+};
+
 export default function CharadesAI({
   couple,
   secondsPerRound = 60,
@@ -12,7 +45,12 @@ export default function CharadesAI({
   category = "General",
   difficulty = "Easy",
   onFinish,
-}: {
+  isHost: isHostProp,
+  remoteState,
+  onStateChange,
+  onGuess,
+  onSkip,
+}: SyncProps & {
   couple?: [string, string];
   secondsPerRound?: number;
   roundsPerTeam?: number;
@@ -20,6 +58,7 @@ export default function CharadesAI({
   difficulty?: "Easy" | "Medium" | "Hard";
   onFinish: (res: GameResult) => void;
 }) {
+  const isHost = isHostProp ?? true;
   const teams = useMemo(() => ({ A: "Team A", B: "Team B" }), []);
   const players = useMemo<[string,string]>(() => couple ?? ["You","Partner"], [couple]);
 
@@ -33,37 +72,115 @@ export default function CharadesAI({
   const [roundIndex, setRoundIndex] = useState(1); // 1..total
   const [teamTurn, setTeamTurn] = useState<"A"|"B">("A");
   const [running, setRunning] = useState(false);
-  const [revealed, setRevealed] = useState(false);
+  const [revealed, setRevealed] = useState(false); // local per-device peek — not synced
   const [skipsLeft, setSkipsLeft] = useState(2);
   const [current, setCurrent] = useState<Card | null>(null);
 
   // Timer
   const [remain, setRemain] = useState(secondsPerRound);
   const finishedRef = useRef(false);
+
+  // Scoring
+  const [scoreA, setScoreA] = useState(0);
+  const [scoreB, setScoreB] = useState(0);
+  const [totalCorrect, setTotalCorrect] = useState(0);
+  const [totalSkips, setTotalSkips] = useState(0);
+  const [used, setUsed] = useState<string[]>([]);
+
+  function pushState(snapshot: CharadesSyncState) {
+    if (isHost) onStateChange?.(snapshot);
+  }
+
+  // Mirrors all synced fields after every render. The 1s timer interval below
+  // is a long-lived closure that only reruns when [isHost, running, roundIndex]
+  // change — guessing/skipping mid-round changes other fields without
+  // touching those, so the interval's own closure (and onRoundEnd, which it
+  // calls) would otherwise read/broadcast stale values. Reading through this
+  // ref (updated post-render, well before the next 1s tick) keeps it accurate.
+  const stateRef = useRef<CharadesSyncState>({
+    roundIndex, teamTurn, running, skipsLeft, current, remain,
+    scoreA, scoreB, totalCorrect, totalSkips,
+  });
   useEffect(() => {
-    if (!running) return;
+    stateRef.current = {
+      roundIndex, teamTurn, running, skipsLeft, current, remain,
+      scoreA, scoreB, totalCorrect, totalSkips,
+    };
+  });
+
+  useEffect(() => {
+    if (!isHost || !running) return;
     const id = setInterval(() => {
       setRemain((t) => {
         if (t <= 1) { clearInterval(id); onRoundEnd(); return 0; }
-        return t - 1;
+        const next = t - 1;
+        pushState({ ...stateRef.current, remain: next });
+        return next;
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [running, roundIndex]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHost, running, roundIndex]);
+
+  // ── Non-host: apply broadcast snapshots from host ─────────────────────────
+  useEffect(() => {
+    if (isHost || !remoteState) return;
+    if (remoteState.roundIndex !== undefined) setRoundIndex(remoteState.roundIndex);
+    if (remoteState.teamTurn !== undefined) setTeamTurn(remoteState.teamTurn);
+    if (remoteState.running !== undefined) setRunning(remoteState.running);
+    if (remoteState.skipsLeft !== undefined) setSkipsLeft(remoteState.skipsLeft);
+    if (remoteState.current !== undefined) { setCurrent(remoteState.current); setRevealed(false); }
+    if (remoteState.remain !== undefined) setRemain(remoteState.remain);
+    if (remoteState.scoreA !== undefined) setScoreA(remoteState.scoreA);
+    if (remoteState.scoreB !== undefined) setScoreB(remoteState.scoreB);
+    if (remoteState.totalCorrect !== undefined) setTotalCorrect(remoteState.totalCorrect);
+    if (remoteState.totalSkips !== undefined) setTotalSkips(remoteState.totalSkips);
+  }, [remoteState, isHost]);
+
+  // ── Host: apply guess/skip actions forwarded by non-host players ──────────
+  // These _incoming* keys persist on remoteState (merged, never cleared), so
+  // dedupe by seq — otherwise a later unrelated state update would re-fire
+  // this effect and silently replay a stale guess/skip.
+  const lastGuessSeq = useRef(0);
+  const lastSkipSeq = useRef(0);
+  useEffect(() => {
+    if (!isHost || !remoteState) return;
+    if (remoteState._incomingGuess && remoteState._incomingGuess.seq !== lastGuessSeq.current) {
+      lastGuessSeq.current = remoteState._incomingGuess.seq;
+      onGuessHost();
+    }
+    if (remoteState._incomingSkip && remoteState._incomingSkip.seq !== lastSkipSeq.current) {
+      lastSkipSeq.current = remoteState._incomingSkip.seq;
+      onSkipHost();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [remoteState, isHost]);
 
   function onRoundEnd() {
+    if (!isHost) return;
+    const s = stateRef.current;
     setRunning(false);
-    setRevealed(false);
     setCurrent(null);
-    if (roundIndex >= totalRounds) { finishNow(); return; }
+    if (s.roundIndex >= totalRounds) {
+      pushState({ ...s, running: false, current: null, remain: 0 });
+      finishNow();
+      return;
+    }
     // next team & next round
-    setTeamTurn((t)=> t==="A" ? "B" : "A");
-    setRoundIndex((r)=> r + 1);
+    const nextTeam = s.teamTurn === "A" ? "B" : "A";
+    const nextRound = s.roundIndex + 1;
+    setTeamTurn(nextTeam);
+    setRoundIndex(nextRound);
     setRemain(secondsPerRound);
     setSkipsLeft(2);
+    pushState({
+      ...s, roundIndex: nextRound, teamTurn: nextTeam, running: false, skipsLeft: 2, current: null,
+      remain: secondsPerRound,
+    });
   }
 
   async function fetchCards(n=24) {
+    if (!isHost) return;
     try {
       setLoading(true); setErr(null);
       const { data } = await api.post("/ai/charades", {
@@ -78,7 +195,7 @@ export default function CharadesAI({
       setLoading(false);
     }
   }
-  useEffect(()=>{ fetchCards(24); }, [category, difficulty]);
+  useEffect(()=>{ if (isHost) fetchCards(24); }, [isHost, category, difficulty]);
 
   function drawCard(): Card | null {
     if (pool.length === 0) { fetchCards(16); return null; }
@@ -88,58 +205,91 @@ export default function CharadesAI({
     return c;
   }
 
-  // Scoring
-  const [scoreA, setScoreA] = useState(0);
-  const [scoreB, setScoreB] = useState(0);
-  const [totalCorrect, setTotalCorrect] = useState(0);
-  const [totalSkips, setTotalSkips] = useState(0);
-  const [used, setUsed] = useState<string[]>([]);
-
   function startRound() {
+    if (!isHost) return;
+    const card = drawCard();
     setRemain(secondsPerRound);
     setSkipsLeft(2);
     setRevealed(false);
-    setCurrent(drawCard());
+    setCurrent(card);
     setRunning(true);
+    pushState({
+      ...stateRef.current, running: true, skipsLeft: 2, current: card, remain: secondsPerRound,
+    });
   }
 
-  function onGuess() {
-    if (!running || !current) return;
-    // +1 and draw next card within same round
-    if (teamTurn === "A") setScoreA((s)=> s + 1); else setScoreB((s)=> s + 1);
-    setTotalCorrect((n)=> n + 1);
-    setUsed((u)=> [...u, current.title]);
-    setCurrent(drawCard());
-    setRevealed(false);
+  // Reached via the _incomingGuess effect (fresh) or a direct host click
+  // (fresh) — but reads from stateRef.current anyway for consistency with
+  // the other host mutators, and because it's called synchronously from
+  // onGuessTap without its own render in between.
+  function onGuessHost() {
+    const s = stateRef.current;
+    if (!s.running || !s.current) return;
+    const newScoreA = s.teamTurn === "A" ? s.scoreA + 1 : s.scoreA;
+    const newScoreB = s.teamTurn === "B" ? s.scoreB + 1 : s.scoreB;
+    const newTotalCorrect = s.totalCorrect + 1;
+    setScoreA(newScoreA); setScoreB(newScoreB);
+    setTotalCorrect(newTotalCorrect);
+    setUsed((u)=> [...u, s.current!.title]);
+    const next = drawCard();
+    setCurrent(next);
+    pushState({
+      ...s, current: next,
+      scoreA: newScoreA, scoreB: newScoreB, totalCorrect: newTotalCorrect,
+    });
   }
 
-  function onSkip() {
-    if (!running || skipsLeft <= 0) return;
-    setSkipsLeft((k)=> k - 1);
-    setTotalSkips((n)=> n + 1);
-    setCurrent(drawCard());
-    setRevealed(false);
+  function onSkipHost() {
+    const s = stateRef.current;
+    if (!s.running || s.skipsLeft <= 0) return;
+    const newSkipsLeft = s.skipsLeft - 1;
+    const newTotalSkips = s.totalSkips + 1;
+    setSkipsLeft(newSkipsLeft);
+    setTotalSkips(newTotalSkips);
+    const next = drawCard();
+    setCurrent(next);
+    pushState({
+      ...s, current: next, skipsLeft: newSkipsLeft, totalSkips: newTotalSkips,
+    });
+  }
+
+  function onGuessTap() {
+    if (!revealed) return;
+    if (isHost) { onGuessHost(); return; }
+    onGuess?.();
+  }
+
+  function onSkipTap() {
+    if (skipsLeft <= 0) return;
+    if (isHost) { onSkipHost(); return; }
+    onSkip?.();
   }
 
   function restartGame() {
+    if (!isHost) return;
     setScoreA(0); setScoreB(0);
     setTotalCorrect(0); setTotalSkips(0);
     setUsed([]); setRoundIndex(1); setTeamTurn("A");
     setRunning(false); setRemain(secondsPerRound); setSkipsLeft(2);
     setCurrent(null); setRevealed(false);
+    pushState({
+      roundIndex: 1, teamTurn: "A", running: false, skipsLeft: 2, current: null,
+      remain: secondsPerRound, scoreA: 0, scoreB: 0, totalCorrect: 0, totalSkips: 0,
+    });
   }
 
   function finishNow() {
     if (finishedRef.current) return;
     finishedRef.current = true;
-    const rounds = roundIndex; // how many timed rounds were run
-    const xp = Math.max(20, totalCorrect * 12);
+    const s = stateRef.current;
+    const rounds = s.roundIndex; // how many timed rounds were run
+    const xp = Math.max(20, s.totalCorrect * 12);
     onFinish({
       xpEarned: xp,
       rounds,
-      skipped: totalSkips,
+      skipped: s.totalSkips,
       meta: {
-        teamA: { score: scoreA }, teamB: { score: scoreB },
+        teamA: { score: s.scoreA }, teamB: { score: s.scoreB },
         secondsPerRound, roundsPerTeam,
         usedTitles: used,
         category, difficulty,
@@ -177,13 +327,17 @@ export default function CharadesAI({
             <div className="text-sm text-gray-600 flex items-center justify-center gap-2">
               <Users className="w-4 h-4"/><span>Pass the phone to <b className="text-gray-900">{teamTurn}</b></span>
             </div>
-            <button
-              onClick={startRound}
-              disabled={loading}
-              className="rounded-xl px-4 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm"
-            >
-              {roundIndex === 1 ? "Start Game" : "Start Round"}
-            </button>
+            {isHost ? (
+              <button
+                onClick={startRound}
+                disabled={loading}
+                className="rounded-xl px-4 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm"
+              >
+                {roundIndex === 1 ? "Start Game" : "Start Round"}
+              </button>
+            ) : (
+              <div className="text-xs text-gray-400 animate-pulse">Waiting for host to start the round…</div>
+            )}
             {loading && <div className="text-xs text-gray-500">Loading prompts…</div>}
           </div>
         ) : !current ? (
@@ -225,14 +379,14 @@ export default function CharadesAI({
 
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <button
-                onClick={onGuess}
+                onClick={onGuessTap}
                 disabled={!revealed}
                 className="rounded-xl px-3 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm disabled:opacity-50"
               >
                 Guessed!
               </button>
               <button
-                onClick={onSkip}
+                onClick={onSkipTap}
                 disabled={skipsLeft<=0}
                 className="rounded-xl px-3 py-2 border text-sm hover:bg-gray-50 disabled:opacity-50 inline-flex items-center gap-2"
               >
@@ -245,14 +399,16 @@ export default function CharadesAI({
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-2">
-        <button onClick={restartGame} className="text-sm text-gray-600 inline-flex items-center gap-1 hover:text-gray-800">
-          <RotateCcw className="w-4 h-4"/> Restart
-        </button>
-        <button onClick={finishNow} className="rounded-xl px-4 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm">
-          Finish & Save
-        </button>
-      </div>
+      {isHost && (
+        <div className="flex items-center justify-between pt-2">
+          <button onClick={restartGame} className="text-sm text-gray-600 inline-flex items-center gap-1 hover:text-gray-800">
+            <RotateCcw className="w-4 h-4"/> Restart
+          </button>
+          <button onClick={finishNow} className="rounded-xl px-4 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm">
+            Finish & Save
+          </button>
+        </div>
+      )}
     </div>
   );
 }

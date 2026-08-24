@@ -8,7 +8,6 @@ import ResetPassword from './pages/ResetPassword';
 import type { JSX } from 'react';
 import Settings from './pages/Settings';
 import LobbyRoom from './pages/LobbyRoom';
-import LobbyGameRunner from "../src/games/LobbyGameRunner";
 import Landing from './pages/Landing';
 import { ToastProvider } from "./components/Toast";
 
@@ -91,8 +90,6 @@ export default function App() {
 
             <Route path="*" element={<NotFound />} />
           </Routes>
-
-          <LobbyGameRunner />
         </BrowserRouter>
       </ToastProvider>
     </AuthProvider>

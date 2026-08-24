@@ -1,11 +1,13 @@
 /**
- * SyncedLobbyGameRunner.tsx — FIXED
+ * SyncedLobbyGameRunner.tsx
  *
- * Key fixes:
- *  1. useGameSync now passes userId so events from self are ignored (no echo loop)
- *  2. Host receives "vote"/"buzz"/"answer" events from non-host players
- *  3. Non-host receives "state"/"tick" events from host
- *  4. Players guard added so games don't crash when players[] is still loading
+ *  - Host receives "vote"/"buzz"/"answer"/"guess"/"skip" events from non-host players
+ *  - Non-host receives "state"/"tick" events from host
+ *  - Players guard added so games don't crash when players[] is still loading
+ *  - Incoming player actions (_incomingVote/_incomingBuzz/etc.) are stamped with
+ *    a monotonic `seq` so the receiving game component can dedupe: those keys
+ *    persist on remoteState (they're merged, not cleared), so without a seq
+ *    check a later unrelated state change would silently re-apply a stale action.
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -67,8 +69,8 @@ function useGameSync(
       .listen(".LobbyGameUpdate", (e: any) => {
         console.log(`[GameSync] Received event:`, e.type, e.data, `isHost:${isHost}`);
 
-        // HOST receives: vote, buzz, answer events sent by non-host players
-        if (isHost && ["vote", "buzz", "answer"].includes(e.type)) {
+        // HOST receives: vote, buzz, answer, guess, skip events sent by non-host players
+        if (isHost && ["vote", "buzz", "answer", "guess", "skip"].includes(e.type)) {
           onHostReceive(e);
         }
 
@@ -147,14 +149,16 @@ function SyncedGroupDareDice({ sessionId, lobbyCode, hostId, players, onFinish }
   const { user } = useAuth();
   const isHost   = String(user?.id) === String(hostId);
   const [remoteState, setRemoteState] = useState<any>(null);
+  const seqRef = useRef(0);
 
   const onHostReceive = useCallback((e: any) => {
     // Host receives vote events from non-host players
     if (e.type === "vote" && e.data?.voter && e.data?.vote) {
+      seqRef.current += 1;
       // Merge the incoming vote into remoteState for host to see
       setRemoteState((prev: any) => ({
         ...prev,
-        _incomingVote: { voter: e.data.voter, vote: e.data.vote },
+        _incomingVote: { voter: e.data.voter, vote: e.data.vote, seq: seqRef.current },
       }));
     }
   }, []);
@@ -185,15 +189,18 @@ function SyncedGroupDareDice({ sessionId, lobbyCode, hostId, players, onFinish }
 function SyncedTrivia({ sessionId, lobbyCode, hostId, players, onFinish }: Omit<Props, "kind">) {
   const { user } = useAuth();
   const isHost   = String(user?.id) === String(hostId);
-  const [, setRemoteState] = useState<any>(null);
+  const [remoteState, setRemoteState] = useState<any>(null);
+  const seqRef = useRef(0);
 
   const onHostReceive = useCallback((e: any) => {
-    // Store buzz/answer events from players for host to process
+    // Buzz/answer events from non-host players, forwarded for the host to apply
     if (e.type === "buzz" && e.data?.team) {
-      setRemoteState((prev: any) => ({ ...prev, _buzz: e.data.team }));
+      seqRef.current += 1;
+      setRemoteState((prev: any) => ({ ...prev, _incomingBuzz: { team: e.data.team, seq: seqRef.current } }));
     }
     if (e.type === "answer" && e.data?.idx !== undefined) {
-      setRemoteState((prev: any) => ({ ...prev, _answer: e.data.idx }));
+      seqRef.current += 1;
+      setRemoteState((prev: any) => ({ ...prev, _incomingAnswer: { idx: e.data.idx, seq: seqRef.current } }));
     }
   }, []);
 
@@ -201,13 +208,10 @@ function SyncedTrivia({ sessionId, lobbyCode, hostId, players, onFinish }: Omit<
     if (e.type === "state" && e.data) setRemoteState(e.data);
   }, []);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { broadcast: _broadcast, sendAction: _sendAction } = useGameSync(sessionId, lobbyCode, isHost, onHostReceive, onPlayerReceive);
+  const { broadcast, sendAction } = useGameSync(sessionId, lobbyCode, isHost, onHostReceive, onPlayerReceive);
 
   if (players.length === 0) return <PlayersNotReady />;
 
-  // TriviaDuoVsDuo doesn't yet accept sync props — runs independently on each device
-  // Full sync can be added once TriviaDuoVsDuo is updated to accept isHost/remoteState
   return (
     <TriviaDuoVsDuo
       count={10}
@@ -215,6 +219,11 @@ function SyncedTrivia({ sessionId, lobbyCode, hostId, players, onFinish }: Omit<
       category="General"
       difficulty="Medium"
       onFinish={onFinish}
+      isHost={isHost}
+      remoteState={remoteState}
+      onStateChange={(state) => broadcast("state", state)}
+      onBuzz={(team) => sendAction("buzz", { team })}
+      onAnswer={(idx) => sendAction("answer", { idx })}
     />
   );
 }
@@ -223,20 +232,29 @@ function SyncedTrivia({ sessionId, lobbyCode, hostId, players, onFinish }: Omit<
 function SyncedCharades({ sessionId, lobbyCode, hostId, players, onFinish }: Omit<Props, "kind">) {
   const { user } = useAuth();
   const isHost   = String(user?.id) === String(hostId);
-  const [, setRemoteState] = useState<any>(null);
+  const [remoteState, setRemoteState] = useState<any>(null);
+  const seqRef = useRef(0);
 
-  const onHostReceive = useCallback((_e: any) => {}, []);
+  const onHostReceive = useCallback((e: any) => {
+    // Guess/skip taps from non-host players, forwarded for the host to apply
+    if (e.type === "guess") {
+      seqRef.current += 1;
+      setRemoteState((prev: any) => ({ ...prev, _incomingGuess: { seq: seqRef.current } }));
+    }
+    if (e.type === "skip") {
+      seqRef.current += 1;
+      setRemoteState((prev: any) => ({ ...prev, _incomingSkip: { seq: seqRef.current } }));
+    }
+  }, []);
 
   const onPlayerReceive = useCallback((e: any) => {
     if (e.type === "state" && e.data) setRemoteState(e.data);
   }, []);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { broadcast: _broadcast } = useGameSync(sessionId, lobbyCode, isHost, onHostReceive, onPlayerReceive);
+  const { broadcast, sendAction } = useGameSync(sessionId, lobbyCode, isHost, onHostReceive, onPlayerReceive);
 
   if (players.length === 0) return <PlayersNotReady />;
 
-  // CharadesAI doesn't yet accept sync props — runs independently on each device
   return (
     <CharadesAI
       secondsPerRound={60}
@@ -244,6 +262,11 @@ function SyncedCharades({ sessionId, lobbyCode, hostId, players, onFinish }: Omi
       category="General"
       difficulty="Easy"
       onFinish={onFinish}
+      isHost={isHost}
+      remoteState={remoteState}
+      onStateChange={(state) => broadcast("state", state)}
+      onGuess={() => sendAction("guess", {})}
+      onSkip={() => sendAction("skip", {})}
     />
   );
 }

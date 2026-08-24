@@ -56,6 +56,9 @@ export default function GroupDareDice({
   const [phase, setPhase]                         = useState<"roll" | "dare" | "vote" | "result">("roll");
   const [challengeTarget, setChallengeTarget]     = useState<string | null>(null);
   const distribution = useRef<Record<number, number>>({ 1:0,2:0,3:0,4:0,5:0,6:0 });
+  // _incomingVote persists on remoteState (merged, never cleared) — dedupe by
+  // seq so a later unrelated state update doesn't replay a stale vote.
+  const lastVoteSeq = useRef(0);
 
   // Apply remote state (must be before early return)
   useEffect(() => {
@@ -70,7 +73,8 @@ export default function GroupDareDice({
       if (remoteState.votes           !== undefined) setVotes(remoteState.votes);
       if (remoteState.challengeTarget !== undefined) setChallengeTarget(remoteState.challengeTarget);
     }
-    if (isHost && remoteState._incomingVote) {
+    if (isHost && remoteState._incomingVote && remoteState._incomingVote.seq !== lastVoteSeq.current) {
+      lastVoteSeq.current = remoteState._incomingVote.seq;
       const { voter, vote } = remoteState._incomingVote;
       setVotes(prev => {
         const newVotes = { ...prev, [voter]: vote as "up" | "down" };
@@ -473,10 +477,12 @@ export default function GroupDareDice({
             </div>
           ))}
         </div>
-        <button onClick={finish}
-          className="rounded-xl px-4 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm">
-          Finish Game
-        </button>
+        {isHost && (
+          <button onClick={finish}
+            className="rounded-xl px-4 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm">
+            Finish Game
+          </button>
+        )}
       </div>
     </div>
   );
