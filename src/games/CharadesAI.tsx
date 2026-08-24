@@ -302,30 +302,30 @@ export default function CharadesAI({
 
   return (
     <div className="space-y-4">
-      {err && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{err}</div>}
+      {err && <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl px-3 py-2">{err}</div>}
 
       {/* Scoreboard */}
       <div className="grid grid-cols-3 gap-3 text-sm">
-        <div className="rounded-2xl border p-3">
-          <div className="text-xs text-gray-500">{teams.A}</div>
-          <div className="text-lg font-semibold text-gray-900">{scoreA}</div>
+        <div className="rounded-2xl border dark:border-gray-800 p-3">
+          <div className="text-xs text-gray-500 dark:text-gray-400">{teams.A}</div>
+          <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">{scoreA}</div>
         </div>
-        <div className="rounded-2xl border p-3 flex items-center justify-center gap-2">
+        <div className="rounded-2xl border dark:border-gray-800 p-3 flex items-center justify-center gap-2">
           <Clock className="w-4 h-4 text-fuchsia-600"/><span className="font-medium tabular-nums">{mm}:{ss}</span>
-          <span className="text-xs text-gray-500 ml-2">Round {roundIndex}/{totalRounds} • Turn: {teamTurn}</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">Round {roundIndex}/{totalRounds} • Turn: {teamTurn}</span>
         </div>
-        <div className="rounded-2xl border p-3 text-right">
-          <div className="text-xs text-gray-500">{teams.B}</div>
-          <div className="text-lg font-semibold text-gray-900">{scoreB}</div>
+        <div className="rounded-2xl border dark:border-gray-800 p-3 text-right">
+          <div className="text-xs text-gray-500 dark:text-gray-400">{teams.B}</div>
+          <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">{scoreB}</div>
         </div>
       </div>
 
       {/* Card zone */}
-      <div className="rounded-2xl border p-5">
+      <div className="rounded-2xl border dark:border-gray-800 p-5">
         {!running ? (
           <div className="text-center space-y-3">
-            <div className="text-sm text-gray-600 flex items-center justify-center gap-2">
-              <Users className="w-4 h-4"/><span>Pass the phone to <b className="text-gray-900">{teamTurn}</b></span>
+            <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center gap-2">
+              <Users className="w-4 h-4"/><span>Pass the phone to <b className="text-gray-900 dark:text-gray-100">{teamTurn}</b></span>
             </div>
             {isHost ? (
               <button
@@ -336,25 +336,25 @@ export default function CharadesAI({
                 {roundIndex === 1 ? "Start Game" : "Start Round"}
               </button>
             ) : (
-              <div className="text-xs text-gray-400 animate-pulse">Waiting for host to start the round…</div>
+              <div className="text-xs text-gray-400 dark:text-gray-500 animate-pulse">Waiting for host to start the round…</div>
             )}
-            {loading && <div className="text-xs text-gray-500">Loading prompts…</div>}
+            {loading && <div className="text-xs text-gray-500 dark:text-gray-400">Loading prompts…</div>}
           </div>
         ) : !current ? (
-          <div className="grid place-items-center h-28 text-sm text-gray-500">Fetching a new card…</div>
+          <div className="grid place-items-center h-28 text-sm text-gray-500 dark:text-gray-400">Fetching a new card…</div>
         ) : (
           <>
-            <div className="text-[11px] text-gray-500 mb-1">
+            <div className="text-[11px] text-gray-500 dark:text-gray-400 mb-1">
               {current.category || category} • {current.difficulty || difficulty}
             </div>
 
             {/* Hide/reveal so guessers can't see */}
-            <div className="rounded-xl border p-4">
+            <div className="rounded-xl border dark:border-gray-800 p-4">
               <div className="flex items-center justify-between">
-                <div className="text-xs text-gray-500">Actor taps Reveal to view the card.</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Actor taps Reveal to view the card.</div>
                 <button
                   onClick={()=> setRevealed(r => !r)}
-                  className="text-xs rounded-lg border px-2 py-1 hover:bg-gray-50 inline-flex items-center gap-1"
+                  className="text-xs rounded-lg border dark:border-gray-700 px-2 py-1 hover:bg-gray-50 dark:hover:bg-gray-800 inline-flex items-center gap-1"
                 >
                   {revealed ? <><EyeOff className="w-4 h-4"/>Hide</> : <><Eye className="w-4 h-4"/>Reveal</>}
                 </button>
@@ -362,16 +362,16 @@ export default function CharadesAI({
 
               {revealed ? (
                 <div className="mt-3">
-                  <div className="font-medium text-gray-900 text-lg">{current.title}</div>
-                  {current.hint && <div className="text-xs text-gray-500 mt-1">Hint: {current.hint}</div>}
+                  <div className="font-medium text-gray-900 dark:text-gray-100 text-lg">{current.title}</div>
+                  {current.hint && <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Hint: {current.hint}</div>}
                   {current.taboo.length > 0 && (
-                    <div className="text-[11px] text-gray-500 mt-2">
+                    <div className="text-[11px] text-gray-500 dark:text-gray-400 mt-2">
                       Taboo: {current.taboo.join(" • ")}
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="h-20 grid place-items-center text-3xl text-gray-300">
+                <div className="h-20 grid place-items-center text-3xl text-gray-300 dark:text-gray-600">
                   <Sparkles className="w-7 h-7"/>
                 </div>
               )}
@@ -388,11 +388,11 @@ export default function CharadesAI({
               <button
                 onClick={onSkipTap}
                 disabled={skipsLeft<=0}
-                className="rounded-xl px-3 py-2 border text-sm hover:bg-gray-50 disabled:opacity-50 inline-flex items-center gap-2"
+                className="rounded-xl px-3 py-2 border dark:border-gray-700 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 inline-flex items-center gap-2"
               >
                 <SkipForward className="w-4 h-4"/> Skip ({skipsLeft})
               </button>
-              <span className="text-xs text-gray-500 ml-auto">No talking • gestures only</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">No talking • gestures only</span>
             </div>
           </>
         )}
@@ -401,7 +401,7 @@ export default function CharadesAI({
       {/* Footer */}
       {isHost && (
         <div className="flex items-center justify-between pt-2">
-          <button onClick={restartGame} className="text-sm text-gray-600 inline-flex items-center gap-1 hover:text-gray-800">
+          <button onClick={restartGame} className="text-sm text-gray-600 dark:text-gray-400 inline-flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200">
             <RotateCcw className="w-4 h-4"/> Restart
           </button>
           <button onClick={finishNow} className="rounded-xl px-4 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm">

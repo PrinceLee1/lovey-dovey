@@ -101,56 +101,56 @@ export default function TruthDareRomantic({ couple, category = "Romantic", onFin
 
   return (
     <div className="space-y-4">
-      {err && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{err}</div>}
+      {err && <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl px-3 py-2">{err}</div>}
       {loading && truths.length + dares.length === 0 && (
-        <div className="text-sm text-gray-600">Getting sweet prompts…</div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">Getting sweet prompts…</div>
       )}
 
       <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-600">Round <b className="text-gray-900">{round}</b> • Turn: <b className="text-gray-900">{players[pIdx]}</b></div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">Round <b className="text-gray-900 dark:text-gray-100">{round}</b> • Turn: <b className="text-gray-900 dark:text-gray-100">{players[pIdx]}</b></div>
         <div className="flex items-center gap-2 text-xs">
-          <span className="px-2 py-1 rounded-full border">Skips: {skips}</span>
-          <span className="px-2 py-1 rounded-full border">Done: {completed}</span>
+          <span className="px-2 py-1 rounded-full border dark:border-gray-700">Skips: {skips}</span>
+          <span className="px-2 py-1 rounded-full border dark:border-gray-700">Done: {completed}</span>
         </div>
       </div>
 
       {step === "choose" && (
         <div className="grid grid-cols-2 gap-3">
-          <button onClick={() => nextPrompt("truth")} className="rounded-2xl border p-5 hover:bg-gray-50 text-left">
-            <div className="h-10 w-10 rounded-xl bg-rose-100 grid place-items-center text-rose-600 mb-2">
+          <button onClick={() => nextPrompt("truth")} className="rounded-2xl border dark:border-gray-800 p-5 hover:bg-gray-50 dark:hover:bg-gray-800 text-left">
+            <div className="h-10 w-10 rounded-xl bg-rose-100 dark:bg-rose-950/40 grid place-items-center text-rose-600 dark:text-rose-300 mb-2">
               <Heart className="w-5 h-5" />
             </div>
-            <div className="font-medium text-gray-900">Truth</div>
-            <div className="text-xs text-gray-500">A heartfelt question to open up.</div>
+            <div className="font-medium text-gray-900 dark:text-gray-100">Truth</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">A heartfelt question to open up.</div>
           </button>
-          <button onClick={() => nextPrompt("dare")} className="rounded-2xl border p-5 hover:bg-gray-50 text-left">
-            <div className="h-10 w-10 rounded-xl bg-fuchsia-100 grid place-items-center text-fuchsia-600 mb-2">
+          <button onClick={() => nextPrompt("dare")} className="rounded-2xl border dark:border-gray-800 p-5 hover:bg-gray-50 dark:hover:bg-gray-800 text-left">
+            <div className="h-10 w-10 rounded-xl bg-fuchsia-100 dark:bg-fuchsia-950/40 grid place-items-center text-fuchsia-600 dark:text-fuchsia-300 mb-2">
               <Sparkles className="w-5 h-5" />
             </div>
-            <div className="font-medium text-gray-900">Dare</div>
-            <div className="text-xs text-gray-500">A sweet action to do together.</div>
+            <div className="font-medium text-gray-900 dark:text-gray-100">Dare</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">A sweet action to do together.</div>
           </button>
         </div>
       )}
 
       {step === "prompt" && (
-        <div className="rounded-2xl border p-5">
-          <div className="text-xs text-gray-500 mb-1 capitalize">{type}</div>
-          <div className="text-gray-900 font-medium">{prompt}</div>
+        <div className="rounded-2xl border dark:border-gray-800 p-5">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 capitalize">{type}</div>
+          <div className="text-gray-900 dark:text-gray-100 font-medium">{prompt}</div>
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <button onClick={onComplete} className="rounded-xl px-3 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm inline-flex items-center gap-2">
               <Check className="w-4 h-4" /> Complete
             </button>
-            <button onClick={onSkip} disabled={skips <= 0} className="rounded-xl px-3 py-2 border hover:bg-gray-50 text-sm inline-flex items-center gap-2 disabled:opacity-50">
+            <button onClick={onSkip} disabled={skips <= 0} className="rounded-xl px-3 py-2 border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm inline-flex items-center gap-2 disabled:opacity-50">
               <SkipForward className="w-4 h-4" /> Skip
             </button>
-            <button onClick={() => nextPrompt(type!)} className="rounded-xl px-3 py-2 border hover:bg-gray-50 text-sm">New prompt</button>
+            <button onClick={() => nextPrompt(type!)} className="rounded-xl px-3 py-2 border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm">New prompt</button>
           </div>
         </div>
       )}
 
       <div className="flex items-center justify-between pt-2">
-        <button onClick={restart} className="text-sm text-gray-600 inline-flex items-center gap-1 hover:text-gray-800">
+        <button onClick={restart} className="text-sm text-gray-600 dark:text-gray-400 inline-flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200">
           <RotateCcw className="w-4 h-4" /> Restart
         </button>
         <button onClick={finishNow} className="rounded-xl px-4 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm">

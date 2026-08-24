@@ -285,7 +285,7 @@ export default function GamesDashboard() {
               initial={{ y: 20, scale: 0.97 }}
               animate={{ y: 0, scale: 1 }}
               exit={{ y: 20, scale: 0.97 }}
-              className="w-full max-w-sm rounded-3xl bg-white shadow-2xl overflow-hidden"
+              className="w-full max-w-sm rounded-3xl bg-white dark:bg-gray-900 shadow-2xl overflow-hidden"
             >
               <div className="bg-gradient-to-br from-pink-500 to-fuchsia-600 p-6 text-white text-center">
                 <div className="text-3xl mb-1">🎉</div>
@@ -305,7 +305,7 @@ export default function GamesDashboard() {
                 </button>
                 <button
                   onClick={() => setShareResult(null)}
-                  className="w-full rounded-2xl py-2.5 text-sm text-gray-500 hover:text-gray-700"
+                  className="w-full rounded-2xl py-2.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                 >
                   Continue
                 </button>
@@ -341,19 +341,19 @@ export default function GamesDashboard() {
           <div className="lg:col-span-3 space-y-6">
 
             {/* Header / greeting */}
-            <motion.div {...variants} className="rounded-3xl bg-white shadow-xl border border-rose-100 p-6">
+            <motion.div {...variants} className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 p-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <h1 className="font-display text-2xl font-semibold text-gray-900">
+                  <h1 className="font-display text-2xl font-semibold text-gray-900 dark:text-gray-100">
                     {greeting} 👋
                   </h1>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 dark:text-gray-400">
                     Ready for a little fun? Invite your {partnerWord} to join the fun 🥰!
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <StreakBadge kind="couple" />
-                  <span className="bg-fuchsia-50 text-fuchsia-700 px-3 py-1 rounded-full text-sm">
+                  <span className="bg-fuchsia-50 dark:bg-fuchsia-950/40 text-fuchsia-700 dark:text-fuchsia-300 px-3 py-1 rounded-full text-sm">
                     ⭐ {xp} XP
                   </span>
                 </div>
@@ -368,7 +368,7 @@ export default function GamesDashboard() {
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       placeholder="Search games…"
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl border outline-none focus:ring-2 focus:ring-fuchsia-500"
+                      className="w-full pl-9 pr-3 py-2.5 rounded-xl border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 outline-none focus:ring-2 focus:ring-fuchsia-500"
                     />
                   </div>
                 </div>
@@ -389,8 +389,8 @@ export default function GamesDashboard() {
                       onClick={() => setCategory(c)}
                       className={`px-3 py-1.5 rounded-full border text-sm transition ${
                         category === c
-                          ? "bg-fuchsia-50 border-fuchsia-400 text-fuchsia-700"
-                          : "hover:bg-gray-50"
+                          ? "bg-fuchsia-50 dark:bg-fuchsia-950/40 border-fuchsia-400 dark:border-fuchsia-700 text-fuchsia-700 dark:text-fuchsia-300"
+                          : "dark:border-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                       }`}
                     >
                       {/* Show lock icon on Spicy/Erotic for free users */}
@@ -451,7 +451,7 @@ export default function GamesDashboard() {
             <SectionTitle icon={<Play className="w-4 h-4" />} title="Featured" />
             <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {loadingGames ? (
-                <div className="col-span-full text-center py-10 text-gray-500">
+                <div className="col-span-full text-center py-10 text-gray-500 dark:text-gray-400">
                   Loading games…
                 </div>
               ) : (
@@ -490,15 +490,15 @@ export default function GamesDashboard() {
             {/* Partner required modal */}
             {showPartnerModal && (
               <div className="fixed inset-0 bg-black/30 grid place-items-center z-50">
-                <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl">
-                  <div className="text-lg font-semibold text-gray-900">Partner required</div>
-                  <p className="text-sm text-gray-600 mt-1">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-md w-full shadow-xl">
+                  <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">Partner required</div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                     This game is for two players. Link your partner to play and save progress together.
                   </p>
                   <div className="mt-4 flex items-center justify-end gap-2">
                     <button
                       onClick={() => setShowPartnerModal(false)}
-                      className="px-3 py-2 rounded-xl border text-sm hover:bg-gray-50"
+                      className="px-3 py-2 rounded-xl border dark:border-gray-700 dark:text-gray-200 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
                       Close
                     </button>
@@ -516,14 +516,14 @@ export default function GamesDashboard() {
             {/* Incoming session invite toast */}
             {invite !== null && (
               <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 max-w-md w-[90%]">
-                <div className="rounded-2xl border bg-white shadow-xl p-4">
-                  <div className="font-semibold text-gray-900">
+                <div className="rounded-2xl border dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xl p-4">
+                  <div className="font-semibold text-gray-900 dark:text-gray-100">
                     {invite.from} invited you to play{" "}
                     <span className="capitalize">{invite.kind.replace('_', ' ')}</span>
                   </div>
                   <div className="mt-2 flex gap-2 justify-end">
                     <button
-                      className="px-3 py-1.5 rounded-xl border hover:bg-gray-50"
+                      className="px-3 py-1.5 rounded-xl border dark:border-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
                       onClick={() => setInvite(null)}
                     >
                       Dismiss
@@ -541,19 +541,19 @@ export default function GamesDashboard() {
 
             {/* History */}
             <SectionTitle icon={<History className="w-4 h-4" />} title="Recently Played" />
-            <div className="rounded-3xl bg-white shadow-xl border border-rose-100 divide-y">
+            <div className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 divide-y dark:divide-gray-800">
               {historyLoading ? (
-                <div className="p-4 text-sm text-gray-500">Loading…</div>
+                <div className="p-4 text-sm text-gray-500 dark:text-gray-400">Loading…</div>
               ) : history.length === 0 ? (
-                <div className="p-4 text-sm text-gray-500">
+                <div className="p-4 text-sm text-gray-500 dark:text-gray-400">
                   No games yet — play your first round!
                 </div>
               ) : (
                 history.map((h) => (
                   <div key={h.id} className="p-4 flex items-center justify-between">
                     <div>
-                      <div className="font-medium text-gray-900">{h.game_title}</div>
-                      <div className="text-xs text-gray-500 flex items-center gap-2">
+                      <div className="font-medium text-gray-900 dark:text-gray-100">{h.game_title}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
                         <span>{h.category}</span>
                         <span>•</span>
                         <span>{h.rounds} rounds</span>
@@ -568,7 +568,7 @@ export default function GamesDashboard() {
                       </div>
                     </div>
                     <button
-                      className="text-sm px-3 py-1.5 rounded-lg border hover:bg-gray-50"
+                      className="text-sm px-3 py-1.5 rounded-lg border dark:border-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
                       onClick={() => {
                         const g = games.find((g) => g.id == h.game_id);
                         console.log("Replaying game", g);
@@ -593,10 +593,10 @@ export default function GamesDashboard() {
             <UpcomingLobbies variants={variants} />
 
             {/* Friends Online */}
-            <motion.div {...variants} className="rounded-3xl bg-white shadow-xl border border-rose-100 p-6">
+            <motion.div {...variants} className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 p-6">
               <div className="flex items-center gap-2 mb-4">
-                <div className="font-display font-semibold text-gray-900">Friends Online</div>
-                <span className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full font-medium">
+                <div className="font-display font-semibold text-gray-900 dark:text-gray-100">Friends Online</div>
+                <span className="bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 text-xs px-2 py-1 rounded-full font-medium">
                   Coming Soon
                 </span>
               </div>
@@ -604,7 +604,7 @@ export default function GamesDashboard() {
                 {friends.map((f) => (
                   <div
                     key={f}
-                    className="h-9 w-9 rounded-full ring-2 ring-white bg-gradient-to-br from-fuchsia-400 to-pink-500 grid place-items-center text-white text-xs font-semibold"
+                    className="h-9 w-9 rounded-full ring-2 ring-white dark:ring-gray-900 bg-gradient-to-br from-fuchsia-400 to-pink-500 grid place-items-center text-white text-xs font-semibold"
                   >
                     {f[0]}
                   </div>
@@ -620,23 +620,23 @@ export default function GamesDashboard() {
             <Modal onClose={() => setPreviewGame(null)}>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="font-display text-lg font-semibold text-gray-900">
+                  <div className="font-display text-lg font-semibold text-gray-900 dark:text-gray-100">
                     {previewGame.title}
                   </div>
                   <button
                     onClick={() => setPreviewGame(null)}
-                    className="text-sm text-gray-500 hover:text-gray-700"
+                    className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                   >
                     Close
                   </button>
                 </div>
-                <div className="text-sm text-gray-600">{previewGame.description}</div>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <span className="px-2 py-1 rounded-full border">{previewGame.category}</span>
-                  <span className="px-2 py-1 rounded-full border">{previewGame.difficulty}</span>
-                  <span className="px-2 py-1 rounded-full border">{previewGame.duration} min</span>
+                <div className="text-sm text-gray-600 dark:text-gray-400">{previewGame.description}</div>
+                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                  <span className="px-2 py-1 rounded-full border dark:border-gray-700">{previewGame.category}</span>
+                  <span className="px-2 py-1 rounded-full border dark:border-gray-700">{previewGame.difficulty}</span>
+                  <span className="px-2 py-1 rounded-full border dark:border-gray-700">{previewGame.duration} min</span>
                   {isPlusLocked(previewGame) && (
-                    <span className="px-2 py-1 rounded-full border border-fuchsia-300 text-fuchsia-700 bg-fuchsia-50">
+                    <span className="px-2 py-1 rounded-full border border-fuchsia-300 dark:border-fuchsia-800 text-fuchsia-700 dark:text-fuchsia-300 bg-fuchsia-50 dark:bg-fuchsia-950/40">
                       🔒 Plus
                     </span>
                   )}
@@ -664,13 +664,13 @@ export default function GamesDashboard() {
                       Play Now
                     </button>
                   ) : (
-                    <button className="rounded-xl px-3 py-2 text-sm bg-gray-200 text-gray-500 cursor-not-allowed">
+                    <button className="rounded-xl px-3 py-2 text-sm bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed">
                       Partner Required
                     </button>
                   )}
                   <button
                     onClick={() => { toggleFavorite(previewGame.id); setPreviewGame(null); }}
-                    className="flex-1 rounded-xl px-4 py-2 border hover:bg-gray-50"
+                    className="flex-1 rounded-xl px-4 py-2 border dark:border-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
                     Save to Favorites
                   </button>
@@ -691,10 +691,10 @@ export default function GamesDashboard() {
 function SectionTitle({ icon, title }: { icon: React.ReactNode; title: string }) {
   return (
     <div className="mt-6 mb-2 flex items-center gap-2">
-      <div className="h-8 w-8 rounded-xl bg-white shadow border border-rose-100 grid place-items-center text-fuchsia-600">
+      <div className="h-8 w-8 rounded-xl bg-white dark:bg-gray-900 shadow border border-rose-100 dark:border-gray-800 grid place-items-center text-fuchsia-600 dark:text-fuchsia-400">
         {icon}
       </div>
-      <div className="font-display text-lg font-semibold text-gray-900">{title}</div>
+      <div className="font-display text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</div>
     </div>
   );
 }
@@ -705,15 +705,15 @@ function ActionCard({ icon, title, desc, onClick }: {
   return (
     <button
       onClick={onClick}
-      className="text-left rounded-3xl bg-white shadow-xl border border-rose-100 p-5 hover:shadow-2xl transition"
+      className="text-left rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 p-5 hover:shadow-2xl transition"
     >
       <div className="flex items-center gap-3">
         <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-pink-500 to-fuchsia-600 grid place-items-center text-white">
           {icon}
         </div>
         <div>
-          <div className="font-medium text-gray-900">{title}</div>
-          <div className="text-xs text-gray-500">{desc}</div>
+          <div className="font-medium text-gray-900 dark:text-gray-100">{title}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">{desc}</div>
         </div>
       </div>
     </button>
@@ -733,19 +733,19 @@ type GameCardProps = {
 
 function GameCard({ game, isFavorite, onFavorite, onPreview, onPlay, disabled, plusLocked, disabledReason }: GameCardProps) {
   return (
-    <div className={`rounded-2xl border p-4 bg-white relative ${plusLocked ? 'border-fuchsia-200' : ''}`}>
+    <div className={`rounded-2xl border dark:border-gray-800 p-4 bg-white dark:bg-gray-900 relative ${plusLocked ? 'border-fuchsia-200 dark:border-fuchsia-800' : ''}`}>
       {plusLocked && (
         <div className="absolute top-3 right-3 flex items-center gap-1 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-xs px-2 py-0.5 rounded-full">
           <Crown className="w-3 h-3" /> Plus
         </div>
       )}
-      <div className="font-medium text-gray-900 pr-16">{game.title}</div>
-      <div className="text-xs text-gray-500">{game.category} • {game.duration} min</div>
+      <div className="font-medium text-gray-900 dark:text-gray-100 pr-16">{game.title}</div>
+      <div className="text-xs text-gray-500 dark:text-gray-400">{game.category} • {game.duration} min</div>
 
       <div className="mt-3 flex items-center gap-2">
         <button
           onClick={onPreview}
-          className="rounded-xl px-3 py-2 border text-sm hover:bg-gray-50"
+          className="rounded-xl px-3 py-2 border dark:border-gray-700 dark:text-gray-200 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
         >
           Preview
         </button>
@@ -758,7 +758,7 @@ function GameCard({ game, isFavorite, onFavorite, onPreview, onPlay, disabled, p
             plusLocked
               ? "bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white"
               : disabled
-              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+              ? "bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-500 cursor-not-allowed"
               : "text-white bg-gradient-to-r from-pink-500 to-fuchsia-600"
           }`}
         >
@@ -767,7 +767,7 @@ function GameCard({ game, isFavorite, onFavorite, onPreview, onPlay, disabled, p
 
         <button
           onClick={onFavorite}
-          className="ml-auto text-xs text-gray-500 hover:text-gray-900"
+          className="ml-auto text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
         >
           {isFavorite ? "★ Favorite" : "☆ Favorite"}
         </button>
@@ -785,7 +785,7 @@ function Modal({ children, onClose }: { children: React.ReactNode; onClose: () =
     >
       <motion.div
         initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 16, opacity: 0 }}
-        className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl"
+        className="w-full max-w-md rounded-2xl bg-white dark:bg-gray-900 p-5 shadow-xl"
       >
         {children}
       </motion.div>
@@ -799,13 +799,13 @@ function Segmented({ value, onChange, options }: {
   options: { label: string; value: string; icon?: React.ReactNode }[];
 }) {
   return (
-    <div className="inline-flex rounded-xl border bg-white p-1">
+    <div className="inline-flex rounded-xl border dark:border-gray-700 bg-white dark:bg-gray-800 p-1">
       {options.map((o) => (
         <button
           key={o.value}
           onClick={() => onChange(o.value)}
           className={`px-3 py-2 rounded-lg text-sm flex items-center gap-2 ${
-            value === o.value ? "bg-fuchsia-600 text-white" : "hover:bg-gray-50"
+            value === o.value ? "bg-fuchsia-600 text-white" : "dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
           }`}
         >
           {o.icon}
@@ -825,27 +825,27 @@ function LobbiesSection() {
   return (
     <>
       <div
-        className="rounded-3xl bg-white shadow-xl border border-rose-100 p-4 flex items-center gap-3 cursor-pointer hover:shadow-2xl transition"
+        className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 p-4 flex items-center gap-3 cursor-pointer hover:shadow-2xl transition"
         onClick={() => setOpen(true)}
       >
         <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-pink-500 to-fuchsia-600 grid place-items-center text-white">
           <Plus className="w-6 h-6" />
         </div>
         <div className="flex-1">
-          <div className="font-semibold text-gray-900">Create Lobby</div>
-          <div className="text-sm text-gray-500">Set rules & invite friends</div>
+          <div className="font-semibold text-gray-900 dark:text-gray-100">Create Lobby</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Set rules & invite friends</div>
         </div>
       </div>
 
       <CreateLobbyModal open={open} onClose={() => setOpen(false)} onCreated={(p) => setLobbyInvite(p)} />
 
       {lobbyInvite && (
-        <div className="mt-3 rounded-2xl border p-3 flex items-center gap-2">
+        <div className="mt-3 rounded-2xl border dark:border-gray-800 p-3 flex items-center gap-2 dark:text-gray-200">
           <div className="text-sm">Invite link:</div>
-          <code className="text-xs bg-gray-50 px-2 py-1 rounded">{lobbyInvite.invite_url}</code>
+          <code className="text-xs bg-gray-50 dark:bg-gray-800 px-2 py-1 rounded">{lobbyInvite.invite_url}</code>
           <button
             onClick={() => navigator.clipboard.writeText(lobbyInvite.invite_url)}
-            className="ml-auto rounded-lg border px-2 py-1 text-sm hover:bg-gray-50"
+            className="ml-auto rounded-lg border dark:border-gray-700 px-2 py-1 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             Copy
           </button>

@@ -126,17 +126,17 @@ export default function EmojiChat({
   return (
     <div className="space-y-4">
       {/* Header / Timer */}
-      <div className="rounded-2xl border p-4">
+      <div className="rounded-2xl border dark:border-gray-800 p-4">
         <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-600">
-            Chat as <b className="text-gray-900">{players[who]}</b> • Emojis only!
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            Chat as <b className="text-gray-900 dark:text-gray-100">{players[who]}</b> • Emojis only!
           </div>
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-fuchsia-600" />
             <div className="font-medium tabular-nums">{timeStr}</div>
             <button
               onClick={() => { setRunning((r) => !r); }}
-              className="ml-2 rounded-lg border px-2.5 py-1.5 text-sm hover:bg-gray-50 inline-flex items-center gap-1"
+              className="ml-2 rounded-lg border dark:border-gray-700 px-2.5 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 inline-flex items-center gap-1"
               title={running ? "Pause" : "Resume"}
             >
               {running ? <Pause className="w-4 h-4" /> : <PlayIcon className="w-4 h-4" />}
@@ -144,22 +144,22 @@ export default function EmojiChat({
             </button>
             <button
               onClick={resetGame}
-              className="rounded-lg border px-2.5 py-1.5 text-sm hover:bg-gray-50 inline-flex items-center gap-1"
+              className="rounded-lg border dark:border-gray-700 px-2.5 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 inline-flex items-center gap-1"
               title="Reset"
             >
               <RotateCcw className="w-4 h-4" /> Reset
             </button>
           </div>
         </div>
-        <div className="mt-3 h-2 w-full rounded-full bg-gray-100 overflow-hidden">
+        <div className="mt-3 h-2 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
           <div className="h-full bg-fuchsia-600" style={{ width: `${progress}%` }} />
         </div>
       </div>
 
       {/* Thread */}
-      <div ref={listRef} className="rounded-2xl border bg-white h-64 overflow-y-auto p-3 space-y-2">
+      <div ref={listRef} className="rounded-2xl border dark:border-gray-800 bg-white dark:bg-gray-900 h-64 overflow-y-auto p-3 space-y-2">
         {messages.length === 0 ? (
-          <div className="h-full grid place-items-center text-sm text-gray-500">
+          <div className="h-full grid place-items-center text-sm text-gray-500 dark:text-gray-400">
             Start the chat — emojis only! (e.g. ❤️🎉 or 😜👉🎵)
           </div>
         ) : (
@@ -168,8 +168,8 @@ export default function EmojiChat({
               key={m.id}
               className={`max-w-[75%] px-3 py-2 rounded-2xl text-lg leading-6 ${
                 m.from === 0
-                  ? "bg-fuchsia-50 text-fuchsia-700 mr-auto rounded-bl-sm"
-                  : "bg-rose-50 text-rose-700 ml-auto rounded-br-sm"
+                  ? "bg-fuchsia-50 dark:bg-fuchsia-950/40 text-fuchsia-700 dark:text-fuchsia-300 mr-auto rounded-bl-sm"
+                  : "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 ml-auto rounded-br-sm"
               }`}
               title={new Date(m.t).toLocaleTimeString()}
             >
@@ -180,9 +180,9 @@ export default function EmojiChat({
       </div>
 
       {/* Composer */}
-      <div className="rounded-2xl border p-3 space-y-2">
+      <div className="rounded-2xl border dark:border-gray-800 p-3 space-y-2">
         <div className="flex items-center gap-2">
-          <div className="text-xs px-2 py-1 rounded-full border">{players[who]}</div>
+          <div className="text-xs px-2 py-1 rounded-full border dark:border-gray-700">{players[who]}</div>
           <div className="flex-1 relative">
             <input
               ref={inputRef}
@@ -190,7 +190,7 @@ export default function EmojiChat({
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Type with emojis only…"
-              className="w-full rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-fuchsia-500"
+              className="w-full rounded-xl border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 px-3 py-2 outline-none focus:ring-2 focus:ring-fuchsia-500"
               onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); send(); } }}
             />
             <button
@@ -203,14 +203,14 @@ export default function EmojiChat({
           </div>
           <button
             onClick={() => setWho((w) => (w === 0 ? 1 : 0))}
-            className="rounded-lg border px-2.5 py-1.5 text-sm hover:bg-gray-50 inline-flex items-center gap-1"
+            className="rounded-lg border dark:border-gray-700 px-2.5 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 inline-flex items-center gap-1"
             title="Switch speaker"
           >
             <Smile className="w-4 h-4" /> Switch
           </button>
         </div>
 
-        {warn && <div className="text-xs text-red-600">{warn}</div>}
+        {warn && <div className="text-xs text-red-600 dark:text-red-400">{warn}</div>}
 
         {/* Quick palette */}
         <div className="flex flex-wrap gap-1.5 pt-1">
@@ -218,7 +218,7 @@ export default function EmojiChat({
             <button
               key={e}
               onClick={() => setText((t) => (t + " " + e).trim())}
-              className="px-2 py-1 rounded-lg border hover:bg-gray-50 text-lg"
+              className="px-2 py-1 rounded-lg border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-lg"
             >
               {e}
             </button>

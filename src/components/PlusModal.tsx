@@ -83,7 +83,7 @@ export default function PlusModal({ open, onClose, reason = 'general' }: PlusMod
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 20, opacity: 0, scale: 0.97 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden"
+            className="relative w-full max-w-md rounded-3xl bg-white dark:bg-gray-900 shadow-2xl overflow-hidden"
           >
             {/* Gradient header */}
             <div className="bg-gradient-to-br from-pink-500 via-fuchsia-600 to-purple-600 px-6 pt-8 pb-10 text-white relative">
@@ -112,13 +112,13 @@ export default function PlusModal({ open, onClose, reason = 'general' }: PlusMod
 
             {/* Perks list — overlaps the header */}
             <div className="px-6 mt-5">
-              <div className="rounded-2xl bg-white border border-rose-100 shadow-lg p-4 space-y-3">
+              <div className="rounded-2xl bg-white dark:bg-gray-800 border border-rose-100 dark:border-gray-700 shadow-lg p-4 space-y-3">
                 {PERKS.map((p, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <div className="h-7 w-7 rounded-lg bg-fuchsia-50 text-fuchsia-600 grid place-items-center flex-shrink-0">
+                    <div className="h-7 w-7 rounded-lg bg-fuchsia-50 dark:bg-fuchsia-950/40 text-fuchsia-600 dark:text-fuchsia-300 grid place-items-center flex-shrink-0">
                       {p.icon}
                     </div>
-                    <span className="text-sm text-gray-700">{p.text}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{p.text}</span>
                   </div>
                 ))}
               </div>
@@ -127,7 +127,7 @@ export default function PlusModal({ open, onClose, reason = 'general' }: PlusMod
             {/* CTA */}
             <div className="px-6 pt-5 pb-6 space-y-3">
               {err && (
-                <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+                <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl px-3 py-2">
                   {err}
                 </div>
               )}
@@ -142,12 +142,12 @@ export default function PlusModal({ open, onClose, reason = 'general' }: PlusMod
 
               <button
                 onClick={onClose}
-                className="w-full rounded-2xl py-2.5 text-sm text-gray-500 hover:text-gray-700 transition"
+                className="w-full rounded-2xl py-2.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition"
               >
                 Maybe later
               </button>
 
-              <p className="text-center text-xs text-gray-400">
+              <p className="text-center text-xs text-gray-400 dark:text-gray-500">
                 Cancel anytime. Billed monthly via Stripe. Secure checkout.
               </p>
             </div>

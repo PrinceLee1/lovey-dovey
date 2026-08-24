@@ -132,31 +132,31 @@ export default function SpiceDice({ couple, onFinish }: Props) {
 
   return (
     <div className="space-y-4">
-      {err && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{err}</div>}
+      {err && <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl px-3 py-2">{err}</div>}
 
       {/* Top status */}
       <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-600">
-          Turn: <b className="text-gray-900">{players[turnIdx]}</b>
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          Turn: <b className="text-gray-900 dark:text-gray-100">{players[turnIdx]}</b>
         </div>
         <div className="flex items-center gap-2 text-xs">
-          <span className="px-2 py-1 rounded-full border">Skips: {skipsLeft}</span>
-          <span className="px-2 py-1 rounded-full border">Completed: {completed}</span>
+          <span className="px-2 py-1 rounded-full border dark:border-gray-700 dark:text-gray-300">Skips: {skipsLeft}</span>
+          <span className="px-2 py-1 rounded-full border dark:border-gray-700 dark:text-gray-300">Completed: {completed}</span>
         </div>
       </div>
 
       {/* Dice + dare panel */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Dice */}
-        <div className="rounded-2xl border p-5 grid place-items-center">
+        <div className="rounded-2xl border dark:border-gray-700 p-5 grid place-items-center">
           <motion.div
             key={spins}
             initial={{ rotate: 0, scale: 1 }}
             animate={{ rotate: 360, scale: 1.05 }}
             transition={{ duration: 0.6, ease: "easeInOut" }}
-            className="h-24 w-24 rounded-2xl bg-gradient-to-br from-rose-100 to-fuchsia-100 grid place-items-center shadow-inner"
+            className="h-24 w-24 rounded-2xl bg-gradient-to-br from-rose-100 to-fuchsia-100 dark:from-rose-950/40 dark:to-fuchsia-950/40 grid place-items-center shadow-inner"
           >
-            <Dice6 className="w-10 h-10 text-fuchsia-600" />
+            <Dice6 className="w-10 h-10 text-fuchsia-600 dark:text-fuchsia-400" />
           </motion.div>
 
           <button
@@ -167,33 +167,33 @@ export default function SpiceDice({ couple, onFinish }: Props) {
           </button>
 
           {rolled && (
-            <div className="mt-2 text-sm text-gray-600">
-              You rolled: <b className="text-gray-900">{rolled.n}</b> — <span className="font-medium">{rolled.label}</span>
+            <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              You rolled: <b className="text-gray-900 dark:text-gray-100">{rolled.n}</b> — <span className="font-medium">{rolled.label}</span>
             </div>
           )}
         </div>
 
         {/* Dare card */}
-        <div className="rounded-2xl border p-5">
+        <div className="rounded-2xl border dark:border-gray-700 p-5">
           {!currentDare ? (
-            <div className="h-full grid place-items-center text-sm text-gray-500">
+            <div className="h-full grid place-items-center text-sm text-gray-500 dark:text-gray-400">
               Roll to get a PG-13 dare ✨
             </div>
           ) : (
             <>
               <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="w-4 h-4 text-fuchsia-600" />
-                <div className="text-xs text-gray-500">{rolled?.label ?? "Dare"}</div>
+                <Sparkles className="w-4 h-4 text-fuchsia-600 dark:text-fuchsia-400" />
+                <div className="text-xs text-gray-500 dark:text-gray-400">{rolled?.label ?? "Dare"}</div>
               </div>
-              <div className="text-gray-900 font-medium">{currentDare}</div>
+              <div className="text-gray-900 dark:text-gray-100 font-medium">{currentDare}</div>
 
               {/* Consent gate */}
               <div className="mt-4 flex items-center gap-2 text-sm">
-                <Shield className="w-4 h-4 text-emerald-600" />
-                <label className="inline-flex items-center gap-2">
+                <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <label className="inline-flex items-center gap-2 dark:text-gray-300">
                   <input
                     type="checkbox"
-                    className="rounded border-gray-300"
+                    className="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-800"
                     checked={consent}
                     onChange={(e) => setConsent(e.target.checked)}
                   />
@@ -208,7 +208,7 @@ export default function SpiceDice({ couple, onFinish }: Props) {
                   className={`rounded-xl px-3 py-2 text-sm inline-flex items-center gap-2 text-white ${
                     consent
                       ? "bg-gradient-to-r from-pink-500 to-fuchsia-600"
-                      : "bg-gray-300 cursor-not-allowed"
+                      : "bg-gray-300 dark:bg-gray-700 cursor-not-allowed"
                   }`}
                 >
                   <Check className="w-4 h-4" /> Complete
@@ -216,7 +216,7 @@ export default function SpiceDice({ couple, onFinish }: Props) {
                 <button
                   onClick={onSkip}
                   disabled={skipsLeft <= 0}
-                  className="rounded-xl px-3 py-2 border hover:bg-gray-50 text-sm inline-flex items-center gap-2 disabled:opacity-50"
+                  className="rounded-xl px-3 py-2 border dark:border-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800 text-sm inline-flex items-center gap-2 disabled:opacity-50"
                 >
                   <SkipForward className="w-4 h-4" /> Skip
                 </button>
@@ -226,7 +226,7 @@ export default function SpiceDice({ couple, onFinish }: Props) {
                     setCurrentDare(d);
                     setConsent(false);
                   }}
-                  className="rounded-xl px-3 py-2 border hover:bg-gray-50 text-sm"
+                  className="rounded-xl px-3 py-2 border dark:border-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800 text-sm"
                 >
                   New dare
                 </button>
@@ -240,7 +240,7 @@ export default function SpiceDice({ couple, onFinish }: Props) {
       <div className="flex items-center justify-between pt-2">
         <button
           onClick={restart}
-          className="text-sm text-gray-600 inline-flex items-center gap-1 hover:text-gray-800"
+          className="text-sm text-gray-600 dark:text-gray-400 inline-flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200"
         >
           <RotateCcw className="w-4 h-4" /> Restart
         </button>

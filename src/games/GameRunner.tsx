@@ -49,25 +49,25 @@ export default function GameRunner({
           initial={{ y: 16, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 16, opacity: 0 }}
-          className="w-full max-w-xl rounded-3xl bg-white p-5 shadow-xl max-h-[90vh] overflow-y-auto"
+          className="w-full max-w-xl rounded-3xl bg-white dark:bg-gray-900 p-5 shadow-xl max-h-[90vh] overflow-y-auto"
         >
           <div className="flex items-center justify-between mb-3">
             <div>
               <div className="flex items-center gap-2">
-                <div className="text-xs text-gray-500">{game.category}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">{game.category}</div>
                 {isPlus && (
                   <span className="text-xs bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white px-2 py-0.5 rounded-full font-semibold">
                     PLUS
                   </span>
                 )}
               </div>
-              <div className="font-display text-lg font-semibold text-gray-900">
+              <div className="font-display text-lg font-semibold text-gray-900 dark:text-gray-100">
                 {game.title}
               </div>
             </div>
             <button
               onClick={onClose}
-              className="text-sm px-3 py-1.5 rounded-lg border hover:bg-gray-50"
+              className="text-sm px-3 py-1.5 rounded-lg border dark:border-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
             >
               Close
             </button>

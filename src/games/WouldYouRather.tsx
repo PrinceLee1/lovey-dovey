@@ -182,7 +182,7 @@ export default function WouldYouRather({
     });
   }
 
-  if (!q) return <div className="text-sm text-gray-500">Loading questions…</div>;
+  if (!q) return <div className="text-sm text-gray-500 dark:text-gray-400">Loading questions…</div>;
 
   return (
     <div className="space-y-4">
@@ -191,7 +191,7 @@ export default function WouldYouRather({
         <div className="flex flex-wrap gap-2">
           {Object.entries(scores).sort((a,b)=>b[1]-a[1]).map(([name,pts],i) => (
             <div key={name} className={`rounded-full px-3 py-1 text-xs font-semibold border flex items-center gap-1 ${
-              i===0?"bg-amber-50 border-amber-300 text-amber-700":"bg-gray-50 text-gray-600"}`}>
+              i===0?"bg-amber-50 border-amber-300 text-amber-700 dark:bg-amber-950/40 dark:border-amber-900 dark:text-amber-300":"bg-gray-50 text-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"}`}>
               {i===0&&<Crown className="w-3 h-3"/>} {name} {pts}pts
             </div>
           ))}
@@ -199,7 +199,7 @@ export default function WouldYouRather({
       )}
 
       {!isHost && phase === "vote" && (
-        <div className="rounded-xl bg-fuchsia-50 border border-fuchsia-200 p-2 text-center text-xs text-fuchsia-700">
+        <div className="rounded-xl bg-fuchsia-50 border border-fuchsia-200 p-2 text-center text-xs text-fuchsia-700 dark:bg-fuchsia-950/40 dark:border-fuchsia-900 dark:text-fuchsia-300">
           Tap your choice below 👇
         </div>
       )}
@@ -210,15 +210,15 @@ export default function WouldYouRather({
         {phase === "vote" && (
           <motion.div key={`vote-${qIdx}`} initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} exit={{opacity:0}} className="space-y-4">
             <div className="text-center">
-              <div className="text-xs text-gray-500 mb-1">Round {rounds+1} • Would You Rather…</div>
-              <div className="text-xs text-gray-400">{players.length - Object.keys(choices).length} players haven't voted</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Round {rounds+1} • Would You Rather…</div>
+              <div className="text-xs text-gray-400 dark:text-gray-500">{players.length - Object.keys(choices).length} players haven't voted</div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               {(["A","B"] as const).map(side => (
                 <div key={side} className={`rounded-2xl border-2 p-4 text-center space-y-2 ${
-                  side==="A"?"border-rose-200 bg-rose-50":"border-fuchsia-200 bg-fuchsia-50"}`}>
-                  <div className={`text-xs font-bold ${side==="A"?"text-rose-600":"text-fuchsia-600"}`}>Option {side}</div>
-                  <div className="text-sm font-medium text-gray-900 leading-snug">{side==="A"?q.a:q.b}</div>
+                  side==="A"?"border-rose-200 bg-rose-50 dark:border-rose-900 dark:bg-rose-950/40":"border-fuchsia-200 bg-fuchsia-50 dark:border-fuchsia-900 dark:bg-fuchsia-950/40"}`}>
+                  <div className={`text-xs font-bold ${side==="A"?"text-rose-600 dark:text-rose-400":"text-fuchsia-600 dark:text-fuchsia-400"}`}>Option {side}</div>
+                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100 leading-snug">{side==="A"?q.a:q.b}</div>
                 </div>
               ))}
             </div>
@@ -226,19 +226,19 @@ export default function WouldYouRather({
               {players.map(player => {
                 const canVote = isHost || player === user?.name;
                 return (
-                  <div key={player} className="flex items-center justify-between rounded-2xl border p-3">
-                    <span className={`text-sm font-medium ${choices[player]?"text-gray-400":"text-gray-900"}`}>
+                  <div key={player} className="flex items-center justify-between rounded-2xl border dark:border-gray-800 p-3">
+                    <span className={`text-sm font-medium ${choices[player]?"text-gray-400 dark:text-gray-500":"text-gray-900 dark:text-gray-100"}`}>
                       {player} {choices[player] ? `→ ${choices[player]}` : ""}
                     </span>
                     {canVote && (
                       <div className="flex gap-2">
                         <button onClick={() => cast(player, "A")} className={`rounded-xl px-3 py-1.5 text-xs border font-semibold transition ${
-                          choices[player]==="A"?"bg-rose-500 text-white":"hover:bg-rose-50 text-rose-700 border-rose-200"}`}>A</button>
+                          choices[player]==="A"?"bg-rose-500 text-white":"hover:bg-rose-50 text-rose-700 border-rose-200 dark:hover:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800"}`}>A</button>
                         <button onClick={() => cast(player, "B")} className={`rounded-xl px-3 py-1.5 text-xs border font-semibold transition ${
-                          choices[player]==="B"?"bg-fuchsia-500 text-white":"hover:bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200"}`}>B</button>
+                          choices[player]==="B"?"bg-fuchsia-500 text-white":"hover:bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200 dark:hover:bg-fuchsia-950/40 dark:text-fuchsia-300 dark:border-fuchsia-800"}`}>B</button>
                       </div>
                     )}
-                    {!canVote && !choices[player] && <span className="text-xs text-gray-400">⌛</span>}
+                    {!canVote && !choices[player] && <span className="text-xs text-gray-400 dark:text-gray-500">⌛</span>}
                   </div>
                 );
               })}
@@ -250,7 +250,7 @@ export default function WouldYouRather({
               </button>
             )}
             {!isHost && !allVoted && (
-              <div className="text-center text-xs text-gray-400">Waiting for all players to vote…</div>
+              <div className="text-center text-xs text-gray-400 dark:text-gray-500">Waiting for all players to vote…</div>
             )}
           </motion.div>
         )}
@@ -258,32 +258,32 @@ export default function WouldYouRather({
         {/* DEBATE */}
         {phase === "debate" && (
           <motion.div key="debate" initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} exit={{opacity:0}} className="space-y-4">
-            <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-5 space-y-2">
+            <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-5 space-y-2 dark:border-amber-900 dark:bg-amber-950/40">
               <div className="flex items-center justify-between">
-                <div className="font-bold text-amber-800 flex items-center gap-2">
+                <div className="font-bold text-amber-800 flex items-center gap-2 dark:text-amber-300">
                   <Zap className="w-5 h-5"/>
                   {isTie ? "🤝 It's a tie! Debate time!" : "🎤 Minority must defend!"}
                 </div>
                 <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-mono font-bold border ${
-                  debateTimer<=10?"bg-red-50 text-red-600 border-red-200 animate-pulse":"bg-white text-amber-700"}`}>
+                  debateTimer<=10?"bg-red-50 text-red-600 border-red-200 animate-pulse dark:bg-red-950/40 dark:text-red-400 dark:border-red-900":"bg-white text-amber-700 dark:bg-gray-800 dark:text-amber-300 dark:border-gray-700"}`}>
                   <Clock className="w-3.5 h-3.5"/> {debateTimer}s
                 </div>
               </div>
-              <div className="h-1.5 w-full bg-amber-200 rounded-full overflow-hidden">
+              <div className="h-1.5 w-full bg-amber-200 dark:bg-amber-900 rounded-full overflow-hidden">
                 <motion.div className="h-full bg-amber-500 rounded-full"
                   animate={{width:`${(debateTimer/DEBATE_SECONDS)*100}%`}} transition={{duration:0}}/>
               </div>
-              <div className="text-sm text-amber-800">
+              <div className="text-sm text-amber-800 dark:text-amber-300">
                 {isTie ? "Everyone argue why their choice is better!" : `${minorityPlayers.join(", ")} chose the minority. Defend it!`}
               </div>
               <div className="grid grid-cols-2 gap-2 mt-2">
-                <div className="rounded-xl bg-rose-50 border border-rose-200 p-2 text-xs">
-                  <div className="font-semibold text-rose-700 mb-1">Team A ({aVoters.length})</div>
-                  {aVoters.map(p=><div key={p}>{p}</div>)}
+                <div className="rounded-xl bg-rose-50 border border-rose-200 p-2 text-xs dark:bg-rose-950/40 dark:border-rose-900">
+                  <div className="font-semibold text-rose-700 mb-1 dark:text-rose-300">Team A ({aVoters.length})</div>
+                  {aVoters.map(p=><div key={p} className="dark:text-gray-300">{p}</div>)}
                 </div>
-                <div className="rounded-xl bg-fuchsia-50 border border-fuchsia-200 p-2 text-xs">
-                  <div className="font-semibold text-fuchsia-700 mb-1">Team B ({bVoters.length})</div>
-                  {bVoters.map(p=><div key={p}>{p}</div>)}
+                <div className="rounded-xl bg-fuchsia-50 border border-fuchsia-200 p-2 text-xs dark:bg-fuchsia-950/40 dark:border-fuchsia-900">
+                  <div className="font-semibold text-fuchsia-700 mb-1 dark:text-fuchsia-300">Team B ({bVoters.length})</div>
+                  {bVoters.map(p=><div key={p} className="dark:text-gray-300">{p}</div>)}
                 </div>
               </div>
             </div>
@@ -294,29 +294,29 @@ export default function WouldYouRather({
             )}
             {isHost && (
               <button onClick={() => { setDebating(false); setPhase("result"); broadcastState(choices, "result"); }}
-                className="w-full rounded-2xl py-2 border text-sm text-gray-500 hover:bg-gray-50">
+                className="w-full rounded-2xl py-2 border dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">
                 End debate
               </button>
             )}
-            {!isHost && <div className="text-center text-xs text-gray-400">Host will end the debate…</div>}
+            {!isHost && <div className="text-center text-xs text-gray-400 dark:text-gray-500">Host will end the debate…</div>}
           </motion.div>
         )}
 
         {/* RESULT */}
         {phase === "result" && (
           <motion.div key="result" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} exit={{opacity:0}} className="space-y-4">
-            <div className="rounded-2xl border p-4 space-y-3">
-              <div className="text-sm font-medium text-gray-700">Would you rather…</div>
+            <div className="rounded-2xl border dark:border-gray-800 p-4 space-y-3">
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Would you rather…</div>
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className={`rounded-xl p-3 ${aVoters.length>bVoters.length?"bg-rose-100 border-2 border-rose-300":"bg-gray-50 border"}`}>
-                  <div className="font-semibold text-rose-700 mb-1">A — {aVoters.length} {aVoters.length>bVoters.length?"✅":""}</div>
-                  <div className="text-gray-700">{q.a}</div>
-                  <div className="text-gray-500 mt-1">{aVoters.join(", ")}</div>
+                <div className={`rounded-xl p-3 ${aVoters.length>bVoters.length?"bg-rose-100 dark:bg-rose-950/40 border-2 border-rose-300 dark:border-rose-800":"bg-gray-50 dark:bg-gray-800 border dark:border-gray-700"}`}>
+                  <div className="font-semibold text-rose-700 dark:text-rose-300 mb-1">A — {aVoters.length} {aVoters.length>bVoters.length?"✅":""}</div>
+                  <div className="text-gray-700 dark:text-gray-300">{q.a}</div>
+                  <div className="text-gray-500 dark:text-gray-400 mt-1">{aVoters.join(", ")}</div>
                 </div>
-                <div className={`rounded-xl p-3 ${bVoters.length>aVoters.length?"bg-fuchsia-100 border-2 border-fuchsia-300":"bg-gray-50 border"}`}>
-                  <div className="font-semibold text-fuchsia-700 mb-1">B — {bVoters.length} {bVoters.length>aVoters.length?"✅":""}</div>
-                  <div className="text-gray-700">{q.b}</div>
-                  <div className="text-gray-500 mt-1">{bVoters.join(", ")}</div>
+                <div className={`rounded-xl p-3 ${bVoters.length>aVoters.length?"bg-fuchsia-100 dark:bg-fuchsia-950/40 border-2 border-fuchsia-300 dark:border-fuchsia-800":"bg-gray-50 dark:bg-gray-800 border dark:border-gray-700"}`}>
+                  <div className="font-semibold text-fuchsia-700 dark:text-fuchsia-300 mb-1">B — {bVoters.length} {bVoters.length>aVoters.length?"✅":""}</div>
+                  <div className="text-gray-700 dark:text-gray-300">{q.b}</div>
+                  <div className="text-gray-500 dark:text-gray-400 mt-1">{bVoters.join(", ")}</div>
                 </div>
               </div>
             </div>
@@ -325,12 +325,12 @@ export default function WouldYouRather({
                 <button onClick={next} className="flex-1 rounded-2xl py-2.5 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm font-medium">
                   Next Question →
                 </button>
-                <button onClick={finish} className="rounded-2xl px-4 py-2.5 border text-sm hover:bg-gray-50 inline-flex items-center gap-1">
+                <button onClick={finish} className="rounded-2xl px-4 py-2.5 border dark:border-gray-700 dark:text-gray-200 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 inline-flex items-center gap-1">
                   <RotateCcw className="w-4 h-4"/> End
                 </button>
               </div>
             ) : (
-              <div className="text-center text-xs text-gray-400">Waiting for host to continue…</div>
+              <div className="text-center text-xs text-gray-400 dark:text-gray-500">Waiting for host to continue…</div>
             )}
           </motion.div>
         )}

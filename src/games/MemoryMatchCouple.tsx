@@ -201,14 +201,14 @@ export default function MemoryMatchCouple({
     <div className="space-y-4">
       {/* Status */}
       <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-600">
-          Turn: <b className="text-gray-900">{players[turn]}</b>
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          Turn: <b className="text-gray-900 dark:text-gray-100">{players[turn]}</b>
         </div>
         <div className="flex items-center gap-3 text-xs">
-          <span className="px-2 py-1 rounded-full border">Moves: {moves}</span>
-          <span className="px-2 py-1 rounded-full border">Matches: {matches}/{PAIRS}</span>
-          <span className="px-2 py-1 rounded-full border inline-flex items-center gap-1">
-            <Clock className="w-4 h-4 text-fuchsia-600" /> {timeStr}
+          <span className="px-2 py-1 rounded-full border dark:border-gray-700 dark:text-gray-300">Moves: {moves}</span>
+          <span className="px-2 py-1 rounded-full border dark:border-gray-700 dark:text-gray-300">Matches: {matches}/{PAIRS}</span>
+          <span className="px-2 py-1 rounded-full border dark:border-gray-700 dark:text-gray-300 inline-flex items-center gap-1">
+            <Clock className="w-4 h-4 text-fuchsia-600 dark:text-fuchsia-400" /> {timeStr}
           </span>
         </div>
       </div>
@@ -223,7 +223,7 @@ export default function MemoryMatchCouple({
         {deck.map((c, idx) => {
           const isUp = c.matched || flipped.includes(idx);
           const tint =
-            c.owner === 0 ? "ring-rose-200" : c.owner === 1 ? "ring-fuchsia-200" : "ring-gray-200";
+            c.owner === 0 ? "ring-rose-200 dark:ring-rose-900" : c.owner === 1 ? "ring-fuchsia-200 dark:ring-fuchsia-900" : "ring-gray-200 dark:ring-gray-700";
 
           return (
             <button
@@ -231,8 +231,8 @@ export default function MemoryMatchCouple({
               onClick={() => onCardClick(idx)}
               disabled={isUp || setupOpen}
               className={`aspect-square rounded-2xl border grid place-items-center text-2xl md:text-3xl
-                bg-white relative overflow-hidden
-                ${isUp ? "border-fuchsia-200" : "border-rose-100 hover:bg-rose-50"}
+                bg-white dark:bg-gray-800 relative overflow-hidden
+                ${isUp ? "border-fuchsia-200 dark:border-fuchsia-800" : "border-rose-100 dark:border-gray-700 hover:bg-rose-50 dark:hover:bg-gray-700"}
                 ${tint}
               `}
             >
@@ -255,9 +255,9 @@ export default function MemoryMatchCouple({
                     animate={{ rotateY: 0, opacity: 1 }}
                     exit={{ rotateY: -90, opacity: 0 }}
                     transition={{ duration: 0.25 }}
-                    className="w-full h-full grid place-items-center bg-gradient-to-br from-rose-100 to-fuchsia-100"
+                    className="w-full h-full grid place-items-center bg-gradient-to-br from-rose-100 to-fuchsia-100 dark:from-rose-950/40 dark:to-fuchsia-950/40"
                   >
-                    <Sparkles className="w-6 h-6 text-fuchsia-600" />
+                    <Sparkles className="w-6 h-6 text-fuchsia-600 dark:text-fuchsia-400" />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -270,25 +270,25 @@ export default function MemoryMatchCouple({
       <div className="flex items-center justify-between pt-2">
         <button
           onClick={restart}
-          className="text-sm text-gray-600 inline-flex items-center gap-1 hover:text-gray-800"
+          className="text-sm text-gray-600 dark:text-gray-400 inline-flex items-center gap-1 hover:text-gray-800 dark:hover:text-gray-200"
         >
           <RotateCcw className="w-4 h-4" /> Restart
         </button>
         {/* When all pairs matched, onFinish will close via GameRunner's handler */}
-        <span className="text-xs text-gray-500">Match all pairs to finish</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400">Match all pairs to finish</span>
       </div>
 
       {/* Setup modal */}
       {setupOpen && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
-          <div className="w-full max-w-2xl rounded-3xl bg-white p-5 shadow-xl">
+          <div className="w-full max-w-2xl rounded-3xl bg-white dark:bg-gray-900 p-5 shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <div className="text-xs text-gray-500">Personalize (optional)</div>
-                <div className="font-display text-lg font-semibold text-gray-900">
+                <div className="text-xs text-gray-500 dark:text-gray-400">Personalize (optional)</div>
+                <div className="font-display text-lg font-semibold text-gray-900 dark:text-gray-100">
                   Couple Favorites
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-gray-500 dark:text-gray-400">
                   Add up to {PAIRS} items total. We’ll fill the rest with cute emojis.
                 </div>
               </div>
@@ -312,7 +312,7 @@ export default function MemoryMatchCouple({
             </div>
 
             <div className="mt-4 flex items-center justify-between">
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-500 dark:text-gray-400">
                 Tip: “Pizza”, “Blue”, “Studio Ghibli”, “Afrobeats”, “Paris”
               </div>
               <button
@@ -346,10 +346,10 @@ function FavColumn({
 }) {
   const [input, setInput] = useState("");
   return (
-    <div className="rounded-2xl border p-4">
+    <div className="rounded-2xl border dark:border-gray-700 p-4">
       <div className="flex items-center justify-between mb-2">
-        <div className="font-medium text-gray-900">{title}</div>
-        <button onClick={onAuto} className="text-xs rounded-lg border px-2 py-1 hover:bg-gray-50">
+        <div className="font-medium text-gray-900 dark:text-gray-100">{title}</div>
+        <button onClick={onAuto} className="text-xs rounded-lg border dark:border-gray-700 dark:text-gray-300 px-2 py-1 hover:bg-gray-50 dark:hover:bg-gray-800">
           Autofill
         </button>
       </div>
@@ -364,7 +364,7 @@ function FavColumn({
             }
           }}
           placeholder="Add a favorite (press Enter)…"
-          className="flex-1 rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-fuchsia-500"
+          className="flex-1 rounded-xl border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 px-3 py-2 outline-none focus:ring-2 focus:ring-fuchsia-500"
         />
         <button
           onClick={() => {
@@ -372,7 +372,7 @@ function FavColumn({
             onAdd(input);
             setInput("");
           }}
-          className="rounded-xl px-3 py-2 text-sm border hover:bg-gray-50"
+          className="rounded-xl px-3 py-2 text-sm border dark:border-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
         >
           Add
         </button>
@@ -380,13 +380,13 @@ function FavColumn({
 
       <div className="mt-3 flex flex-wrap gap-2">
         {values.length === 0 ? (
-          <span className="text-xs text-gray-400">No items yet</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500">No items yet</span>
         ) : (
           values.map((v) => (
             <button
               key={v}
               onClick={() => onRemove(v)}
-              className="text-xs px-2 py-1 rounded-full border hover:bg-gray-50"
+              className="text-xs px-2 py-1 rounded-full border dark:border-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
               title="Remove"
             >
               {v}

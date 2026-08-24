@@ -387,45 +387,45 @@ export default function LobbyRoom() {
         <div className="lg:col-span-2 space-y-5">
 
           {/* Header */}
-          <div className="rounded-3xl bg-white shadow-xl border border-rose-100 p-5">
+          <div className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 p-5">
             {lobby ? (
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     {lobby.privacy === "Public" ? <Globe className="w-4 h-4 text-emerald-500"/> : <Lock className="w-4 h-4 text-amber-500"/>}
-                    <span className="text-xs text-gray-500">Code: <b className="font-mono">{lobby.code}</b></span>
-                    <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border ${presenceReady ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-amber-50 text-amber-700 border-amber-200"}`}>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Code: <b className="font-mono">{lobby.code}</b></span>
+                    <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border ${presenceReady ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900" : "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-900"}`}>
                       <Wifi className="w-3 h-3"/>
                       {presenceReady ? "Live" : "Polling…"}
                     </span>
                   </div>
-                  <h1 className="text-2xl font-bold text-gray-900">{lobby.name}</h1>
-                  <div className="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{lobby.name}</h1>
+                  <div className="flex items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">
                     <span className="flex items-center gap-1"><Users className="w-4 h-4"/>{displayCount}/{displayMax} online</span>
-                    {isHost && <span className="flex items-center gap-1 text-amber-600"><Crown className="w-4 h-4"/> You're the host</span>}
+                    {isHost && <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400"><Crown className="w-4 h-4"/> You're the host</span>}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button onClick={copyInvite} className="rounded-xl px-3 py-2 border text-sm inline-flex items-center gap-1 hover:bg-gray-50"><Copy className="w-4 h-4"/> Invite</button>
-                  <button onClick={leave} className="rounded-xl px-3 py-2 border text-sm inline-flex items-center gap-1 text-red-600 border-red-200 hover:bg-red-50"><LogOut className="w-4 h-4"/> Leave</button>
+                  <button onClick={copyInvite} className="rounded-xl px-3 py-2 border dark:border-gray-700 dark:text-gray-200 text-sm inline-flex items-center gap-1 hover:bg-gray-50 dark:hover:bg-gray-800"><Copy className="w-4 h-4"/> Invite</button>
+                  <button onClick={leave} className="rounded-xl px-3 py-2 border text-sm inline-flex items-center gap-1 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900 hover:bg-red-50 dark:hover:bg-red-950/40"><LogOut className="w-4 h-4"/> Leave</button>
                 </div>
               </div>
-            ) : <div className="h-20 animate-pulse bg-gray-100 rounded-2xl"/>}
+            ) : <div className="h-20 animate-pulse bg-gray-100 dark:bg-gray-800 rounded-2xl"/>}
           </div>
 
           {/* Active game */}
           <AnimatePresence>
             {activeGame && (
-              <motion.div initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} exit={{opacity:0}} className="rounded-3xl bg-white shadow-xl border border-rose-100 p-5">
+              <motion.div initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} exit={{opacity:0}} className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 p-5">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">{modeInfo(activeGame.kind)?.emoji}</span>
                     <div>
-                      <div className="font-bold text-gray-900">{modeInfo(activeGame.kind)?.label}</div>
-                      <div className="text-xs text-emerald-600 font-medium">● Live now</div>
+                      <div className="font-bold text-gray-900 dark:text-gray-100">{modeInfo(activeGame.kind)?.label}</div>
+                      <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">● Live now</div>
                     </div>
                   </div>
-                  {isHost && <button onClick={() => endActiveGame({})} className="rounded-xl px-3 py-1.5 border text-xs text-red-600 border-red-200 hover:bg-red-50">End Game</button>}
+                  {isHost && <button onClick={() => endActiveGame({})} className="rounded-xl px-3 py-1.5 border text-xs text-red-600 dark:text-red-400 border-red-200 dark:border-red-900 hover:bg-red-50 dark:hover:bg-red-950/40">End Game</button>}
                 </div>
                 {renderActiveGame()}
               </motion.div>
@@ -434,63 +434,63 @@ export default function LobbyRoom() {
 
           {/* Game picker */}
           {isHost && !activeGame && (
-            <div className="rounded-3xl bg-white shadow-xl border border-rose-100 p-5">
+            <div className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 p-5">
               <div className="mb-4">
-                <div className="font-bold text-gray-900 flex items-center gap-2"><Sparkles className="w-5 h-5 text-fuchsia-500"/> Start a Game</div>
-                <div className="text-xs text-gray-500">{displayCount} player{displayCount !== 1 ? "s" : ""} in the room</div>
+                <div className="font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2"><Sparkles className="w-5 h-5 text-fuchsia-500"/> Start a Game</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">{displayCount} player{displayCount !== 1 ? "s" : ""} in the room</div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {GAME_MODES.filter(m => displayCount >= m.minPlayers).map(mode => (
                   <button key={mode.kind} onClick={() => startGame(mode.kind)}
-                    className="text-left rounded-2xl border border-rose-100 p-4 hover:shadow-md hover:border-fuchsia-200 transition group">
+                    className="text-left rounded-2xl border border-rose-100 dark:border-gray-800 p-4 hover:shadow-md hover:border-fuchsia-200 dark:hover:border-fuchsia-800 transition group">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-2xl">{mode.emoji}</span>
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                        mode.vibe==="Spicy"?"bg-orange-100 text-orange-700":
-                        mode.vibe==="Competitive"?"bg-blue-100 text-blue-700":
-                        mode.vibe==="Hilarious"?"bg-yellow-100 text-yellow-700":
-                        mode.vibe==="Chaotic"?"bg-purple-100 text-purple-700":
-                        "bg-rose-100 text-rose-700"}`}>{mode.vibe}</span>
+                        mode.vibe==="Spicy"?"bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300":
+                        mode.vibe==="Competitive"?"bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300":
+                        mode.vibe==="Hilarious"?"bg-yellow-100 dark:bg-yellow-950/40 text-yellow-700 dark:text-yellow-300":
+                        mode.vibe==="Chaotic"?"bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300":
+                        "bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300"}`}>{mode.vibe}</span>
                     </div>
-                    <div className="font-semibold text-gray-900 text-sm">{mode.label}</div>
-                    <div className="text-xs text-gray-500 mt-0.5">{mode.desc}</div>
-                    <div className="mt-2 flex items-center gap-1 text-fuchsia-600 text-xs font-medium opacity-0 group-hover:opacity-100 transition">
+                    <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{mode.label}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{mode.desc}</div>
+                    <div className="mt-2 flex items-center gap-1 text-fuchsia-600 dark:text-fuchsia-400 text-xs font-medium opacity-0 group-hover:opacity-100 transition">
                       <PlayCircle className="w-3.5 h-3.5"/> Start now <ChevronRight className="w-3.5 h-3.5"/>
                     </div>
                   </button>
                 ))}
               </div>
-              {displayCount < 2 && <div className="mt-3 rounded-2xl bg-amber-50 border border-amber-200 px-4 py-3 text-xs text-amber-700">💡 Share code: <b className="font-mono">{code}</b> to invite players</div>}
-              {displayCount >= 2 && displayCount < 3 && <div className="mt-3 rounded-2xl bg-blue-50 border border-blue-200 px-4 py-3 text-xs text-blue-700">💡 Invite 1 more to unlock Hot Seat and Charades</div>}
+              {displayCount < 2 && <div className="mt-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 px-4 py-3 text-xs text-amber-700 dark:text-amber-300">💡 Share code: <b className="font-mono">{code}</b> to invite players</div>}
+              {displayCount >= 2 && displayCount < 3 && <div className="mt-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900 px-4 py-3 text-xs text-blue-700 dark:text-blue-300">💡 Invite 1 more to unlock Hot Seat and Charades</div>}
             </div>
           )}
 
           {!isHost && !activeGame && (
-            <div className="rounded-3xl bg-white shadow-xl border border-rose-100 p-5 text-center py-8">
+            <div className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 p-5 text-center py-8">
               <div className="text-3xl mb-2">⏳</div>
-              <div className="font-semibold text-gray-900">Waiting for host to start a game</div>
-              <div className="text-sm text-gray-500 mt-1">{displayCount} player{displayCount!==1?"s":""} online</div>
+              <div className="font-semibold text-gray-900 dark:text-gray-100">Waiting for host to start a game</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">{displayCount} player{displayCount!==1?"s":""} online</div>
             </div>
           )}
 
           {/* ── WHATSAPP-STYLE CHAT ──────────────────────────────────────── */}
-          <div className="rounded-3xl bg-white shadow-xl border border-rose-100 overflow-hidden">
+          <div className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 overflow-hidden">
             {/* Chat header */}
-            <div className="px-5 py-4 border-b border-rose-50 flex items-center justify-between">
+            <div className="px-5 py-4 border-b border-rose-50 dark:border-gray-800 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-full bg-gradient-to-br from-pink-400 to-fuchsia-500 grid place-items-center text-white text-sm font-bold">
                   {lobby?.name?.[0] ?? "L"}
                 </div>
                 <div>
-                  <div className="font-semibold text-gray-900 text-sm">{lobby?.name ?? "Party Chat"}</div>
-                  <div className="text-xs text-emerald-600">{displayCount} online</div>
+                  <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{lobby?.name ?? "Party Chat"}</div>
+                  <div className="text-xs text-emerald-600 dark:text-emerald-400">{displayCount} online</div>
                 </div>
               </div>
               {/* Quick reactions in header */}
               <div className="flex gap-1">
                 {REACTIONS.slice(0, 4).map(e => (
                   <button key={e} onClick={() => sendReaction(e)}
-                    className="text-base px-1.5 py-1 rounded-xl hover:bg-rose-50 active:scale-125 transition">
+                    className="text-base px-1.5 py-1 rounded-xl hover:bg-rose-50 dark:hover:bg-gray-800 active:scale-125 transition">
                     {e}
                   </button>
                 ))}
@@ -500,14 +500,13 @@ export default function LobbyRoom() {
             {/* Message list */}
             <div
               ref={listRef}
-              className="h-72 overflow-y-auto px-4 py-4 space-y-2"
-              style={{ background: "linear-gradient(to bottom, #fdf2f8, #fce7f3, #fdf4ff)" }}
+              className="h-72 overflow-y-auto px-4 py-4 space-y-2 bg-gradient-to-b from-rose-50 via-pink-100 to-fuchsia-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950"
             >
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   <div className="text-3xl mb-2">💬</div>
-                  <div className="text-sm text-gray-400">No messages yet</div>
-                  <div className="text-xs text-gray-300 mt-1">Say hi to the group! 👋</div>
+                  <div className="text-sm text-gray-400 dark:text-gray-500">No messages yet</div>
+                  <div className="text-xs text-gray-300 dark:text-gray-600 mt-1">Say hi to the group! 👋</div>
                 </div>
               ) : (
                 messages.map((m, i) => {
@@ -547,18 +546,18 @@ export default function LobbyRoom() {
                         <div className={`px-3.5 py-2 rounded-2xl text-sm leading-relaxed ${
                           isMe
                             ? "bg-gradient-to-br from-pink-500 to-fuchsia-600 text-white rounded-br-sm"
-                            : "bg-white text-gray-900 shadow-sm border border-rose-100 rounded-bl-sm"
+                            : "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm border border-rose-100 dark:border-gray-700 rounded-bl-sm"
                         }`}>
                           {m.body}
                         </div>
 
                         {/* Timestamp + delivery status */}
                         <div className={`flex items-center gap-1 mt-0.5 px-1 ${isMe ? "flex-row-reverse" : ""}`}>
-                          <span className="text-[10px] text-gray-400">{formatTime(m.created_at)}</span>
+                          <span className="text-[10px] text-gray-400 dark:text-gray-500">{formatTime(m.created_at)}</span>
                           {isMe && (
                             m.confirmed
                               ? <CheckCheck className="w-3 h-3 text-fuchsia-500"/>
-                              : <Check className="w-3 h-3 text-gray-400"/>
+                              : <Check className="w-3 h-3 text-gray-400 dark:text-gray-500"/>
                           )}
                         </div>
                       </div>
@@ -569,12 +568,12 @@ export default function LobbyRoom() {
             </div>
 
             {/* Input area */}
-            <div className="px-4 py-3 border-t border-rose-50 bg-white">
+            <div className="px-4 py-3 border-t border-rose-50 dark:border-gray-800 bg-white dark:bg-gray-900">
               {/* All reactions row */}
               <div className="flex gap-1.5 mb-3 overflow-x-auto pb-1">
                 {REACTIONS.map(e => (
                   <button key={e} onClick={() => sendReaction(e)}
-                    className="text-xl flex-shrink-0 px-2 py-1.5 rounded-2xl border border-rose-100 hover:bg-rose-50 active:scale-125 transition">
+                    className="text-xl flex-shrink-0 px-2 py-1.5 rounded-2xl border border-rose-100 dark:border-gray-700 hover:bg-rose-50 dark:hover:bg-gray-800 active:scale-125 transition">
                     {e}
                   </button>
                 ))}
@@ -584,7 +583,7 @@ export default function LobbyRoom() {
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && sendMessage()}
-                  className="flex-1 rounded-2xl border border-gray-200 px-4 py-2.5 outline-none focus:ring-2 focus:ring-fuchsia-400 text-sm bg-gray-50"
+                  className="flex-1 rounded-2xl border border-gray-200 dark:border-gray-700 px-4 py-2.5 outline-none focus:ring-2 focus:ring-fuchsia-400 text-sm bg-gray-50 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500"
                   placeholder="Type a message…"
                 />
                 <button
@@ -599,20 +598,20 @@ export default function LobbyRoom() {
           </div>
 
           {sessions.length > 0 && (
-            <div className="rounded-3xl bg-white shadow-xl border border-rose-100 p-5">
-              <div className="font-semibold text-gray-900 mb-3 flex items-center gap-2"><Trophy className="w-4 h-4 text-fuchsia-500"/> Games Played</div>
+            <div className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 p-5">
+              <div className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2"><Trophy className="w-4 h-4 text-fuchsia-500"/> Games Played</div>
               <div className="space-y-2">
                 {sessions.map(s => (
-                  <div key={s.id} className="flex items-center justify-between rounded-xl border p-3 text-sm">
+                  <div key={s.id} className="flex items-center justify-between rounded-xl border dark:border-gray-800 p-3 text-sm">
                     <div className="flex items-center gap-2">
                       <span>{modeInfo(s.kind)?.emoji ?? "🎮"}</span>
                       <div>
-                        <div className="font-medium text-gray-900">{modeInfo(s.kind)?.label ?? s.kind}</div>
-                        <div className="text-xs text-gray-500">{s.status==="active" ? "🟢 Live" : "✅ Finished"}</div>
+                        <div className="font-medium text-gray-900 dark:text-gray-100">{modeInfo(s.kind)?.label ?? s.kind}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{s.status==="active" ? "🟢 Live" : "✅ Finished"}</div>
                       </div>
                     </div>
                     {s.result?.meta?.winner && (
-                      <span className="text-xs text-amber-700 bg-amber-50 border border-amber-200 px-2 py-1 rounded-full flex items-center gap-1">
+                      <span className="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 px-2 py-1 rounded-full flex items-center gap-1">
                         <Crown className="w-3 h-3"/> {s.result.meta.winner}
                       </span>
                     )}
@@ -625,22 +624,22 @@ export default function LobbyRoom() {
 
         {/* Sidebar */}
         <div className="space-y-5">
-          <div className="rounded-3xl bg-white shadow-xl border border-rose-100 p-5">
-            <div className="font-semibold text-gray-900 mb-3 flex items-center justify-between">
+          <div className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 p-5">
+            <div className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center justify-between">
               <div className="flex items-center gap-2"><Users className="w-4 h-4 text-fuchsia-500"/> Players ({displayCount}/{displayMax})</div>
-              {!presenceReady && <span className="text-xs text-gray-400 animate-pulse">syncing…</span>}
+              {!presenceReady && <span className="text-xs text-gray-400 dark:text-gray-500 animate-pulse">syncing…</span>}
             </div>
             {members.length === 0 && !presenceReady ? (
               <div className="space-y-2">
                 {[...Array(2)].map((_,i) => (
                   <div key={i} className="flex items-center gap-2 animate-pulse">
-                    <div className="h-8 w-8 rounded-full bg-gray-100"/>
-                    <div className="h-3 w-24 bg-gray-100 rounded"/>
+                    <div className="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-800"/>
+                    <div className="h-3 w-24 bg-gray-100 dark:bg-gray-800 rounded"/>
                   </div>
                 ))}
               </div>
             ) : members.length === 0 ? (
-              <div className="text-sm text-gray-400">No players yet</div>
+              <div className="text-sm text-gray-400 dark:text-gray-500">No players yet</div>
             ) : (
               <div className="space-y-2">
                 {members.map(m => (
@@ -654,16 +653,16 @@ export default function LobbyRoom() {
                             </div>
                         }
                         {/* Online dot */}
-                        <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-400 border-2 border-white"/>
+                        <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-400 border-2 border-white dark:border-gray-900"/>
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{m.name}</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{m.name}</div>
                         {lobby && String(m.id) === String(lobby.host_id) && (
-                          <div className="text-xs text-amber-600 flex items-center gap-0.5"><Crown className="w-2.5 h-2.5"/> Host</div>
+                          <div className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-0.5"><Crown className="w-2.5 h-2.5"/> Host</div>
                         )}
                       </div>
                     </div>
-                    {partyScores[m.name] ? <span className="text-xs text-fuchsia-700 font-semibold bg-fuchsia-50 px-2 py-0.5 rounded-full">{partyScores[m.name]}pts</span> : null}
+                    {partyScores[m.name] ? <span className="text-xs text-fuchsia-700 dark:text-fuchsia-300 font-semibold bg-fuchsia-50 dark:bg-fuchsia-950/40 px-2 py-0.5 rounded-full">{partyScores[m.name]}pts</span> : null}
                   </motion.div>
                 ))}
               </div>
@@ -671,17 +670,17 @@ export default function LobbyRoom() {
           </div>
 
           {Object.keys(partyScores).length > 0 && (
-            <div className="rounded-3xl bg-white shadow-xl border border-rose-100 p-5">
-              <div className="font-semibold text-gray-900 mb-3 flex items-center gap-2"><Trophy className="w-4 h-4 text-amber-500"/> Party Leaderboard</div>
+            <div className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 p-5">
+              <div className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2"><Trophy className="w-4 h-4 text-amber-500"/> Party Leaderboard</div>
               <div className="space-y-2">
                 {Object.entries(partyScores).sort((a,b)=>b[1]-a[1]).map(([name,pts],i) => (
-                  <div key={name} className={`flex items-center justify-between rounded-xl px-3 py-2 ${i===0?"bg-amber-50 border border-amber-200":"border"}`}>
+                  <div key={name} className={`flex items-center justify-between rounded-xl px-3 py-2 ${i===0?"bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900":"border dark:border-gray-800"}`}>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-gray-400 w-4">{i+1}</span>
+                      <span className="text-sm font-bold text-gray-400 dark:text-gray-500 w-4">{i+1}</span>
                       {i===0 && <Crown className="w-3.5 h-3.5 text-amber-500"/>}
-                      <span className="text-sm font-medium text-gray-900">{name}</span>
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{name}</span>
                     </div>
-                    <span className="text-sm font-bold text-fuchsia-700">{pts} pts</span>
+                    <span className="text-sm font-bold text-fuchsia-700 dark:text-fuchsia-300">{pts} pts</span>
                   </div>
                 ))}
               </div>
@@ -689,12 +688,12 @@ export default function LobbyRoom() {
           )}
 
           {/* Reaction pad */}
-          <div className="rounded-3xl bg-white shadow-xl border border-rose-100 p-5">
-            <div className="font-semibold text-gray-900 mb-3 flex items-center gap-2"><Flame className="w-4 h-4 text-orange-500"/> React Live</div>
+          <div className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 p-5">
+            <div className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2"><Flame className="w-4 h-4 text-orange-500"/> React Live</div>
             <div className="grid grid-cols-4 gap-2">
               {REACTIONS.map(e => (
                 <button key={e} onClick={() => sendReaction(e)}
-                  className="text-2xl aspect-square rounded-2xl border hover:bg-rose-50 active:scale-110 transition">
+                  className="text-2xl aspect-square rounded-2xl border dark:border-gray-700 hover:bg-rose-50 dark:hover:bg-gray-800 active:scale-110 transition">
                   {e}
                 </button>
               ))}
@@ -702,17 +701,17 @@ export default function LobbyRoom() {
           </div>
 
           {!activeGame && (
-            <div className="rounded-3xl bg-gradient-to-br from-fuchsia-50 to-rose-50 border border-rose-100 p-5">
-              <div className="text-xs font-semibold text-fuchsia-700 mb-2 flex items-center gap-1"><Zap className="w-3.5 h-3.5"/> Suggested for {displayCount} players</div>
+            <div className="rounded-3xl bg-gradient-to-br from-fuchsia-50 to-rose-50 dark:from-fuchsia-950/40 dark:to-rose-950/40 border border-rose-100 dark:border-gray-800 p-5">
+              <div className="text-xs font-semibold text-fuchsia-700 dark:text-fuchsia-300 mb-2 flex items-center gap-1"><Zap className="w-3.5 h-3.5"/> Suggested for {displayCount} players</div>
               <div className="space-y-1.5">
                 {GAME_MODES.filter(m => displayCount >= m.minPlayers).slice(0,3).map(m => (
                   <button key={m.kind} onClick={() => isHost ? startGame(m.kind) : undefined}
-                    className={`w-full text-left rounded-xl px-3 py-2 text-xs border transition ${isHost?"hover:bg-white hover:shadow cursor-pointer":"cursor-default opacity-70"}`}>
+                    className={`w-full text-left rounded-xl px-3 py-2 text-xs border dark:border-gray-800 dark:text-gray-200 transition ${isHost?"hover:bg-white dark:hover:bg-gray-800 hover:shadow cursor-pointer":"cursor-default opacity-70"}`}>
                     {m.emoji} <b>{m.label}</b> — {m.vibe}
                   </button>
                 ))}
-                {displayCount < 2 && <div className="text-xs text-gray-400 text-center py-2">Waiting for players…</div>}
-                {!isHost && displayCount >= 2 && <div className="text-xs text-gray-400 text-center mt-2">Ask the host to start a game</div>}
+                {displayCount < 2 && <div className="text-xs text-gray-400 dark:text-gray-500 text-center py-2">Waiting for players…</div>}
+                {!isHost && displayCount >= 2 && <div className="text-xs text-gray-400 dark:text-gray-500 text-center mt-2">Ask the host to start a game</div>}
               </div>
             </div>
           )}

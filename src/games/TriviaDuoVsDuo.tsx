@@ -367,28 +367,28 @@ export default function TriviaDuoVsDuo({
 
   return (
     <div className="space-y-4">
-      {err && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{err}</div>}
+      {err && <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-xl px-3 py-2">{err}</div>}
       {loading || !q ? (
-        <div className="text-sm text-gray-600">Loading trivia…</div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">Loading trivia…</div>
       ) : (
         <>
           {/* Scoreboard */}
           <div className="grid grid-cols-3 gap-3 text-sm">
-            <div className="rounded-2xl border p-3">
-              <div className="text-xs text-gray-500">Team A</div>
-              <div className="text-lg font-semibold text-gray-900">{scoreA}</div>
-              <div className="text-[11px] text-gray-500">✅ {correctA} • ❌ {wrongA}</div>
+            <div className="rounded-2xl border dark:border-gray-800 p-3">
+              <div className="text-xs text-gray-500 dark:text-gray-400">Team A</div>
+              <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">{scoreA}</div>
+              <div className="text-[11px] text-gray-500 dark:text-gray-400">✅ {correctA} • ❌ {wrongA}</div>
             </div>
-            <div className="rounded-2xl border p-3 flex items-center justify-center">
+            <div className="rounded-2xl border dark:border-gray-800 p-3 flex items-center justify-center">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-fuchsia-600" />
-                <span className="font-medium tabular-nums">{timeLeft}s</span>
+                <Clock className="w-4 h-4 text-fuchsia-600 dark:text-fuchsia-400" />
+                <span className="font-medium tabular-nums dark:text-gray-100">{timeLeft}s</span>
               </div>
             </div>
-            <div className="rounded-2xl border p-3 text-right">
-              <div className="text-xs text-gray-500">Team B</div>
-              <div className="text-lg font-semibold text-gray-900">{scoreB}</div>
-              <div className="text-[11px] text-gray-500">✅ {correctB} • ❌ {wrongB}</div>
+            <div className="rounded-2xl border dark:border-gray-800 p-3 text-right">
+              <div className="text-xs text-gray-500 dark:text-gray-400">Team B</div>
+              <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">{scoreB}</div>
+              <div className="text-[11px] text-gray-500 dark:text-gray-400">✅ {correctB} • ❌ {wrongB}</div>
             </div>
           </div>
 
@@ -397,8 +397,8 @@ export default function TriviaDuoVsDuo({
             <button
               onClick={() => buzz("A")}
               disabled={!!buzzedBy || !running}
-              className={`rounded-xl px-3 py-2 text-sm inline-flex items-center gap-1 border ${
-                buzzedBy === "A" ? "bg-rose-50 border-rose-300 text-rose-700" : "hover:bg-gray-50"
+              className={`rounded-xl px-3 py-2 text-sm inline-flex items-center gap-1 border dark:border-gray-700 ${
+                buzzedBy === "A" ? "bg-rose-50 border-rose-300 text-rose-700 dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300" : "hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800"
               }`}
             >
               <Bolt className="w-4 h-4" /> Buzz A
@@ -406,23 +406,23 @@ export default function TriviaDuoVsDuo({
             <button
               onClick={() => buzz("B")}
               disabled={!!buzzedBy || !running}
-              className={`rounded-xl px-3 py-2 text-sm inline-flex items-center gap-1 border ${
-                buzzedBy === "B" ? "bg-fuchsia-50 border-fuchsia-300 text-fuchsia-700" : "hover:bg-gray-50"
+              className={`rounded-xl px-3 py-2 text-sm inline-flex items-center gap-1 border dark:border-gray-700 ${
+                buzzedBy === "B" ? "bg-fuchsia-50 border-fuchsia-300 text-fuchsia-700 dark:bg-fuchsia-950/40 dark:border-fuchsia-800 dark:text-fuchsia-300" : "hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800"
               }`}
             >
               <Bolt className="w-4 h-4" /> Buzz B
             </button>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-gray-500 dark:text-gray-400">
               {buzzedBy ? `Answering: Team ${buzzedBy}` : "Buzz to answer"}
             </span>
           </div>
 
           {/* Question card */}
-          <div className="rounded-2xl border p-5">
-            <div className="text-[11px] text-gray-500 mb-1">
+          <div className="rounded-2xl border dark:border-gray-800 p-5">
+            <div className="text-[11px] text-gray-500 dark:text-gray-400 mb-1">
               {q.category || category} • {q.difficulty || difficulty} • Q{idx + 1} / {qs.length}
             </div>
-            <div className="font-medium text-gray-900">{q.question}</div>
+            <div className="font-medium text-gray-900 dark:text-gray-100">{q.question}</div>
 
             <div className="mt-3 grid grid-cols-1 gap-2">
               {q.options.map((opt, i) => {
@@ -432,16 +432,16 @@ export default function TriviaDuoVsDuo({
                 const style =
                   revealed != null
                     ? isCorrect
-                      ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                      ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"
                       : isChosen
-                      ? "border-red-300 bg-red-50 text-red-700"
+                      ? "border-red-300 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-400"
                       : "opacity-60"
-                    : "hover:bg-gray-50";
+                    : "hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800";
                 return (
                   <button
                     key={i}
                     onClick={() => (canClick ? answer(i) : undefined)}
-                    className={`text-left rounded-xl border px-3 py-2 text-sm ${style}`}
+                    className={`text-left rounded-xl border dark:border-gray-700 px-3 py-2 text-sm ${style}`}
                   >
                     <span className="inline-block w-5">{["A","B","C","D"][i]}</span>
                     <span className="ml-1">{opt}</span>
@@ -455,13 +455,13 @@ export default function TriviaDuoVsDuo({
               <div className="mt-4 flex items-center gap-2">
                 <button
                   onClick={nextQuestion}
-                  className="rounded-xl px-3 py-2 border text-sm hover:bg-gray-50 inline-flex items-center gap-1"
+                  className="rounded-xl px-3 py-2 border dark:border-gray-700 text-sm hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800 inline-flex items-center gap-1"
                 >
                   Next <ChevronRight className="w-4 h-4" />
                 </button>
                 <button
                   onClick={restart}
-                  className="rounded-xl px-3 py-2 border text-sm hover:bg-gray-50 inline-flex items-center gap-1"
+                  className="rounded-xl px-3 py-2 border dark:border-gray-700 text-sm hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800 inline-flex items-center gap-1"
                 >
                   <RotateCcw className="w-4 h-4" /> Restart
                 </button>
@@ -474,7 +474,7 @@ export default function TriviaDuoVsDuo({
               </div>
             )}
             {!isHost && (
-              <div className="mt-4 text-center text-xs text-gray-400">Host controls Next / Restart / Finish…</div>
+              <div className="mt-4 text-center text-xs text-gray-400 dark:text-gray-500">Host controls Next / Restart / Finish…</div>
             )}
           </div>
         </>

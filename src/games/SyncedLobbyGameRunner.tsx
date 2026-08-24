@@ -94,7 +94,7 @@ function PlayersNotReady() {
   return (
     <div className="text-center py-8 space-y-2">
       <div className="text-2xl">⏳</div>
-      <div className="text-sm text-gray-500 animate-pulse">Waiting for players to connect…</div>
+      <div className="text-sm text-gray-500 dark:text-gray-400 animate-pulse">Waiting for players to connect…</div>
     </div>
   );
 }

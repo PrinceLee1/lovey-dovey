@@ -16,33 +16,33 @@ const CONFIG: Record<ToastType, {
 }> = {
   success: {
     icon: <CheckCircle className="w-5 h-5" />,
-    border: "border-emerald-200",
-    title: "text-emerald-800",
-    text: "text-emerald-700",
+    border: "border-emerald-200 dark:border-emerald-900",
+    title: "text-emerald-800 dark:text-emerald-300",
+    text: "text-emerald-700 dark:text-emerald-400",
     iconColor: "text-emerald-500",
     progressColor: "bg-emerald-500",
   },
   error: {
     icon: <XCircle className="w-5 h-5" />,
-    border: "border-red-200",
-    title: "text-red-800",
-    text: "text-red-700",
+    border: "border-red-200 dark:border-red-900",
+    title: "text-red-800 dark:text-red-300",
+    text: "text-red-700 dark:text-red-400",
     iconColor: "text-red-500",
     progressColor: "bg-red-500",
   },
   info: {
     icon: <Info className="w-5 h-5" />,
-    border: "border-fuchsia-200",
-    title: "text-fuchsia-800",
-    text: "text-fuchsia-700",
+    border: "border-fuchsia-200 dark:border-fuchsia-900",
+    title: "text-fuchsia-800 dark:text-fuchsia-300",
+    text: "text-fuchsia-700 dark:text-fuchsia-400",
     iconColor: "text-fuchsia-500",
     progressColor: "bg-fuchsia-500",
   },
   warning: {
     icon: <AlertTriangle className="w-5 h-5" />,
-    border: "border-amber-200",
-    title: "text-amber-800",
-    text: "text-amber-700",
+    border: "border-amber-200 dark:border-amber-900",
+    title: "text-amber-800 dark:text-amber-300",
+    text: "text-amber-700 dark:text-amber-400",
     iconColor: "text-amber-500",
     progressColor: "bg-amber-500",
   },
@@ -59,7 +59,7 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
       animate={{ opacity: 1, y: 0,   scale: 1     }}
       exit={{    opacity: 0, y: -16, scale: 0.95, transition: { duration: 0.2 } }}
       transition={{ type: "spring", damping: 25, stiffness: 300 }}
-      className={`relative w-full max-w-sm rounded-2xl border bg-white shadow-xl overflow-hidden ${cfg.border}`}
+      className={`relative w-full max-w-sm rounded-2xl border bg-white dark:bg-gray-900 shadow-xl overflow-hidden ${cfg.border}`}
     >
       {/* Auto-dismiss progress bar */}
       <motion.div

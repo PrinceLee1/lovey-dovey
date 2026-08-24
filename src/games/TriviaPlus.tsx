@@ -187,20 +187,20 @@ export default function TriviaPlus({
     });
   }
 
-  if (loading) return <div className="text-sm text-gray-500 text-center py-8">Loading Compatibility Trivia…</div>;
-  if (err) return <div className="text-sm text-red-600 bg-red-50 p-3 rounded-xl">{err}</div>;
+  if (loading) return <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">Loading Compatibility Trivia…</div>;
+  if (err) return <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 p-3 rounded-xl">{err}</div>;
 
   return (
     <div className="space-y-4">
       {/* Compat meter */}
-      <div className="rounded-2xl border bg-gradient-to-r from-rose-50 to-fuchsia-50 p-3">
+      <div className="rounded-2xl border dark:border-gray-800 bg-gradient-to-r from-rose-50 to-fuchsia-50 dark:from-rose-950/40 dark:to-fuchsia-950/40 p-3">
         <div className="flex items-center justify-between mb-1">
-          <div className="text-xs text-gray-600 flex items-center gap-1">
-            <Heart className="w-3.5 h-3.5 text-rose-500" /> Compatibility Score
+          <div className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1">
+            <Heart className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" /> Compatibility Score
           </div>
-          <div className="text-xs font-bold text-fuchsia-700">{compatScore}%</div>
+          <div className="text-xs font-bold text-fuchsia-700 dark:text-fuchsia-400">{compatScore}%</div>
         </div>
-        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div className="h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
           <motion.div
             className="h-full bg-gradient-to-r from-rose-500 to-fuchsia-500 rounded-full"
             animate={{ width: `${compatScore}%` }}
@@ -215,23 +215,23 @@ export default function TriviaPlus({
         {phase === "know" && kyQ && (
           <motion.div key={`know-${qIdx}`} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-3">
             <div className="flex items-center justify-between">
-              <div className="font-semibold text-gray-900 flex items-center gap-2">
-                <Heart className="w-4 h-4 text-rose-500" /> Know Your Partner
+              <div className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <Heart className="w-4 h-4 text-rose-500 dark:text-rose-400" /> Know Your Partner
               </div>
-              <div className="text-xs text-gray-500">Round {knowRounds + 1}/{KY_ROUNDS}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">Round {knowRounds + 1}/{KY_ROUNDS}</div>
             </div>
 
-            <div className="rounded-2xl border p-4">
-              <div className="font-medium text-gray-900 mb-3">{kyQ.question}</div>
+            <div className="rounded-2xl border dark:border-gray-800 p-4">
+              <div className="font-medium text-gray-900 dark:text-gray-100 mb-3">{kyQ.question}</div>
               <div className="grid grid-cols-1 gap-2">
                 {kyQ.options.map((opt, i) => (
                   <button
                     key={i}
                     onClick={() => !revealed && setP0Answer(i)}
-                    className={`text-left rounded-xl px-3 py-2 text-sm border transition ${
-                      revealed && i === kyQ.correctIndex ? "border-emerald-300 bg-emerald-50" :
-                      revealed && i === p0Answer && i !== kyQ.correctIndex ? "border-red-200 bg-red-50" :
-                      p0Answer === i ? "border-fuchsia-400 bg-fuchsia-50" : "hover:bg-gray-50"
+                    className={`text-left rounded-xl px-3 py-2 text-sm border dark:border-gray-700 transition ${
+                      revealed && i === kyQ.correctIndex ? "border-emerald-300 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300" :
+                      revealed && i === p0Answer && i !== kyQ.correctIndex ? "border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/40 dark:text-red-400" :
+                      p0Answer === i ? "border-fuchsia-400 bg-fuchsia-50 dark:border-fuchsia-800 dark:bg-fuchsia-950/40 dark:text-fuchsia-300" : "hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800"
                     }`}
                   >
                     {["A","B","C","D"][i]}. {opt}
@@ -242,14 +242,14 @@ export default function TriviaPlus({
 
             {/* P0 predicts P1 */}
             {p0Answer !== null && !revealed && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-2xl border p-3 space-y-2">
-                <div className="text-xs font-semibold text-gray-700">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-2xl border dark:border-gray-800 p-3 space-y-2">
+                <div className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                   {players[0]}: What will {players[1]} answer?
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {kyQ.options.map((_opt, i) => (
                     <button key={i} onClick={() => setP0Prediction(i)}
-                      className={`rounded-xl px-3 py-1.5 text-xs border ${p0Prediction === i ? "bg-fuchsia-600 text-white" : "hover:bg-gray-50"}`}>
+                      className={`rounded-xl px-3 py-1.5 text-xs border dark:border-gray-700 ${p0Prediction === i ? "bg-fuchsia-600 text-white" : "hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800"}`}>
                       {["A","B","C","D"][i]}
                     </button>
                   ))}
@@ -259,14 +259,14 @@ export default function TriviaPlus({
 
             {/* P1 answers (pass phone) */}
             {p0Prediction !== null && !revealed && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-2xl border-2 border-fuchsia-200 p-3 space-y-2">
-                <div className="text-xs font-semibold text-fuchsia-700">
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-2xl border-2 border-fuchsia-200 dark:border-fuchsia-900 p-3 space-y-2">
+                <div className="text-xs font-semibold text-fuchsia-700 dark:text-fuchsia-300">
                   📱 Pass to {players[1]} — don't peek!
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {kyQ.options.map((opt, i) => (
                     <button key={i} onClick={() => setP1Answer(i)}
-                      className={`rounded-xl px-3 py-2 text-xs border text-left ${p1Answer === i ? "bg-fuchsia-600 text-white" : "hover:bg-gray-50"}`}>
+                      className={`rounded-xl px-3 py-2 text-xs border dark:border-gray-700 text-left ${p1Answer === i ? "bg-fuchsia-600 text-white" : "hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800"}`}>
                       {["A","B","C","D"][i]}. {opt}
                     </button>
                   ))}
@@ -282,11 +282,11 @@ export default function TriviaPlus({
               )}
               {revealed && (
                 <div className="w-full space-y-2">
-                  <div className="text-sm text-gray-700 space-y-1">
+                  <div className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
                     <div>{p0Answer === p1Answer ? "✅ You chose the same!" : "❌ Different answers"}</div>
                     <div>{p0Prediction === p1Answer ? `✅ ${players[0]} predicted correctly!` : `❌ ${players[0]}'s prediction missed`}</div>
                   </div>
-                  <button onClick={nextKnow} className="rounded-xl px-4 py-2 border text-sm inline-flex items-center gap-1 hover:bg-gray-50">
+                  <button onClick={nextKnow} className="rounded-xl px-4 py-2 border dark:border-gray-700 text-sm inline-flex items-center gap-1 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800">
                     Next <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -299,40 +299,40 @@ export default function TriviaPlus({
         {phase === "hottakes" && (
           <motion.div key={`ht-${htIdx}`} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-3">
             <div className="flex items-center justify-between">
-              <div className="font-semibold text-gray-900 flex items-center gap-2">
-                <Crown className="w-4 h-4 text-amber-500" /> Hot Takes
+              <div className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <Crown className="w-4 h-4 text-amber-500 dark:text-amber-400" /> Hot Takes
               </div>
-              <div className="text-xs text-gray-500">Round {htIdx + 1}/{HT_ROUNDS}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">Round {htIdx + 1}/{HT_ROUNDS}</div>
             </div>
 
-            <div className="rounded-2xl border-2 border-amber-200 bg-amber-50 p-4">
-              <div className="font-medium text-gray-900 text-center">{HOT_TAKES[htIdx]}</div>
-              <div className="text-xs text-center text-amber-700 mt-1">No right answer — do you agree?</div>
+            <div className="rounded-2xl border-2 border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40 p-4">
+              <div className="font-medium text-gray-900 dark:text-gray-100 text-center">{HOT_TAKES[htIdx]}</div>
+              <div className="text-xs text-center text-amber-700 dark:text-amber-300 mt-1">No right answer — do you agree?</div>
             </div>
 
             {/* Both vote separately */}
             <div className="grid grid-cols-2 gap-3">
               {([0, 1] as const).map(p => (
-                <div key={p} className="rounded-2xl border p-3 space-y-2">
-                  <div className="text-xs font-semibold text-gray-700">{players[p]}</div>
+                <div key={p} className="rounded-2xl border dark:border-gray-800 p-3 space-y-2">
+                  <div className="text-xs font-semibold text-gray-700 dark:text-gray-300">{players[p]}</div>
                   {!htRevealed ? (
                     <div className="flex gap-2">
                       <button
                         onClick={() => p === 0 ? setHtP0(true) : setHtP1(true)}
-                        className={`flex-1 rounded-xl py-2 text-xs border font-semibold ${
-                          (p === 0 ? htP0 : htP1) === true ? "bg-emerald-500 text-white" : "hover:bg-emerald-50 text-emerald-700"
+                        className={`flex-1 rounded-xl py-2 text-xs border dark:border-gray-700 font-semibold ${
+                          (p === 0 ? htP0 : htP1) === true ? "bg-emerald-500 text-white" : "hover:bg-emerald-50 text-emerald-700 dark:text-emerald-300 dark:hover:bg-emerald-950/40"
                         }`}
                       >Agree ✅</button>
                       <button
                         onClick={() => p === 0 ? setHtP0(false) : setHtP1(false)}
-                        className={`flex-1 rounded-xl py-2 text-xs border font-semibold ${
-                          (p === 0 ? htP0 : htP1) === false ? "bg-red-500 text-white" : "hover:bg-red-50 text-red-700"
+                        className={`flex-1 rounded-xl py-2 text-xs border dark:border-gray-700 font-semibold ${
+                          (p === 0 ? htP0 : htP1) === false ? "bg-red-500 text-white" : "hover:bg-red-50 text-red-700 dark:text-red-400 dark:hover:bg-red-950/40"
                         }`}
                       >Disagree ❌</button>
                     </div>
                   ) : (
                     <div className={`text-center rounded-xl py-2 font-semibold text-sm ${
-                      (p === 0 ? htP0 : htP1) ? "text-emerald-700 bg-emerald-50" : "text-red-700 bg-red-50"
+                      (p === 0 ? htP0 : htP1) ? "text-emerald-700 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-950/40" : "text-red-700 bg-red-50 dark:text-red-400 dark:bg-red-950/40"
                     }`}>
                       {(p === 0 ? htP0 : htP1) ? "Agree" : "Disagree"}
                     </div>
@@ -349,11 +349,11 @@ export default function TriviaPlus({
             {htRevealed && (
               <div className="space-y-2">
                 <div className={`rounded-xl p-3 text-center text-sm font-semibold ${
-                  htP0 === htP1 ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-gray-50 text-gray-700 border"
+                  htP0 === htP1 ? "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900" : "bg-gray-50 text-gray-700 border dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
                 }`}>
                   {htP0 === htP1 ? "💕 You agree! +20 XP" : "Interesting difference! Discuss why 💬"}
                 </div>
-                <button onClick={nextHotTake} className="rounded-xl px-4 py-2 border text-sm inline-flex items-center gap-1 hover:bg-gray-50">
+                <button onClick={nextHotTake} className="rounded-xl px-4 py-2 border dark:border-gray-700 text-sm inline-flex items-center gap-1 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800">
                   Next <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
@@ -365,33 +365,33 @@ export default function TriviaPlus({
         {phase === "lightning" && lQ && (
           <motion.div key={`lightning-${qIdx}`} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="space-y-3">
             <div className="flex items-center justify-between">
-              <div className="font-semibold text-gray-900 flex items-center gap-2">
-                <Zap className="w-4 h-4 text-amber-500" /> ⚡ Lightning Round
+              <div className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <Zap className="w-4 h-4 text-amber-500 dark:text-amber-400" /> ⚡ Lightning Round
               </div>
               <div className={`flex items-center gap-1 px-3 py-1 rounded-full font-mono font-bold text-sm border ${
-                lTimer <= 3 ? "bg-red-50 text-red-600 border-red-200 animate-pulse" : "bg-white"
+                lTimer <= 3 ? "bg-red-50 text-red-600 border-red-200 animate-pulse dark:bg-red-950/40 dark:text-red-400 dark:border-red-900" : "bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100"
               }`}>
                 <Clock className="w-3.5 h-3.5" /> {lTimer}s
               </div>
             </div>
 
-            <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
               <motion.div className="h-full bg-amber-500 rounded-full" animate={{ width: `${(lTimer / 10) * 100}%` }} transition={{ duration: 0 }} />
             </div>
 
-            <div className="rounded-2xl border p-4">
-              <div className="text-xs text-gray-500 mb-2">Q{lTotal + 1}/{L_ROUNDS}</div>
-              <div className="font-medium text-gray-900 mb-3">{lQ.question}</div>
+            <div className="rounded-2xl border dark:border-gray-800 p-4">
+              <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Q{lTotal + 1}/{L_ROUNDS}</div>
+              <div className="font-medium text-gray-900 dark:text-gray-100 mb-3">{lQ.question}</div>
               <div className="grid grid-cols-2 gap-2">
                 {lQ.options.map((opt, i) => (
                   <button
                     key={i}
                     onClick={() => lAnswer === null && advanceLightning(i)}
                     disabled={lAnswer !== null}
-                    className={`rounded-xl px-3 py-2 text-sm border text-left transition ${
-                      lAnswer !== null && i === lQ.correctIndex ? "border-emerald-400 bg-emerald-50 text-emerald-800" :
-                      lAnswer === i && i !== lQ.correctIndex ? "border-red-400 bg-red-50 text-red-700" :
-                      lAnswer !== null ? "opacity-50" : "hover:bg-gray-50"
+                    className={`rounded-xl px-3 py-2 text-sm border dark:border-gray-700 text-left transition ${
+                      lAnswer !== null && i === lQ.correctIndex ? "border-emerald-400 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300" :
+                      lAnswer === i && i !== lQ.correctIndex ? "border-red-400 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-400" :
+                      lAnswer !== null ? "opacity-50" : "hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800"
                     }`}
                   >
                     {["A","B","C","D"][i]}. {opt}
@@ -405,29 +405,29 @@ export default function TriviaPlus({
         {/* ── RESULTS ───────────────────────────────────────────────────────── */}
         {phase === "results" && (
           <motion.div key="results" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 text-center">
-            <div className="rounded-3xl bg-gradient-to-br from-pink-50 to-fuchsia-50 border border-fuchsia-100 p-6 space-y-3">
+            <div className="rounded-3xl bg-gradient-to-br from-pink-50 to-fuchsia-50 dark:from-pink-950/40 dark:to-fuchsia-950/40 border border-fuchsia-100 dark:border-fuchsia-900 p-6 space-y-3">
               <div className="text-4xl">
                 {compatScore >= 80 ? "💑" : compatScore >= 60 ? "💕" : compatScore >= 40 ? "💞" : "💛"}
               </div>
-              <div className="font-bold text-2xl text-gray-900">{compatScore}% Compatible</div>
-              <div className="text-sm text-gray-600">
+              <div className="font-bold text-2xl text-gray-900 dark:text-gray-100">{compatScore}% Compatible</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
                 {compatScore >= 80 ? "You two are incredibly in sync! 🌟" :
                  compatScore >= 60 ? "Great connection with room to grow 💕" :
                  compatScore >= 40 ? "You complement each other well! 🌈" :
                  "Opposites attract — keep exploring! 🔥"}
               </div>
               <div className="grid grid-cols-3 gap-3 text-xs mt-2">
-                <div className="rounded-xl bg-white border p-2">
-                  <div className="text-gray-500">Know Score</div>
-                  <div className="font-bold text-gray-900">{knowScore} pts</div>
+                <div className="rounded-xl bg-white dark:bg-gray-800 border dark:border-gray-700 p-2">
+                  <div className="text-gray-500 dark:text-gray-400">Know Score</div>
+                  <div className="font-bold text-gray-900 dark:text-gray-100">{knowScore} pts</div>
                 </div>
-                <div className="rounded-xl bg-white border p-2">
-                  <div className="text-gray-500">Hot Takes</div>
-                  <div className="font-bold text-gray-900">{htMatches}/{HT_ROUNDS} match</div>
+                <div className="rounded-xl bg-white dark:bg-gray-800 border dark:border-gray-700 p-2">
+                  <div className="text-gray-500 dark:text-gray-400">Hot Takes</div>
+                  <div className="font-bold text-gray-900 dark:text-gray-100">{htMatches}/{HT_ROUNDS} match</div>
                 </div>
-                <div className="rounded-xl bg-white border p-2">
-                  <div className="text-gray-500">Lightning</div>
-                  <div className="font-bold text-gray-900">{lCorrect}/{L_ROUNDS} ✅</div>
+                <div className="rounded-xl bg-white dark:bg-gray-800 border dark:border-gray-700 p-2">
+                  <div className="text-gray-500 dark:text-gray-400">Lightning</div>
+                  <div className="font-bold text-gray-900 dark:text-gray-100">{lCorrect}/{L_ROUNDS} ✅</div>
                 </div>
               </div>
             </div>
@@ -440,10 +440,10 @@ export default function TriviaPlus({
 
       {phase !== "results" && (
         <div className="flex items-center justify-between">
-          <button onClick={() => setPhase("results")} className="text-xs text-gray-400 inline-flex items-center gap-1 hover:text-gray-600">
+          <button onClick={() => setPhase("results")} className="text-xs text-gray-400 dark:text-gray-500 inline-flex items-center gap-1 hover:text-gray-600 dark:hover:text-gray-300">
             <RotateCcw className="w-3 h-3" /> End early
           </button>
-          <div className="text-xs text-gray-500">{totalXp} XP so far</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">{totalXp} XP so far</div>
         </div>
       )}
     </div>

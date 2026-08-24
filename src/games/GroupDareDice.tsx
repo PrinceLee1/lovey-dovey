@@ -25,12 +25,12 @@ type Props = {
 };
 
 const FACES = [
-  { n: 1, label: "Sweet",     color: "from-pink-100 to-rose-100",      text: "text-rose-600"    },
-  { n: 2, label: "Funny",     color: "from-yellow-100 to-amber-100",   text: "text-amber-600"   },
-  { n: 3, label: "Playful",   color: "from-fuchsia-100 to-purple-100", text: "text-fuchsia-600" },
-  { n: 4, label: "Bold",      color: "from-orange-100 to-red-100",     text: "text-orange-600"  },
-  { n: 5, label: "Challenge", color: "from-blue-100 to-indigo-100",    text: "text-blue-600"    },
-  { n: 6, label: "Wild Card", color: "from-emerald-100 to-teal-100",   text: "text-emerald-600" },
+  { n: 1, label: "Sweet",     color: "from-pink-100 to-rose-100 dark:from-pink-950/40 dark:to-rose-950/40",           text: "text-rose-600 dark:text-rose-300"       },
+  { n: 2, label: "Funny",     color: "from-yellow-100 to-amber-100 dark:from-yellow-950/40 dark:to-amber-950/40",     text: "text-amber-600 dark:text-amber-300"     },
+  { n: 3, label: "Playful",   color: "from-fuchsia-100 to-purple-100 dark:from-fuchsia-950/40 dark:to-purple-950/40", text: "text-fuchsia-600 dark:text-fuchsia-300" },
+  { n: 4, label: "Bold",      color: "from-orange-100 to-red-100 dark:from-orange-950/40 dark:to-red-950/40",         text: "text-orange-600 dark:text-orange-300"   },
+  { n: 5, label: "Challenge", color: "from-blue-100 to-indigo-100 dark:from-blue-950/40 dark:to-indigo-950/40",       text: "text-blue-600 dark:text-blue-300"       },
+  { n: 6, label: "Wild Card", color: "from-emerald-100 to-teal-100 dark:from-emerald-950/40 dark:to-teal-950/40",     text: "text-emerald-600 dark:text-emerald-300" },
 ];
 
 export default function GroupDareDice({
@@ -92,7 +92,7 @@ export default function GroupDareDice({
   // ── Guard: after all hooks ────────────────────────────────────────────────
   if (!players || players.length === 0) {
     return (
-      <div className="text-center py-8 text-sm text-gray-500 animate-pulse">
+      <div className="text-center py-8 text-sm text-gray-500 dark:text-gray-400 animate-pulse">
         Waiting for players to connect…
       </div>
     );
@@ -242,14 +242,14 @@ export default function GroupDareDice({
 
   return (
     <div className="space-y-4">
-      {err && <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">{err}</div>}
+      {err && <div className="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-xl px-3 py-2">{err}</div>}
 
       {/* Scores */}
       {Object.keys(scores).length > 0 && (
         <div className="flex flex-wrap gap-2">
           {Object.entries(scores).sort((a,b) => b[1]-a[1]).map(([name, pts], i) => (
             <div key={name} className={`rounded-full px-3 py-1 text-xs font-semibold border flex items-center gap-1 ${
-              i === 0 ? "bg-amber-50 border-amber-300 text-amber-700" : "bg-gray-50 text-gray-600"
+              i === 0 ? "bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800 text-amber-700 dark:text-amber-300" : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
             }`}>
               {i === 0 && <Crown className="w-3 h-3"/>} {name} {pts}pts
             </div>
@@ -263,9 +263,9 @@ export default function GroupDareDice({
           <div className="h-7 w-7 rounded-full bg-gradient-to-br from-pink-400 to-fuchsia-500 grid place-items-center text-white text-xs font-bold">
             {currentPlayer[0]?.toUpperCase()}
           </div>
-          <span className="font-semibold text-gray-900">{currentPlayer}'s turn</span>
+          <span className="font-semibold text-gray-900 dark:text-gray-100">{currentPlayer}'s turn</span>
         </div>
-        {isHost && <span className="text-xs px-2 py-1 rounded-full border text-gray-500">Skips: {skipsLeft}</span>}
+        {isHost && <span className="text-xs px-2 py-1 rounded-full border dark:border-gray-700 text-gray-500 dark:text-gray-400">Skips: {skipsLeft}</span>}
       </div>
 
       <AnimatePresence mode="wait">
@@ -277,8 +277,8 @@ export default function GroupDareDice({
             <motion.div key={spins}
               initial={{rotate:0,scale:1}} animate={{rotate:360,scale:1.1}}
               transition={{duration:0.6,ease:"easeInOut"}}
-              className="h-28 w-28 rounded-3xl bg-gradient-to-br from-rose-100 to-fuchsia-100 grid place-items-center shadow-inner">
-              <Dice6 className="w-14 h-14 text-fuchsia-600"/>
+              className="h-28 w-28 rounded-3xl bg-gradient-to-br from-rose-100 to-fuchsia-100 dark:from-rose-950/40 dark:to-fuchsia-950/40 grid place-items-center shadow-inner">
+              <Dice6 className="w-14 h-14 text-fuchsia-600 dark:text-fuchsia-400"/>
             </motion.div>
             {isHost ? (
               <button onClick={rollDice} disabled={loading}
@@ -286,11 +286,11 @@ export default function GroupDareDice({
                 🎲 Roll the Dice
               </button>
             ) : (
-              <div className="text-sm text-gray-500 animate-pulse">
+              <div className="text-sm text-gray-500 dark:text-gray-400 animate-pulse">
                 Waiting for <b>{currentPlayer}</b> to roll…
               </div>
             )}
-            {loading && <div className="text-xs text-gray-500">Loading dares…</div>}
+            {loading && <div className="text-xs text-gray-500 dark:text-gray-400">Loading dares…</div>}
           </motion.div>
         )}
 
@@ -306,11 +306,11 @@ export default function GroupDareDice({
               {/* Challenge — pick target (host only) */}
               {rolled.label === "Challenge" && !challengeTarget && isHost && (
                 <div className="space-y-2">
-                  <div className="text-sm font-medium text-gray-900">Pick someone to challenge:</div>
+                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100">Pick someone to challenge:</div>
                   <div className="flex flex-wrap gap-2">
                     {voters.map(p => (
                       <button key={p} onClick={() => pickChallengeDare(p)}
-                        className="rounded-xl px-3 py-1.5 text-sm bg-white border border-gray-200 hover:border-fuchsia-400 hover:bg-fuchsia-50 font-medium text-gray-900 transition">
+                        className="rounded-xl px-3 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-fuchsia-400 dark:hover:border-fuchsia-500 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-950/40 font-medium text-gray-900 dark:text-gray-100 transition">
                         {p}
                       </button>
                     ))}
@@ -318,16 +318,16 @@ export default function GroupDareDice({
                 </div>
               )}
               {rolled.label === "Challenge" && !challengeTarget && !isHost && (
-                <div className="text-sm text-gray-600 animate-pulse">Host is picking who to challenge…</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400 animate-pulse">Host is picking who to challenge…</div>
               )}
 
               {/* Dare card */}
               {currentDare && (
                 <div className="mt-2">
                   {challengeTarget && (
-                    <div className="text-xs text-gray-500 mb-1">Challenge for <b>{challengeTarget}</b>:</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Challenge for <b>{challengeTarget}</b>:</div>
                   )}
-                  <div className="text-gray-900 font-medium text-base leading-relaxed">{currentDare}</div>
+                  <div className="text-gray-900 dark:text-gray-100 font-medium text-base leading-relaxed">{currentDare}</div>
                 </div>
               )}
             </div>
@@ -341,13 +341,13 @@ export default function GroupDareDice({
                       <Check className="w-4 h-4"/> Done — Let everyone vote
                     </button>
                     <button onClick={skipDare} disabled={skipsLeft <= 0}
-                      className="rounded-xl px-3 py-2 border text-sm hover:bg-gray-50 disabled:opacity-50 inline-flex items-center gap-1">
+                      className="rounded-xl px-3 py-2 border dark:border-gray-700 text-sm hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800 disabled:opacity-50 inline-flex items-center gap-1">
                       <SkipForward className="w-4 h-4"/> New dare
                     </button>
                   </>
                 )}
                 {!isHost && (
-                  <div className="text-xs text-gray-400 animate-pulse">
+                  <div className="text-xs text-gray-400 dark:text-gray-500 animate-pulse">
                     Watching <b>{challengeTarget ?? currentPlayer}</b> do the dare…
                   </div>
                 )}
@@ -361,12 +361,12 @@ export default function GroupDareDice({
           <motion.div key="vote" initial={{opacity:0,x:20}} animate={{opacity:1,x:0}} exit={{opacity:0,x:-20}}
             className="space-y-3">
             <div className="text-center">
-              <div className="font-semibold text-gray-900">
+              <div className="font-semibold text-gray-900 dark:text-gray-100">
                 Did <b>{challengeTarget ?? currentPlayer}</b> complete the dare? 🗳️
               </div>
-              <div className="text-xs text-gray-500 mt-1">{Object.keys(votes).length}/{voters.length} voted</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{Object.keys(votes).length}/{voters.length} voted</div>
             </div>
-            <div className="rounded-2xl border bg-gray-50 p-3 text-sm text-gray-700 italic">"{currentDare}"</div>
+            <div className="rounded-2xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3 text-sm text-gray-700 dark:text-gray-300 italic">"{currentDare}"</div>
 
             {/* Vote list — each player only sees their OWN vote buttons */}
             <div className="space-y-2">
@@ -374,35 +374,35 @@ export default function GroupDareDice({
                 // Only show vote buttons if this row is the current user
                 const isMyRow = voter === myName;
                 return (
-                  <div key={voter} className="flex items-center justify-between rounded-2xl border p-3">
+                  <div key={voter} className="flex items-center justify-between rounded-2xl border dark:border-gray-700 p-3">
                     <div className="flex items-center gap-2">
                       <div className="h-6 w-6 rounded-full bg-gradient-to-br from-pink-400 to-fuchsia-500 grid place-items-center text-white text-[10px] font-bold">
                         {voter[0]?.toUpperCase()}
                       </div>
-                      <span className="text-sm font-medium text-gray-900">{voter}</span>
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{voter}</span>
                     </div>
                     {/* Vote status or buttons */}
                     {votes[voter] ? (
                       <span className={`text-xs px-3 py-1 rounded-full font-semibold ${
                         votes[voter] === "up"
-                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                          : "bg-red-50 text-red-700 border border-red-200"
+                          ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900"
+                          : "bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900"
                       }`}>
                         {votes[voter] === "up" ? "✅ Yes" : "👀 Nope"}
                       </span>
                     ) : isMyRow ? (
                       <div className="flex gap-2">
                         <button onClick={() => castVote(voter, "up")}
-                          className="rounded-xl px-3 py-1.5 text-sm border inline-flex items-center gap-1 hover:bg-emerald-50 text-emerald-700 transition">
+                          className="rounded-xl px-3 py-1.5 text-sm border dark:border-gray-700 inline-flex items-center gap-1 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 transition">
                           <ThumbsUp className="w-4 h-4"/> Yes!
                         </button>
                         <button onClick={() => castVote(voter, "down")}
-                          className="rounded-xl px-3 py-1.5 text-sm border inline-flex items-center gap-1 hover:bg-red-50 text-red-700 transition">
+                          className="rounded-xl px-3 py-1.5 text-sm border dark:border-gray-700 inline-flex items-center gap-1 hover:bg-red-50 dark:hover:bg-red-950/40 text-red-700 dark:text-red-400 transition">
                           <ThumbsDown className="w-4 h-4"/> Nope
                         </button>
                       </div>
                     ) : (
-                      <span className="text-xs text-gray-400">⌛ waiting…</span>
+                      <span className="text-xs text-gray-400 dark:text-gray-500">⌛ waiting…</span>
                     )}
                   </div>
                 );
@@ -416,7 +416,7 @@ export default function GroupDareDice({
               </button>
             )}
             {!isHost && (
-              <div className="text-center text-xs text-gray-400 animate-pulse">
+              <div className="text-center text-xs text-gray-400 dark:text-gray-500 animate-pulse">
                 Waiting for host to reveal results…
               </div>
             )}
@@ -432,9 +432,9 @@ export default function GroupDareDice({
           return (
             <motion.div key="result" initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} exit={{opacity:0}}
               className="space-y-3 text-center">
-              <div className={`rounded-2xl p-5 ${won ? "bg-emerald-50 border border-emerald-200" : "bg-red-50 border border-red-200"}`}>
+              <div className={`rounded-2xl p-5 ${won ? "bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900" : "bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900"}`}>
                 <div className="text-3xl mb-2">{won ? "🎉" : "😬"}</div>
-                <div className="font-bold text-gray-900">
+                <div className="font-bold text-gray-900 dark:text-gray-100">
                   {voters.length === 0
                     ? `${scorer} completed the dare!`
                     : won
@@ -449,12 +449,12 @@ export default function GroupDareDice({
                     Next Player →
                   </button>
                   <button onClick={finish}
-                    className="rounded-2xl px-4 py-2.5 border text-sm hover:bg-gray-50 inline-flex items-center gap-1">
+                    className="rounded-2xl px-4 py-2.5 border dark:border-gray-700 text-sm hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800 inline-flex items-center gap-1">
                     <RotateCcw className="w-4 h-4"/> End Game
                   </button>
                 </div>
               ) : (
-                <div className="text-center text-xs text-gray-400 animate-pulse">
+                <div className="text-center text-xs text-gray-400 dark:text-gray-500 animate-pulse">
                   Waiting for host to continue…
                 </div>
               )}
@@ -471,7 +471,7 @@ export default function GroupDareDice({
               className={`h-6 w-6 rounded-full border-2 border-white grid place-items-center text-white text-[10px] font-bold ${
                 i === turnIdx % players.length
                   ? "bg-gradient-to-br from-pink-500 to-fuchsia-600 ring-2 ring-fuchsia-400"
-                  : "bg-gradient-to-br from-gray-300 to-gray-400"
+                  : "bg-gradient-to-br from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-700"
               }`}>
               {p[0]?.toUpperCase()}
             </div>

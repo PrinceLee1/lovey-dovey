@@ -219,22 +219,22 @@ export default function EmojiChatPlus({
           <motion.div key="story" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="flex items-center gap-2 text-fuchsia-700 font-semibold">
+                <div className="flex items-center gap-2 text-fuchsia-700 dark:text-fuchsia-400 font-semibold">
                   <BookOpen className="w-4 h-4" /> Emoji Story Builder
                 </div>
-                <div className="text-xs text-gray-500">Take turns adding emoji chapters to your shared story</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Take turns adding emoji chapters to your shared story</div>
               </div>
               <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-mono font-bold border ${
-                remaining <= 30000 ? "bg-red-50 text-red-600 border-red-200 animate-pulse" : "bg-white text-gray-700"
+                remaining <= 30000 ? "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900 animate-pulse" : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 dark:border-gray-700"
               }`}>
                 <Clock className="w-3.5 h-3.5" /> {mm}:{String(ss).padStart(2, "0")}
               </div>
             </div>
 
             {/* Story so far */}
-            <div className="rounded-2xl border bg-gradient-to-br from-rose-50 to-fuchsia-50 p-4 min-h-24 space-y-2">
+            <div className="rounded-2xl border dark:border-gray-700 bg-gradient-to-br from-rose-50 to-fuchsia-50 dark:from-rose-950/40 dark:to-fuchsia-950/40 p-4 min-h-24 space-y-2">
               {chapters.length === 0 ? (
-                <div className="text-center text-gray-400 text-sm py-4">
+                <div className="text-center text-gray-400 dark:text-gray-500 text-sm py-4">
                   Your story starts here… ✨<br />
                   <span className="text-xs">{players[0]} goes first</span>
                 </div>
@@ -246,25 +246,25 @@ export default function EmojiChatPlus({
                     animate={{ opacity: 1, x: 0 }}
                     className={`flex gap-2 items-start ${ch.from === 1 ? "flex-row-reverse" : ""}`}
                   >
-                    <div className="text-xs text-gray-400 mt-1 flex-shrink-0">Ch.{ch.turn}</div>
+                    <div className="text-xs text-gray-400 dark:text-gray-500 mt-1 flex-shrink-0">Ch.{ch.turn}</div>
                     <div className={`px-3 py-2 rounded-2xl text-xl leading-relaxed ${
-                      ch.from === 0 ? "bg-rose-100 text-rose-700 rounded-bl-sm" : "bg-fuchsia-100 text-fuchsia-700 rounded-br-sm"
+                      ch.from === 0 ? "bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 rounded-bl-sm" : "bg-fuchsia-100 dark:bg-fuchsia-950/40 text-fuchsia-700 dark:text-fuchsia-300 rounded-br-sm"
                     }`}>
                       {ch.emojis}
                     </div>
-                    <div className="text-xs text-gray-400 mt-1">{players[ch.from]}</div>
+                    <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">{players[ch.from]}</div>
                   </motion.div>
                 ))
               )}
             </div>
 
             {/* Input */}
-            <div className="rounded-2xl border p-3 space-y-2">
+            <div className="rounded-2xl border dark:border-gray-700 p-3 space-y-2">
               <div className="flex items-center gap-2">
-                <div className="text-xs px-2 py-1 rounded-full bg-fuchsia-50 border border-fuchsia-200 text-fuchsia-700">
+                <div className="text-xs px-2 py-1 rounded-full bg-fuchsia-50 dark:bg-fuchsia-950/40 border border-fuchsia-200 dark:border-fuchsia-900 text-fuchsia-700 dark:text-fuchsia-300">
                   {players[who]}'s chapter
                 </div>
-                {warn && <div className="text-xs text-red-600">{warn}</div>}
+                {warn && <div className="text-xs text-red-600 dark:text-red-400">{warn}</div>}
               </div>
               <div className="flex gap-2">
                 <input
@@ -273,7 +273,7 @@ export default function EmojiChatPlus({
                   onChange={e => setText(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addChapter(); } }}
                   placeholder="Add emojis to continue the story…"
-                  className="flex-1 rounded-xl border px-3 py-2 outline-none focus:ring-2 focus:ring-fuchsia-500"
+                  className="flex-1 rounded-xl border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 px-3 py-2 outline-none focus:ring-2 focus:ring-fuchsia-500"
                 />
                 <button
                   onClick={addChapter}
@@ -285,13 +285,13 @@ export default function EmojiChatPlus({
               <div className="flex flex-wrap gap-1.5">
                 {PALETTE.map(e => (
                   <button key={e} onClick={() => setText(t => (t + e).trim())}
-                    className="px-1.5 py-1 rounded-lg border hover:bg-gray-50 text-lg">{e}</button>
+                    className="px-1.5 py-1 rounded-lg border dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-lg">{e}</button>
                 ))}
               </div>
             </div>
 
             <div className="flex justify-between items-center">
-              <div className="text-xs text-gray-500">{chapters.length} chapters • {score} XP earned</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">{chapters.length} chapters • {score} XP earned</div>
               <button
                 onClick={goToGuessPhase}
                 className="rounded-xl px-4 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm"
@@ -311,8 +311,8 @@ export default function EmojiChatPlus({
             >
               <Sparkles className="w-10 h-10 text-fuchsia-500 mx-auto" />
             </motion.div>
-            <div className="font-semibold text-gray-900">AI is reading your story…</div>
-            <div className="text-sm text-gray-500">Interpreting {chapters.length} chapters of your emoji journey</div>
+            <div className="font-semibold text-gray-900 dark:text-gray-100">AI is reading your story…</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">Interpreting {chapters.length} chapters of your emoji journey</div>
           </motion.div>
         )}
 
@@ -320,30 +320,30 @@ export default function EmojiChatPlus({
         {phase === "guess" && (
           <motion.div key="guess" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             {aiStory && (
-              <div className="rounded-2xl border border-fuchsia-200 bg-fuchsia-50 p-4">
-                <div className="text-xs text-fuchsia-600 font-semibold mb-1 flex items-center gap-1">
+              <div className="rounded-2xl border border-fuchsia-200 dark:border-fuchsia-900 bg-fuchsia-50 dark:bg-fuchsia-950/40 p-4">
+                <div className="text-xs text-fuchsia-600 dark:text-fuchsia-300 font-semibold mb-1 flex items-center gap-1">
                   <Eye className="w-3.5 h-3.5" /> AI read your story:
                 </div>
-                <div className="text-sm text-gray-800 italic">"{aiStory}"</div>
+                <div className="text-sm text-gray-800 dark:text-gray-200 italic">"{aiStory}"</div>
               </div>
             )}
 
-            <div className="rounded-2xl border p-4 space-y-3">
+            <div className="rounded-2xl border dark:border-gray-700 p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <div className="font-semibold text-gray-900">Guess the Meaning 🤔</div>
-                <div className="text-xs text-gray-500">Round {guessIdx + 1}/{GUESS_ROUNDS}</div>
+                <div className="font-semibold text-gray-900 dark:text-gray-100">Guess the Meaning 🤔</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Round {guessIdx + 1}/{GUESS_ROUNDS}</div>
               </div>
-              <div className="text-3xl text-center py-4 bg-gray-50 rounded-xl">
+              <div className="text-3xl text-center py-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
                 {GUESS_PROMPTS[guessIdx].emoji}
               </div>
-              <div className="text-xs text-gray-500">What do these emojis represent?</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">What do these emojis represent?</div>
               <div className="flex gap-2">
                 <input
                   value={guessInput}
                   onChange={e => setGuessInput(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter") submitGuess(); }}
                   placeholder="Type your interpretation…"
-                  className="flex-1 rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
+                  className="flex-1 rounded-xl border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
                 />
                 <button onClick={submitGuess} className="rounded-xl px-4 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm">
                   Guess
@@ -355,7 +355,7 @@ export default function EmojiChatPlus({
                     initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
                     className={`text-center rounded-xl py-2 text-sm font-semibold ${
                       guessResult === "correct"
-                        ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
+                        ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300" : "bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400"
                     }`}
                   >
                     {guessResult === "correct" ? "✅ Nice! +20 XP" : `❌ It was: "${GUESS_PROMPTS[guessIdx].meaning}"`}
@@ -370,18 +370,18 @@ export default function EmojiChatPlus({
         {phase === "speed" && speedPrompt && (
           <motion.div key="speed" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4">
             <div className="text-center">
-              <div className="font-bold text-gray-900 flex items-center justify-center gap-2">
-                <Zap className="w-5 h-5 text-amber-500" /> Speed Round!
+              <div className="font-bold text-gray-900 dark:text-gray-100 flex items-center justify-center gap-2">
+                <Zap className="w-5 h-5 text-amber-500 dark:text-amber-400" /> Speed Round!
               </div>
-              <div className="text-sm text-gray-500">First to buzz wins +30 XP</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">First to buzz wins +30 XP</div>
             </div>
 
-            <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-6 text-center space-y-2">
+            <div className="rounded-2xl border-2 border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 p-6 text-center space-y-2">
               <div className="text-4xl">{speedPrompt.emoji}</div>
-              <div className={`text-2xl font-bold tabular-nums ${speedTimer <= 2 ? "text-red-600" : "text-gray-900"}`}>
+              <div className={`text-2xl font-bold tabular-nums ${speedTimer <= 2 ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-gray-100"}`}>
                 {speedTimer}s
               </div>
-              <div className="text-xs text-gray-500">What scene is this?</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">What scene is this?</div>
             </div>
 
             {speedWinner === null ? (
@@ -399,12 +399,12 @@ export default function EmojiChatPlus({
             ) : (
               <motion.div
                 initial={{ scale: 0.9 }} animate={{ scale: 1 }}
-                className="rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-4 text-center"
+                className="rounded-2xl border-2 border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 p-4 text-center"
               >
-                <div className="font-bold text-emerald-700">
+                <div className="font-bold text-emerald-700 dark:text-emerald-300">
                   {speedWinner === "tie" ? "⏰ Time's up — tie!" : `⚡ ${players[speedWinner]} buzzed first! +30 XP`}
                 </div>
-                <div className="text-xs text-gray-500 mt-1">It was: "{speedPrompt.meaning}"</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">It was: "{speedPrompt.meaning}"</div>
                 <button
                   onClick={finishGame}
                   className="mt-3 rounded-xl px-6 py-2 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm"
@@ -421,10 +421,10 @@ export default function EmojiChatPlus({
       {phase === "story" && (
         <div className="flex items-center justify-between">
           <button onClick={() => { if (!finishedRef.current) finishGame(); }}
-            className="text-xs text-gray-400 inline-flex items-center gap-1 hover:text-gray-600">
+            className="text-xs text-gray-400 dark:text-gray-500 inline-flex items-center gap-1 hover:text-gray-600 dark:hover:text-gray-300">
             <RotateCcw className="w-3 h-3" /> Skip to results
           </button>
-          <div className="text-xs text-gray-500">+5 XP per chapter</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">+5 XP per chapter</div>
         </div>
       )}
     </div>
