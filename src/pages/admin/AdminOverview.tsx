@@ -31,7 +31,7 @@ function StatCard({ label, value, sub, icon: Icon, accent }: {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl border border-rose-100 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+      className="bg-white dark:bg-gray-900 rounded-2xl border border-rose-100 dark:border-gray-800 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
     >
       <div className="flex items-start justify-between mb-3">
         <div className={`h-9 w-9 rounded-xl ${accent} grid place-items-center flex-shrink-0`}>
@@ -39,9 +39,9 @@ function StatCard({ label, value, sub, icon: Icon, accent }: {
         </div>
         <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
       </div>
-      <div className="text-2xl font-black text-gray-900 mb-0.5">{value}</div>
-      <div className="text-xs font-semibold text-gray-400">{label}</div>
-      {sub && <div className="text-[10px] text-gray-300 mt-0.5">{sub}</div>}
+      <div className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-0.5">{value}</div>
+      <div className="text-xs font-semibold text-gray-400 dark:text-gray-500">{label}</div>
+      {sub && <div className="text-[10px] text-gray-300 dark:text-gray-600 mt-0.5">{sub}</div>}
     </motion.div>
   );
 }
@@ -68,15 +68,15 @@ export default function AdminOverview() {
 
   if (loading) return (
     <div className="p-8 grid grid-cols-2 md:grid-cols-4 gap-4 animate-pulse">
-      {[...Array(8)].map((_,i) => <div key={i} className="h-28 rounded-2xl bg-rose-50" />)}
+      {[...Array(8)].map((_,i) => <div key={i} className="h-28 rounded-2xl bg-rose-50 dark:bg-gray-800/60" />)}
     </div>
   );
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl space-y-8">
+    <div className="p-4 md:p-8 max-w-7xl space-y-8">
       <div>
-        <h1 className="text-2xl font-black text-gray-900" style={{ fontFamily: "Georgia, serif" }}>Overview</h1>
-        <p className="text-sm text-gray-400 mt-1">Platform health at a glance</p>
+        <h1 className="text-2xl font-black text-gray-900 dark:text-gray-100" style={{ fontFamily: "Georgia, serif" }}>Overview</h1>
+        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Platform health at a glance</p>
       </div>
 
       {/* Stats */}
@@ -95,37 +95,37 @@ export default function AdminOverview() {
       <div className="grid md:grid-cols-2 gap-6">
 
         {/* Recent Users */}
-        <div className="bg-white rounded-2xl border border-rose-100 shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-rose-50">
-            <span className="text-sm font-bold text-gray-900">Recent Users</span>
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-rose-100 dark:border-gray-800 shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-rose-50 dark:border-gray-800">
+            <span className="text-sm font-bold text-gray-900 dark:text-gray-100">Recent Users</span>
             <Link to="/admin/users" className="flex items-center gap-1 text-xs text-rose-500 hover:text-rose-700 font-semibold transition">
               View all <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
-          <div className="divide-y divide-rose-50">
+          <div className="divide-y divide-rose-50 dark:divide-gray-800">
             {recentUsers.length === 0 ? (
-              <div className="py-10 text-center text-sm text-gray-300">No users yet</div>
+              <div className="py-10 text-center text-sm text-gray-300 dark:text-gray-600">No users yet</div>
             ) : recentUsers.map(u => (
-              <div key={u.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-rose-50/40 transition">
+              <div key={u.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-rose-50/40 dark:hover:bg-gray-800/40 transition">
                 <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-rose-400 to-fuchsia-500 grid place-items-center text-white text-xs font-bold flex-shrink-0">
                   {u.name[0]?.toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-semibold text-gray-900 truncate">{u.name}</span>
-                    {u.is_plus && <span className="text-[9px] font-black bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">✦ PLUS</span>}
+                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{u.name}</span>
+                    {u.is_plus && <span className="text-[9px] font-black bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded-full">✦ PLUS</span>}
                   </div>
-                  <div className="text-[11px] text-gray-400 truncate">{u.email}</div>
+                  <div className="text-[11px] text-gray-400 dark:text-gray-500 truncate">{u.email}</div>
                 </div>
                 <div className="text-right flex-shrink-0">
                   {u.partner ? (
-                    <div className="flex items-center gap-1 text-[10px] text-rose-500 font-semibold">
+                    <div className="flex items-center gap-1 text-[10px] text-rose-500 dark:text-rose-400 font-semibold">
                       <Heart className="w-2.5 h-2.5" fill="currentColor" />{u.partner.name}
                     </div>
                   ) : (
-                    <div className="text-[10px] text-gray-300">No partner</div>
+                    <div className="text-[10px] text-gray-300 dark:text-gray-600">No partner</div>
                   )}
-                  <div className="text-[10px] text-gray-300 mt-0.5">
+                  <div className="text-[10px] text-gray-300 dark:text-gray-600 mt-0.5">
                     {new Date(u.created_at).toLocaleDateString()}
                   </div>
                 </div>
@@ -135,30 +135,30 @@ export default function AdminOverview() {
         </div>
 
         {/* Recent Games */}
-        <div className="bg-white rounded-2xl border border-rose-100 shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-rose-50">
-            <span className="text-sm font-bold text-gray-900">Recent Games</span>
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-rose-100 dark:border-gray-800 shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-rose-50 dark:border-gray-800">
+            <span className="text-sm font-bold text-gray-900 dark:text-gray-100">Recent Games</span>
             <Link to="/admin/games" className="flex items-center gap-1 text-xs text-rose-500 hover:text-rose-700 font-semibold transition">
               View all <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
-          <div className="divide-y divide-rose-50">
+          <div className="divide-y divide-rose-50 dark:divide-gray-800">
             {recentGames.length === 0 ? (
-              <div className="py-10 text-center text-sm text-gray-300">No games yet</div>
+              <div className="py-10 text-center text-sm text-gray-300 dark:text-gray-600">No games yet</div>
             ) : recentGames.map(g => (
-              <div key={g.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-rose-50/40 transition">
-                <div className="h-8 w-8 rounded-xl bg-rose-50 grid place-items-center text-lg flex-shrink-0">
+              <div key={g.id} className="flex items-center gap-3 px-5 py-3.5 hover:bg-rose-50/40 dark:hover:bg-gray-800/40 transition">
+                <div className="h-8 w-8 rounded-xl bg-rose-50 dark:bg-gray-800 grid place-items-center text-lg flex-shrink-0">
                   {GAME_EMOJI[g.kind] ?? "🎮"}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-gray-900 capitalize">{g.kind.replace(/_/g," ")}</div>
-                  <div className="text-[11px] text-gray-400">{g.lobby_name ?? "Session"} · {g.players} players</div>
+                  <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 capitalize">{g.kind.replace(/_/g," ")}</div>
+                  <div className="text-[11px] text-gray-400 dark:text-gray-500">{g.lobby_name ?? "Session"} · {g.players} players</div>
                 </div>
                 <div className="text-right flex-shrink-0">
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                    g.status === "active" ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-400"
+                    g.status === "active" ? "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300" : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500"
                   }`}>{g.status === "active" ? "● Live" : "Ended"}</span>
-                  <div className="text-[10px] text-gray-300 mt-1">
+                  <div className="text-[10px] text-gray-300 dark:text-gray-600 mt-1">
                     {new Date(g.started_at).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" })}
                   </div>
                 </div>
