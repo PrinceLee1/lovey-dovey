@@ -4,18 +4,19 @@ import { useAuth } from "../../context/AuthContext";
 import {
   LayoutDashboard, Users, Gamepad2, BarChart3,
   Settings, Heart, LogOut, Bell, ChevronRight, Shield, MessageSquare,
-  Menu, X, Sun, Moon,
+  Menu, X, Sun, Moon, Megaphone,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 const NAV = [
-  { to: "/admin",          label: "Overview",  icon: LayoutDashboard, end: true },
-  { to: "/admin/users",    label: "Users",     icon: Users            },
-  { to: "/admin/games",    label: "Games",     icon: Gamepad2         },
-  { to: "/admin/feedback", label: "Feedback",  icon: MessageSquare    },
-  { to: "/admin/reports",  label: "Reports",   icon: BarChart3        },
-  { to: "/admin/settings", label: "Settings",  icon: Settings         },
+  { to: "/admin",              label: "Overview",       icon: LayoutDashboard, end: true },
+  { to: "/admin/users",        label: "Users",          icon: Users            },
+  { to: "/admin/games",        label: "Games",          icon: Gamepad2         },
+  { to: "/admin/feedback",     label: "Feedback",       icon: MessageSquare    },
+  { to: "/admin/announcements",label: "Features & Tips",icon: Megaphone        },
+  { to: "/admin/reports",      label: "Reports",        icon: BarChart3        },
+  { to: "/admin/settings",     label: "Settings",       icon: Settings         },
 ];
 
 function useAdminTheme() {

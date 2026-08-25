@@ -21,6 +21,7 @@ import AdminSettings from './pages/admin/AdminSettings';
 import AdminReports from './pages/admin/AdminReports';
 import AdminGames from './pages/admin/AdminGames';
 import AdminFeedback from './pages/admin/AdminFeedback';
+import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const { token } = useAuth();
@@ -86,6 +87,7 @@ export default function App() {
               <Route path="users" element={<AdminUsers />} />
               <Route path="games"    element={<AdminGames />} />
               <Route path="feedback" element={<AdminFeedback />} />
+              <Route path="announcements" element={<AdminAnnouncements />} />
               <Route path="reports"  element={<AdminReports />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>
