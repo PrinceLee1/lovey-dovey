@@ -306,6 +306,9 @@ export default function CoupleSession() {
             <div className="text-sm text-gray-500 dark:text-gray-400">
               We sent them an invite to play {m.label}. This screen updates the moment they join.
             </div>
+            <div className="text-xs text-gray-400 dark:text-gray-500">
+              Ask {partnerName} to check their email — including the spam/junk folder — if it doesn't show up soon.
+            </div>
           </>
         ) : (
           <>
