@@ -138,7 +138,7 @@ export default function AdminUsers() {
     <div className="p-4 md:p-8 max-w-7xl space-y-5">
       <div>
         <h1 className="text-2xl font-black text-gray-900 dark:text-gray-100" style={{ fontFamily: "Georgia, serif" }}>Users</h1>
-        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">{meta.total.toLocaleString()} total members</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">{users.length} total members</p>
       </div>
 
       {/* Controls */}
