@@ -9,6 +9,7 @@ import { useToast } from '../context/ToastContext';
 import { usePresenceMap } from '../context/PresenceContext';
 import type { PresenceStatus } from '../hooks/usePresence';
 import { useGameInvitesContext } from '../context/GameInvitesContext';
+import { useFriendFeed, type FeedItem } from '../hooks/useFriendFeed';
 
 type Friend = {
   id: number;
@@ -31,16 +32,47 @@ type MyLobby = { id: number; code: string; name: string; status: string; game_ki
 
 type InviteStep = 'choice' | 'existing-lobby' | null;
 
-type TabKey = 'friends' | 'requests' | 'find';
+type TabKey = 'friends' | 'activity' | 'requests' | 'find';
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'friends', label: 'Friends' },
+  { key: 'activity', label: 'Activity' },
   { key: 'requests', label: 'Requests' },
   { key: 'find', label: 'Find Players' },
 ];
 
 function initials(name: string) {
   return name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase() || '?';
+}
+
+function timeAgo(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins} minute${mins === 1 ? '' : 's'} ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days} day${days === 1 ? '' : 's'} ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
+function activityText(item: FeedItem, myUserId?: number): string {
+  const m = item.metadata;
+  switch (item.activity_type) {
+    case 'game_completed':
+      return `${item.actor.name} completed ${m.game_name} 🎮`;
+    case 'xp_gained':
+      return `${item.actor.name} earned ${m.amount} XP ⭐`;
+    case 'friend_added':
+      return Number(m.friend_id) === myUserId
+        ? `You and ${item.actor.name} are now friends 🎉`
+        : `${item.actor.name} and ${m.friend_name} are now friends 🎉`;
+    case 'streak_milestone':
+      return `${item.actor.name} is on a ${m.streak_days}-day streak 🔥`;
+    default:
+      return `${item.actor.name} did something`;
+  }
 }
 
 function Avatar({ name, avatarUrl }: { name: string; avatarUrl: string | null }) {
@@ -74,6 +106,7 @@ export default function FriendsPage() {
   const { toast } = useToast();
   const presenceMap = usePresenceMap();
   const { sendInvite } = useGameInvitesContext();
+  const { feed, loading: loadingFeed } = useFriendFeed();
 
   const [tab, setTab] = useState<TabKey>('friends');
 
@@ -363,6 +396,30 @@ export default function FriendsPage() {
                     </div>
                   );
                 })}
+              </div>
+            )
+          )}
+
+          {/* Tab: Activity */}
+          {tab === 'activity' && (
+            loadingFeed ? (
+              <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-10">Loading…</div>
+            ) : feed.length === 0 ? (
+              <EmptyState text="No activity yet — play some games with friends!" />
+            ) : (
+              <div className="space-y-3">
+                {feed.map((item) => (
+                  <div
+                    key={item.id}
+                    className="rounded-2xl border border-rose-100 dark:border-gray-800 p-4 flex items-center gap-3"
+                  >
+                    <Avatar name={item.actor.name} avatarUrl={item.actor.avatar_url} />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm text-gray-900 dark:text-gray-100">{activityText(item, user?.id)}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{timeAgo(item.created_at)}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )
           )}
