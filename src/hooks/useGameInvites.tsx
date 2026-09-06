@@ -68,6 +68,15 @@ export function useGameInvites() {
     }
   }, [invite]);
 
+  const sendInvite = useCallback(async (receiverId: number, gameId: number, lobbyId?: number) => {
+    const { data } = await api.post('/invites/send', {
+      receiver_id: receiverId,
+      game_id: gameId,
+      lobby_id: lobbyId ?? null,
+    });
+    return data.invite;
+  }, []);
+
   const banner = (
     <AnimatePresence>
       {invite && (
@@ -118,5 +127,5 @@ export function useGameInvites() {
     </AnimatePresence>
   );
 
-  return { invite, accept, decline, dismiss, banner };
+  return { invite, accept, decline, dismiss, sendInvite, banner };
 }

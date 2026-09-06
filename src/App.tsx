@@ -11,6 +11,9 @@ import Landing from './pages/Landing';
 import { ToastProvider } from "./components/Toast";
 import { usePresence } from './hooks/usePresence';
 import { useGameInvites } from './hooks/useGameInvites';
+import { PresenceContext } from './context/PresenceContext';
+import { GameInvitesContext } from './context/GameInvitesContext';
+import FriendsPage from './pages/Friends';
 
 // Admin imports
 import AdminLayout from './pages/admin/AdminLayout';
@@ -31,16 +34,18 @@ import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 // presence effect) on every navigation.
 function AuthenticatedLayout() {
   const { token } = useAuth();
-  usePresence();
-  const { banner } = useGameInvites();
+  const { presenceMap } = usePresence();
+  const { banner, sendInvite } = useGameInvites();
 
   if (!token) return <Navigate to="/" replace />;
 
   return (
-    <>
-      {banner}
-      <Outlet />
-    </>
+    <PresenceContext.Provider value={presenceMap}>
+      <GameInvitesContext.Provider value={{ sendInvite }}>
+        {banner}
+        <Outlet />
+      </GameInvitesContext.Provider>
+    </PresenceContext.Provider>
   );
 }
 
@@ -59,6 +64,7 @@ export default function App() {
             <Route element={<AuthenticatedLayout />}>
               <Route path="/games" element={<GamesDashboard />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/friends" element={<FriendsPage />} />
               <Route path="/lobby/:code" element={<LobbyRoom />} />
               <Route path="/session/:code" element={<CoupleSession />} />
             </Route>

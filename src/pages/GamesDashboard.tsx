@@ -366,6 +366,10 @@ export default function GamesDashboard() {
               <MessageSquare className="w-4 h-4" />
               <span className="hidden sm:inline">Feedback</span>
             </button>
+            <Link to="/friends" className="rounded-xl border dark:border-gray-700 px-3 py-2 text-sm flex items-center gap-2 text-gray-800 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-800">
+              <Users className="w-4 h-4" />
+              <span className="hidden sm:inline">Friends</span>
+            </Link>
             <Link to="/settings" className="rounded-xl border dark:border-gray-700 px-3 py-2 text-sm flex items-center gap-2 text-gray-800 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-800">
               <Settings className="w-4 h-4" />
               Settings
@@ -658,24 +662,21 @@ export default function GamesDashboard() {
             <LeaderboardCard />
             <UpcomingLobbies variants={variants} />
 
-            {/* Friends Online */}
+            {/* Friends */}
             <motion.div {...variants} className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="font-display font-semibold text-gray-900 dark:text-gray-100">Friends Online</div>
-                <span className="bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 text-xs px-2 py-1 rounded-full font-medium">
-                  Coming Soon
-                </span>
+              <div className="flex items-center justify-between mb-3">
+                <div className="font-display font-semibold text-gray-900 dark:text-gray-100">Friends</div>
+                <Users className="w-5 h-5 text-fuchsia-500" />
               </div>
-              <div className="flex -space-x-2 overflow-hidden">
-                {friends.map((f) => (
-                  <div
-                    key={f}
-                    className="h-9 w-9 rounded-full ring-2 ring-white dark:ring-gray-900 bg-gradient-to-br from-fuchsia-400 to-pink-500 grid place-items-center text-white text-xs font-semibold"
-                  >
-                    {f[0]}
-                  </div>
-                ))}
-              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                See who's online, manage requests, and invite friends to play.
+              </p>
+              <Link
+                to="/friends"
+                className="block w-full text-center rounded-xl py-2.5 text-sm font-medium bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white"
+              >
+                View Friends
+              </Link>
             </motion.div>
           </div>
         </div>
@@ -882,8 +883,6 @@ function Segmented({ value, onChange, options }: {
     </div>
   );
 }
-
-const friends = ["Sam", "Joy", "Liam", "Zoe", "Kai"];
 
 function LobbiesSection() {
   const [open, setOpen] = useState(false);
