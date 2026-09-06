@@ -1,15 +1,16 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Onboarding from './pages/Onboarding';
 import GamesDashboard from './pages/GamesDashboard';
 import SignIn from './pages/SignIn';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
-import type { JSX } from 'react';
 import Settings from './pages/Settings';
 import LobbyRoom from './pages/LobbyRoom';
 import Landing from './pages/Landing';
 import { ToastProvider } from "./components/Toast";
+import { usePresence } from './hooks/usePresence';
+import { useGameInvites } from './hooks/useGameInvites';
 
 // Admin imports
 import AdminLayout from './pages/admin/AdminLayout';
@@ -23,10 +24,24 @@ import AdminGames from './pages/admin/AdminGames';
 import AdminFeedback from './pages/admin/AdminFeedback';
 import AdminAnnouncements from './pages/admin/AdminAnnouncements';
 
-function PrivateRoute({ children }: { children: JSX.Element }) {
+// Root layout for every authenticated (non-admin) page. Mounted once via a
+// nested <Route element={...}> below, so it stays mounted across navigation
+// between /games, /settings, /lobby/:code, /session/:code — unlike a
+// per-route wrapper, which would remount (and re-fire the online/offline
+// presence effect) on every navigation.
+function AuthenticatedLayout() {
   const { token } = useAuth();
+  usePresence();
+  const { banner } = useGameInvites();
+
   if (!token) return <Navigate to="/" replace />;
-  return children;
+
+  return (
+    <>
+      {banner}
+      <Outlet />
+    </>
+  );
 }
 
 export default function App() {
@@ -41,38 +56,12 @@ export default function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/password-reset/:token" element={<ResetPassword />} />
 
-            <Route
-              path="/games"
-              element={
-                <PrivateRoute>
-                  <GamesDashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <PrivateRoute>
-                  <Settings />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/lobby/:code"
-              element={
-                <PrivateRoute>
-                  <LobbyRoom />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/session/:code"
-              element={
-                <PrivateRoute>
-                  <CoupleSession />
-                </PrivateRoute>
-              }
-            />
+            <Route element={<AuthenticatedLayout />}>
+              <Route path="/games" element={<GamesDashboard />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/lobby/:code" element={<LobbyRoom />} />
+              <Route path="/session/:code" element={<CoupleSession />} />
+            </Route>
 
             {/* Admin area */}
             <Route
