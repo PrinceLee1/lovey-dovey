@@ -8,7 +8,7 @@
 //     frontend listens and shows floating emoji for all players
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../libs/axios";
 import { echo } from "../libs/echo";
 import {
@@ -19,6 +19,9 @@ import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import SyncedLobbyGameRunner from "../games/SyncedLobbyGameRunner";
 import { useToast } from "../context/ToastContext";
+import { usePresenceMap } from "../context/PresenceContext";
+import { useGameInvitesContext } from "../context/GameInvitesContext";
+import { UserPlus } from "lucide-react";
 type Lobby   = { id: number; code: string; name: string; max_players: number; privacy: "Public"|"Private"; status: string; host_id: number; start_at?: string|null };
 type Member  = { id: number; name: string; avatar?: string|null };
 type Message = {
@@ -46,8 +49,11 @@ const POLL_MS   = 3000;
 export default function LobbyRoom() {
   const { code = "" } = useParams();
   const nav            = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user }       = useAuth();
   const { toast } = useToast();
+  const presenceMap = usePresenceMap();
+  const { sendInvite } = useGameInvitesContext();
 
   const [lobby, setLobby]               = useState<Lobby|null>(null);
   const [members, setMembers]           = useState<Member[]>([]);
@@ -59,6 +65,10 @@ export default function LobbyRoom() {
   const [partyScores, setPartyScores]   = useState<Record<string,number>>({});
   const [floatingReactions, setFloatingReactions] = useState<{id:string; emoji:string; x:number}[]>([]);
   const [joinToast, setJoinToast]       = useState<string|null>(null);
+  const [friends, setFriends]           = useState<{ id: number; name: string; avatar_url: string | null; presence_status: string | null }[]>([]);
+  const [catalogIdByKind, setCatalogIdByKind] = useState<Record<string, number>>({});
+  const [invitedIds, setInvitedIds]     = useState<Set<number>>(new Set());
+  const [invitingId, setInvitingId]     = useState<number|null>(null);
 
   const listRef     = useRef<HTMLDivElement>(null);
   const lobbyIdRef  = useRef<number|null>(null);
@@ -66,6 +76,7 @@ export default function LobbyRoom() {
   const pollRef     = useRef<number|null>(null);
   // Track real server IDs we've received via broadcast to avoid duplicates
   const receivedServerIds = useRef<Set<number>>(new Set());
+  const autoInvitedRef = useRef<string | null>(null);
 
   const isHost      = lobby && String(user?.id) === String(lobby.host_id);
   const memberNames = members.map(m => m.name);
@@ -186,6 +197,16 @@ export default function LobbyRoom() {
     pollRef.current = window.setInterval(pollData, POLL_MS);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [pollData]);
+
+  // ── Friends + game catalog (for the "Invite Friends" panel) ────────────────
+  useEffect(() => {
+    api.get("/friends").then(({ data }) => setFriends(data.friends ?? [])).catch(() => {});
+    api.get("/games").then(({ data }) => {
+      const map: Record<string, number> = {};
+      for (const g of (data.games ?? []) as { id: number; kind: string }[]) map[g.kind] = g.id;
+      setCatalogIdByKind(map);
+    }).catch(() => {});
+  }, []);
 
   // ── Presence + live events ────────────────────────────────────────────────
   useEffect(() => {
@@ -343,6 +364,52 @@ export default function LobbyRoom() {
   const modeInfo     = (kind: string) => GAME_MODES.find(m => m.kind === kind);
   const displayCount = members.length;
   const displayMax   = lobby?.max_players ?? 4;
+
+  // The game currently selected for this lobby, for invite purposes: the
+  // active session's kind if one is running, otherwise whichever GAME_MODE
+  // is first suggested (same list/order the "Suggested" card below uses).
+  // Not every lobby game kind has a row in the `games` catalog table
+  // (hot_seat / would_you_rather are lobby-only, started ad hoc), so we only
+  // ever pick one that resolves to a real game_id.
+  const inviteGameKind = activeGame?.kind ?? GAME_MODES.find(m => catalogIdByKind[m.kind])?.kind;
+  const inviteGameId   = inviteGameKind ? catalogIdByKind[inviteGameKind] : undefined;
+
+  const memberIds = new Set(members.map(m => m.id));
+  const onlineFriends = friends.filter(f => {
+    const status = presenceMap[f.id]?.status ?? f.presence_status ?? "offline";
+    return (status === "online" || status === "idle") && !memberIds.has(f.id);
+  });
+
+  async function inviteFriendToLobby(friendId: number) {
+    if (!lobby || !inviteGameId) return;
+    setInvitingId(friendId);
+    try {
+      await sendInvite(friendId, inviteGameId, lobby.id);
+      setInvitedIds(prev => new Set(prev).add(friendId));
+      toast.success("Invite sent!");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Couldn't send invite");
+    } finally {
+      setInvitingId(null);
+    }
+  }
+
+  // ── Auto-invite a friend pre-selected on the Friends page (?inviteFriend=id) ─
+  useEffect(() => {
+    const pending = searchParams.get("inviteFriend");
+    if (!pending || !lobby || !inviteGameId) return;
+    // Guards against firing twice for the same query value — React 18
+    // StrictMode double-invokes effects in dev, and this send isn't
+    // idempotent on the backend (each call creates a new invite row).
+    if (autoInvitedRef.current === pending) return;
+    autoInvitedRef.current = pending;
+
+    inviteFriendToLobby(Number(pending)).finally(() => {
+      searchParams.delete("inviteFriend");
+      setSearchParams(searchParams, { replace: true });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lobby, inviteGameId]);
 
   // ── Time formatter ────────────────────────────────────────────────────────
   function formatTime(iso: string) {
@@ -725,6 +792,52 @@ export default function LobbyRoom() {
                 {displayCount < 2 && <div className="text-xs text-gray-400 dark:text-gray-500 text-center py-2">Waiting for players…</div>}
                 {!isHost && displayCount >= 2 && <div className="text-xs text-gray-400 dark:text-gray-500 text-center mt-2">Ask the host to start a game</div>}
               </div>
+            </div>
+          )}
+
+          {/* Invite Friends */}
+          {!activeGame && (
+            <div className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 p-5">
+              <div className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                <UserPlus className="w-4 h-4 text-fuchsia-500"/> Invite Friends
+              </div>
+              {onlineFriends.length === 0 ? (
+                <div className="text-sm text-gray-400 dark:text-gray-500">None of your friends are online right now</div>
+              ) : (
+                <div className="space-y-2">
+                  {onlineFriends.map(f => {
+                    const status = presenceMap[f.id]?.status ?? f.presence_status ?? "offline";
+                    const invited = invitedIds.has(f.id);
+                    return (
+                      <div key={f.id} className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="relative flex-shrink-0">
+                            {f.avatar_url
+                              ? <img src={f.avatar_url} alt={f.name} className="h-8 w-8 rounded-full object-cover"/>
+                              : <div className="h-8 w-8 rounded-full bg-gradient-to-br from-pink-400 to-fuchsia-500 grid place-items-center text-white text-xs font-bold">
+                                  {f.name[0]?.toUpperCase()}
+                                </div>
+                            }
+                            <div className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white dark:border-gray-900 ${status === "online" ? "bg-emerald-500" : "bg-gray-400 dark:bg-gray-600"}`}/>
+                          </div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{f.name}</div>
+                        </div>
+                        <button
+                          onClick={() => inviteFriendToLobby(f.id)}
+                          disabled={invited || invitingId === f.id || !inviteGameId}
+                          className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                            invited
+                              ? "border dark:border-gray-700 text-gray-500 dark:text-gray-400"
+                              : "bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white disabled:opacity-50"
+                          }`}
+                        >
+                          {invited ? "Invited" : "Invite"}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>

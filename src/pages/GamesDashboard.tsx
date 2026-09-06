@@ -78,6 +78,13 @@ export default function GamesDashboard() {
   const [plusModalReason, setPlusModalReason] = useState<'spicy' | 'erotic' | 'general'>('general');
   const [invite, setInvite] = useState<null | { code: string; kind: string; from: string; url: string }>(null);
 
+  // ─── PRE-SELECTED "INVITE THIS FRIEND ONCE THE LOBBY EXISTS" (from /friends) ─
+  const [autoOpenCreateLobby] = useState(() => searchParams.get('createLobby') === '1');
+  const [pendingInviteFriendId] = useState<number | null>(() => {
+    const v = searchParams.get('inviteFriendId');
+    return v ? Number(v) : null;
+  });
+
   // ─── POST-GAME SHARE STATE ─────────────────────────────────────────────────
   const [shareResult, setShareResult] = useState<{ game: Game; xp: number } | null>(null);
 
@@ -95,6 +102,15 @@ export default function GamesDashboard() {
       showToast('🎉 Welcome to Plus! Spicy & Erotic games are now unlocked.');
       // Remove the query param so refresh doesn't re-trigger
       searchParams.delete('subscribed');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, []);
+
+  // ─── DETECT "INVITE FRIEND" REDIRECT FROM /friends ────────────────────────
+  useEffect(() => {
+    if (searchParams.get('createLobby') === '1') {
+      searchParams.delete('createLobby');
+      searchParams.delete('inviteFriendId');
       setSearchParams(searchParams, { replace: true });
     }
   }, []);
@@ -456,7 +472,7 @@ export default function GamesDashboard() {
                   if (pick) tryStartGame(pick);
                 }}
               />
-              <LobbiesSection />
+              <LobbiesSection autoOpen={autoOpenCreateLobby} inviteFriendId={pendingInviteFriendId} />
               {/* Only relevant before you're paired — hide once a partner is linked */}
               {!partnerActive && (
                 <ActionCard
@@ -884,9 +900,25 @@ function Segmented({ value, onChange, options }: {
   );
 }
 
-function LobbiesSection() {
+function LobbiesSection({ autoOpen, inviteFriendId }: { autoOpen?: boolean; inviteFriendId?: number | null }) {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [lobbyInvite, setLobbyInvite] = useState<{ code: string; invite_url: string } | null>(null);
+
+  useEffect(() => {
+    if (autoOpen) setOpen(true);
+  }, [autoOpen]);
+
+  function handleCreated(p: { code: string; invite_url: string }) {
+    // Came here from the Friends page with a friend pre-selected — skip the
+    // "share this link" popup and go straight to the lobby, which auto-sends
+    // that friend an invite once it (and the game catalog) finish loading.
+    if (inviteFriendId) {
+      navigate(`/lobby/${p.code}?inviteFriend=${inviteFriendId}`);
+      return;
+    }
+    setLobbyInvite(p);
+  }
 
   return (
     <>
@@ -903,7 +935,7 @@ function LobbiesSection() {
         </div>
       </div>
 
-      <CreateLobbyModal open={open} onClose={() => setOpen(false)} onCreated={(p) => setLobbyInvite(p)} />
+      <CreateLobbyModal open={open} onClose={() => setOpen(false)} onCreated={handleCreated} />
 
       {lobbyInvite && (
         <Modal onClose={() => setLobbyInvite(null)}>
