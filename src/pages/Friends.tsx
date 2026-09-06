@@ -239,25 +239,29 @@ export default function FriendsPage() {
           </p>
 
           {/* Tabs */}
-          <div className="flex gap-2 border-b dark:border-gray-800 mb-5 overflow-x-auto">
-            {TABS.map((t) => (
-              <button
-                key={t.key}
-                onClick={() => setTab(t.key)}
-                className={`relative px-4 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition ${
-                  tab === t.key
-                    ? 'border-fuchsia-600 text-fuchsia-700 dark:text-fuchsia-300'
-                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                }`}
-              >
-                {t.label}
-                {t.key === 'requests' && requests.length > 0 && (
-                  <span className="ml-2 inline-flex items-center justify-center h-5 min-w-5 px-1 rounded-full bg-rose-600 text-white text-xs">
-                    {requests.length}
-                  </span>
-                )}
-              </button>
-            ))}
+          <div className="relative mb-5">
+            <div className="flex gap-1 sm:gap-2 border-b dark:border-gray-800 overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {TABS.map((t) => (
+                <button
+                  key={t.key}
+                  onClick={() => setTab(t.key)}
+                  className={`relative px-2.5 sm:px-4 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition shrink-0 ${
+                    tab === t.key
+                      ? 'border-fuchsia-600 text-fuchsia-700 dark:text-fuchsia-300'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                  }`}
+                >
+                  {t.label}
+                  {t.key === 'requests' && requests.length > 0 && (
+                    <span className="ml-2 inline-flex items-center justify-center h-5 min-w-5 px-1 rounded-full bg-rose-600 text-white text-xs">
+                      {requests.length}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+            {/* Hints that the tab row scrolls horizontally on narrow screens */}
+            <div className="sm:hidden pointer-events-none absolute right-0 top-0 bottom-1 w-8 bg-gradient-to-l from-white dark:from-gray-900 to-transparent" />
           </div>
 
           {/* Tab: Friends */}

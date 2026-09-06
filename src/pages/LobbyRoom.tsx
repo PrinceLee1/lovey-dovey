@@ -463,14 +463,18 @@ export default function LobbyRoom() {
       </div>
 
       <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-5">
+        {/* min-w-0 is required here: a CSS grid item's default min-width is
+            "auto", which lets its content's intrinsic width (e.g. an
+            unwrapped button row) force the grid track — and this whole
+            card — wider than the viewport instead of wrapping/truncating. */}
+        <div className="min-w-0 lg:col-span-2 space-y-5">
 
           {/* Header */}
           <div className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 p-5">
             {lobby ? (
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
                     {lobby.privacy === "Public" ? <Globe className="w-4 h-4 text-emerald-500"/> : <Lock className="w-4 h-4 text-amber-500"/>}
                     <span className="text-xs text-gray-500 dark:text-gray-400">Code: <b className="font-mono">{lobby.code}</b></span>
                     <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border ${presenceReady ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-900" : "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-900"}`}>
@@ -478,13 +482,13 @@ export default function LobbyRoom() {
                       {presenceReady ? "Live" : "Polling…"}
                     </span>
                   </div>
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{lobby.name}</h1>
-                  <div className="flex items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 break-words">{lobby.name}</h1>
+                  <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">
                     <span className="flex items-center gap-1"><Users className="w-4 h-4"/>{displayCount}/{displayMax} online</span>
                     {isHost && <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400"><Crown className="w-4 h-4"/> You're the host</span>}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   <button onClick={copyInvite} className="rounded-xl px-3 py-2 border dark:border-gray-700 dark:text-gray-200 text-sm inline-flex items-center gap-1 hover:bg-gray-50 dark:hover:bg-gray-800"><Copy className="w-4 h-4"/> Invite</button>
                   <button onClick={leave} className="rounded-xl px-3 py-2 border text-sm inline-flex items-center gap-1 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900 hover:bg-red-50 dark:hover:bg-red-950/40"><LogOut className="w-4 h-4"/> Leave</button>
                 </div>
@@ -555,18 +559,18 @@ export default function LobbyRoom() {
           {/* ── WHATSAPP-STYLE CHAT ──────────────────────────────────────── */}
           <div className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 overflow-hidden">
             {/* Chat header */}
-            <div className="px-5 py-4 border-b border-rose-50 dark:border-gray-800 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-pink-400 to-fuchsia-500 grid place-items-center text-white text-sm font-bold">
+            <div className="px-5 py-4 border-b border-rose-50 dark:border-gray-800 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-9 w-9 shrink-0 rounded-full bg-gradient-to-br from-pink-400 to-fuchsia-500 grid place-items-center text-white text-sm font-bold">
                   {lobby?.name?.[0] ?? "L"}
                 </div>
-                <div>
-                  <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{lobby?.name ?? "Party Chat"}</div>
+                <div className="min-w-0">
+                  <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">{lobby?.name ?? "Party Chat"}</div>
                   <div className="text-xs text-emerald-600 dark:text-emerald-400">{displayCount} online</div>
                 </div>
               </div>
               {/* Quick reactions in header */}
-              <div className="flex gap-1">
+              <div className="flex gap-1 shrink-0">
                 {REACTIONS.slice(0, 4).map(e => (
                   <button key={e} onClick={() => sendReaction(e)}
                     className="text-base px-1.5 py-1 rounded-xl hover:bg-rose-50 dark:hover:bg-gray-800 active:scale-125 transition">
@@ -702,7 +706,7 @@ export default function LobbyRoom() {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-5">
+        <div className="min-w-0 space-y-5">
           <div className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 p-5">
             <div className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center justify-between">
               <div className="flex items-center gap-2"><Users className="w-4 h-4 text-fuchsia-500"/> Players ({displayCount}/{displayMax})</div>

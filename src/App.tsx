@@ -15,6 +15,8 @@ import { PresenceContext } from './context/PresenceContext';
 import { GameInvitesContext } from './context/GameInvitesContext';
 import FriendsPage from './pages/Friends';
 import ProfilePage from './pages/Profile';
+import MobileTabBar from './components/MobileTabBar';
+import InstallPrompt from './components/InstallPrompt';
 
 // Admin imports
 import AdminLayout from './pages/admin/AdminLayout';
@@ -45,6 +47,9 @@ function AuthenticatedLayout() {
       <GameInvitesContext.Provider value={{ sendInvite }}>
         {banner}
         <Outlet />
+        {/* Clears the fixed MobileTabBar below on small screens */}
+        <div className="h-16 md:hidden" />
+        <MobileTabBar />
       </GameInvitesContext.Provider>
     </PresenceContext.Provider>
   );
@@ -55,6 +60,7 @@ export default function App() {
     <AuthProvider>
       <ToastProvider>
         <BrowserRouter>
+          <InstallPrompt />
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/onboarding" element={<Onboarding />} />

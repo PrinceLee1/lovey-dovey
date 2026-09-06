@@ -369,19 +369,23 @@ export default function GamesDashboard() {
             <span className="font-display font-semibold text-gray-800 dark:text-gray-100 tracking-tight">LoveyDovey</span>
             {/* Plus badge in nav */}
             {user?.is_plus && (
-              <span className="flex items-center gap-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs px-2.5 py-1 rounded-full font-semibold">
-                <Crown className="w-3 h-3" /> {onTrial ? `Plus Trial · ${trialDaysLeft}d left` : "Plus"}
+              <span className="flex items-center gap-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs px-2.5 py-1 rounded-full font-semibold whitespace-nowrap">
+                <Crown className="w-3 h-3 shrink-0" />
+                <span className="sm:hidden">Plus</span>
+                <span className="hidden sm:inline">{onTrial ? `Plus Trial · ${trialDaysLeft}d left` : "Plus"}</span>
               </span>
             )}
           </div>
           <div className="flex items-center gap-2">
+            {/* Friends/Settings/Profile move to the bottom tab bar on mobile;
+                Feedback isn't a tab, so it stays reachable everywhere. */}
             <Link
               to="/profile/me"
               title="View your profile"
-              className="rounded-xl border dark:border-gray-700 pl-2 pr-3 py-1.5 text-sm flex items-center gap-2 text-gray-800 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-800"
+              className="hidden md:flex rounded-xl border dark:border-gray-700 pl-2 pr-3 py-1.5 text-sm items-center gap-2 text-gray-800 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-800"
             >
               <Avatar name={user?.name ?? '?'} avatarUrl={user?.avatar_url ?? null} size="sm" />
-              <span className="hidden sm:inline">{user?.name}</span>
+              <span>{user?.name}</span>
             </Link>
             <button
               onClick={() => setShowFeedbackModal(true)}
@@ -391,11 +395,11 @@ export default function GamesDashboard() {
               <MessageSquare className="w-4 h-4" />
               <span className="hidden sm:inline">Feedback</span>
             </button>
-            <Link to="/friends" className="rounded-xl border dark:border-gray-700 px-3 py-2 text-sm flex items-center gap-2 text-gray-800 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-800">
+            <Link to="/friends" className="hidden md:flex rounded-xl border dark:border-gray-700 px-3 py-2 text-sm items-center gap-2 text-gray-800 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-800">
               <Users className="w-4 h-4" />
-              <span className="hidden sm:inline">Friends</span>
+              <span>Friends</span>
             </Link>
-            <Link to="/settings" className="rounded-xl border dark:border-gray-700 px-3 py-2 text-sm flex items-center gap-2 text-gray-800 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-800">
+            <Link to="/settings" className="hidden md:flex rounded-xl border dark:border-gray-700 px-3 py-2 text-sm items-center gap-2 text-gray-800 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-800">
               <Settings className="w-4 h-4" />
               Settings
             </Link>
