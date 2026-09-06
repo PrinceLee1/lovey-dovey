@@ -76,7 +76,7 @@ export default function WouldYouRather({
     (async () => {
       try {
         const { data } = await api.post("/ai/truth-dare", {
-          category, tone: "PG-13", count_truths: 15, count_dares: 0, personalize: false,
+          category, tone: "PG-13", count_truths: 30, count_dares: 0, personalize: false,
         });
         const wyrs: WYRQuestion[] = (data.truths ?? [])
           .filter((t: string) => t.toLowerCase().includes(" or "))
