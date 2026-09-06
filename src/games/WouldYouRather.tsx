@@ -144,9 +144,10 @@ export default function WouldYouRather({
   const minorityPlayers = majorityIs === "A" ? bVoters : aVoters;
 
   function cast(player: string, choice: "A" | "B") {
+    // Everyone — host included — can only vote for themselves.
+    if (player !== user?.name) return;
+
     if (!isHost) {
-      // Non-host sends their own vote only
-      if (player !== user?.name) return;
       onVote?.(player, choice);
       setChoices(c => ({ ...c, [player]: choice })); // optimistic
       return;
@@ -242,7 +243,7 @@ export default function WouldYouRather({
             </div>
             <div className="space-y-2">
               {players.map(player => {
-                const canVote = isHost || player === user?.name;
+                const canVote = player === user?.name;
                 return (
                   <div key={player} className="flex items-center justify-between rounded-2xl border dark:border-gray-800 p-3">
                     <span className={`text-sm font-medium ${choices[player]?"text-gray-400 dark:text-gray-500":"text-gray-900 dark:text-gray-100"}`}>
