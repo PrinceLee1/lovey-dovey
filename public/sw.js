@@ -1,4 +1,4 @@
-const CACHE_NAME = 'loveydovey-shell-v1';
+const CACHE_NAME = 'loveydovey-shell-v2';
 const APP_SHELL = ['/', '/manifest.json', '/logo.png'];
 
 self.addEventListener('install', (event) => {
@@ -43,9 +43,27 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first for everything else — the app shell (HTML/CSS/JS/fonts/
-  // images). First load populates the cache as each asset is fetched, since
-  // Vite's hashed build filenames aren't known ahead of time to precache.
+  // Network-first for page navigations — the HTML shell decides which
+  // hashed JS/CSS bundle the SPA loads next, so it must never be served
+  // stale from cache while online. A cache-first shell would leave a
+  // PWA already installed to a home screen permanently frozen on
+  // whatever bundle was cached at install time, even after new deploys.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
+          return response;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || caches.match('/')))
+    );
+    return;
+  }
+
+  // Cache-first for everything else — hashed JS/CSS/fonts/images. Safe to
+  // cache indefinitely since Vite fingerprints these filenames by content
+  // hash, so a given URL's bytes never change.
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;
@@ -57,11 +75,7 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => {
-          // Offline and not cached — for a page navigation, fall back to the
-          // cached app shell so the SPA can still boot and route client-side.
-          if (request.mode === 'navigate') return caches.match('/');
-        });
+        .catch(() => {});
     })
   );
 });
