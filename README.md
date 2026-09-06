@@ -1,313 +1,161 @@
-**LoveyDovey — AI Party Games for Couples & Friends**
+# LoveyDovey — Frontend
+
+React + TypeScript + Vite single-page app for **LoveyDovey**, a real-time game app for couples and friend groups: synced two-player games, AI-generated party games for group lobbies, XP/streaks/leaderboards, and an admin dashboard.
 
-Playful, real-time games for couples and groups. AI-generated prompts, streaks & XP, leaderboards, and live lobbies.
+This is the frontend only. It talks to the [lovey-dovey-api](../lovey-dovey-api) Laravel backend over REST + Pusher-backed WebSockets.
 
+## Tech stack
 
-Replace the image above with your own: docs/screenshots/hero.png.
+- **React 19** + **TypeScript** + **Vite 7**
+- **React Router v7** (client-side routing, `BrowserRouter`)
+- **Tailwind CSS v3** (`darkMode: 'class'`) + **Framer Motion** for animation
+- **Axios** for REST calls, **Laravel Echo** + **Pusher JS** for real-time
+- **lucide-react** for icons
+
+No server-side rendering, no state management library beyond React context — auth and partner state live in small hand-rolled contexts/hooks (see below).
+
+## Getting started
+
+```bash
+npm install
+cp .env.example .env   # then fill in the values below
+npm run dev             # http://localhost:5173
+```
 
-Table of Contents
+```bash
+npm run build      # tsc -b && vite build → dist/
+npm run preview    # serve the production build locally
+npm run lint        # eslint .
+```
+
+### Environment variables
+
+| Variable | Example | Notes |
+|---|---|---|
+| `VITE_API_BASE_URL` | `http://127.0.0.1:8000/api` | Axios base URL — **includes** the `/api` prefix. Read in `src/libs/axios.ts`. |
+| `VITE_API_URL` | `http://127.0.0.1:8000` | Base URL **without** `/api` — used only to build the `/broadcasting/auth` URL in `src/libs/echo.ts`. |
+| `VITE_PUSHER_APP_KEY` | `abc123` | Required. If empty, `new Pusher(...)` throws synchronously at import time and **the whole app fails to boot** — see Troubleshooting. |
+| `VITE_PUSHER_APP_CLUSTER` | `mt1` | Pusher cluster. |
+| `VITE_PUSHER_SCHEME` | `https` | Anything other than `http` forces TLS for the socket connection. |
 
-Features
+There is no build-time distinction between environments beyond these variables — point them at whichever backend you're running (local `php artisan serve`, staging, production) and rebuild.
+
+## Project structure
 
-Screenshots
+```
+src/
+  pages/            top-level routed screens (see Routes below)
+  pages/admin/       admin dashboard screens, behind RequireAdmin
+  games/             the actual game UIs — one file per game, plus two "runner"
+                     wrappers that add real-time sync on top
+  components/        shared UI (cards, modals, toasts, feedback widget, footer…)
+  components/lobbies/  lobby-specific widgets (create-lobby modal, upcoming list)
+  components/partners/ partner-linking UI
+  context/           AuthContext (session/token), ToastContext (toast queue)
+  hooks/             usePartner (active partner + pair status)
+  libs/              axios client, Echo client, and thin per-domain API wrappers
+                     (auth, partner, daily, leaderboard, notification, progress, streaks)
+```
 
-Tech Stack
+### Routes
 
-Architecture
+| Path | Page | Notes |
+|---|---|---|
+| `/` | `Landing` | Marketing/landing page, public |
+| `/onboarding` | `Onboarding` | Sign-up flow |
+| `/signin` | `SignIn` | Login |
+| `/forgot-password`, `/password-reset/:token` | `ForgotPassword`, `ResetPassword` | Password reset flow |
+| `/games` | `GamesDashboard` | Main authenticated home — game catalog, quick actions, progress, leaderboard |
+| `/settings` | `Settings` | Profile, notification prefs, dark mode toggle, sessions/devices, partner unpair |
+| `/lobby/:code` | `LobbyRoom` | Group lobby: presence, chat, host-started games |
+| `/session/:code` | `Session` | A live couple game session (see Real-time below) |
+| `/admin/*` | `AdminLayout` + children | Admin dashboard, gated by `RequireAdmin` (checks `user.is_admin`) |
 
-Quick Start
+`vercel.json` adds a catch-all SPA rewrite (`/(.*)  → /index.html`) — **required** on Vercel (or any static host) so a hard refresh or a deep link (an emailed invite link, a bookmark) doesn't 404 before React Router even boots.
 
-Backend (Laravel)
+## Two real-time architectures
 
-Frontend (React + Vite)
+The app has **two distinct multiplayer models**, each with its own sync strategy — knowing which one a given game uses matters a lot when debugging or extending it.
 
-Environment Variables
+### 1. Couple sessions — server-authoritative
 
-Real-time (Pusher / Echo)
+Used by all "couple" games (Truth or Dare, Truth or Dare Plus/Erotic, Spice Dice, Emoji-Only Chat, Memory Match). Rendered by `src/pages/Session.tsx` at `/session/:code`.
 
-OpenAI (Structured Outputs + Cache)
+- The **backend** owns the entire game state (`GameSession.state`, a JSON blob) and validates every move (whose turn it is, legal actions).
+- The client just calls `POST /sessions/{code}/action` and re-renders whatever state comes back.
+- Real-time sync is via a Pusher **presence channel** `couple-session.{code}`, receiving `.session.created` / `.session.updated` events — plus a 3-second polling fallback (`Session.tsx`) in case a broadcast is missed.
+- A persistent side chat panel lives alongside the game (works on every kind, including Emoji Chat, which also has its own separate emoji-only messaging).
+- Starting the same game kind twice with the same partner **resumes** the existing waiting/active session instead of creating a new one — this is what makes hitting the browser back button mid-game safe.
 
-Core Flows
+### 2. Lobby (group) games — host-authoritative, broadcast-relay
 
-API Overview
+Used by Trivia, Charades (AI), Hot Seat, Would You Rather, and Spice Dice **in a group lobby** (a different code path from the couple version of Spice Dice). Rendered inside `src/pages/LobbyRoom.tsx` via `src/games/SyncedLobbyGameRunner.tsx`.
 
-Run & Scripts
+- The **host's browser** is the source of truth for game state. Non-host players' UI is a pure mirror of whatever the host last broadcast.
+- Host → everyone: `broadcast(type, payload)` → `POST /lobbies/{code}/games/{id}/action` → relayed over Pusher channel `lobby-game.{id}` as `.LobbyGameUpdate`.
+- Player → host: `sendAction(type, payload)` (e.g. a vote, a buzz) goes over the same channel; only the host's client applies it (`onHostReceive`) and re-broadcasts the resulting state.
+- **This state is not persisted server-side beyond the final result** — a page reload mid-round currently re-initializes that client's local game state from scratch (the couple-session model above does not have this limitation).
+- Every vote/action prop carries a monotonic `seq` so a client can dedupe an event it's already applied.
+- Each player can only act for **themselves** — e.g. in Would You Rather, only your own row's A/B buttons are clickable, host included.
 
-Deploy
+### Presence & auth for Echo
 
-Troubleshooting
+`src/libs/echo.ts` configures a `laravel-echo` client with a custom `authorizer` that POSTs the bearer token (from `localStorage.auth_token`) to `${VITE_API_URL}/broadcasting/auth`. Channel authorization rules live server-side in the backend's `routes/channels.php`.
 
-Contributing
+## Games catalog
 
-License
+| Kind | Title | Category | Mode | Notes |
+|---|---|---|---|---|
+| `truth_dare` | Truth or Dare – Romantic | Romantic | Couple | Curated prompt bank (`TruthDarePrompts` on the backend), turn-based |
+| `truth_dare_erotic` | Truth or Dare – Erotic | Erotic | Couple | Plus-only; same engine, spicier prompt pool |
+| `spice_dice` | Spice Dice | Spicy | Couple *and* Lobby | Always draws a dare, never a truth |
+| `emoji_chat` | Emoji-Only Chat | Playful | Couple | No turns, timed, emoji-only messages (server-validated) |
+| `memory_match` | Memory Match – Couple Edition | Challenge | Couple | Server-dealt deck, match keeps your turn |
+| `trivia` | Trivia Night: Duo vs Duo | Challenge | Lobby | AI-generated questions, cached & rotated (see backend README) |
+| `charades_ai` | Charades with AI Prompts | Playful | Lobby | AI-generated prompt cards |
+| `hot_seat`, `would_you_rather` | — | — | Lobby only | Not in the seeded catalog as standalone tiles; started from within a lobby |
 
-Features
+"Plus" (Spicy/Erotic categories) requires `user.is_plus`, which the backend computes as **paid subscriber OR still inside their 14-day free trial** — the frontend never needs to know which; it just reads `user.is_plus`.
 
-🎮 Games: Truth or Dare, Emoji-Chat (timer), Spice Dice, Memory Match, Trivia, Charades (AI prompts)
+## Admin dashboard (`/admin`)
 
-💞 Couple mode: link partner via invite code, play real-time sessions, shared history & streak
+A separate, non-dark-mode-by-default (toggleable) shell (`AdminLayout`) gated by `RequireAdmin`. Responsive: sidebar collapses into a slide-in drawer below `md`.
 
-💬 Group lobbies: presence, chat, host starts trivia/charades
+| Page | Purpose |
+|---|---|
+| Overview | Platform stats (users, revenue, games played, signups) |
+| Users | Search/filter, view profile, promote/demote admin, (de)activate, delete, bulk actions, last-login |
+| Games | CRUD on the seeded game catalog; recent/all lobby sessions |
+| Feedback | In-app user feedback inbox (bug/idea/praise/other), mark reviewed |
+| Features & Tips | Compose an email announcement to every user who opted into "New features & tips"; history of past sends |
+| Reports | Signups, games-by-kind, revenue, Plus conversions, top lobbies |
+| Settings | Platform-wide toggles (maintenance mode, registration open, Plus pricing, announcement banner) |
 
-🧠 AI content: OpenAI structured JSON + Redis caching
+The user-facing feedback widget (`src/components/FeedbackModal.tsx`) is available from the main dashboard's top bar for any signed-in user, not just admins.
 
-📈 Progression: XP, levels, daily challenge, streaks, leaderboards
+## Progression system
 
-✅ Admin: manage users, deactivate accounts (example panel)
+- **XP**: awarded server-side. Standalone/local games and couple sessions post to `/history`; lobby games are credited when the host ends the session (every current lobby member gets the same XP, not just the host).
+- **Streaks**: personal and couple streaks, bumped alongside XP (`StreakService` on the backend).
+- **Daily Challenge**: one bonus-XP task per day (`DailyChallengeCard`).
+- **Weekly summary**: an in-app card (`WeeklySummaryCard`) and an opt-in email digest, covering both couple games and lobby games.
+- **Leaderboard**: couples ranked by XP, all-time/weekly/monthly.
 
-✨ UI: sleek, responsive, animated (Tailwind + Framer Motion)
+## Notification preferences
 
-Screenshots
+Set in `/settings` (`email_news`, `email_reminders`, `weekly_summary`, `private_profile` on the user). `email_news` ("New features & tips") is the audience for the admin's Features & Tips announcements.
 
-Put your images in docs/screenshots/ and update names below.
+## Dark mode
 
-Screen	Image
-Dashboard	
+Toggled via `localStorage.theme` (`'light' | 'dark'`) and a `dark` class on `<html>` (Tailwind's class strategy). Set from `Settings.tsx` for the main app and independently from the admin header (`AdminLayout.tsx`) — both read/write the same `localStorage` key so the preference is shared, but each surface applies the class itself on mount rather than relying on a single global bootstrap.
 
-Onboarding	
+## Troubleshooting
 
-Couple Session	
+- **Blank white page, console says "You must pass your app key when you instantiate Pusher"** — `VITE_PUSHER_APP_KEY` is empty. `echo.ts` constructs the Pusher client at module import time, so this crashes the entire app before React even renders, not just real-time features. Any non-empty placeholder value is enough to boot locally if you don't need working real-time (the socket just won't connect).
+- **A route 404s on Vercel only after a refresh or when opened directly, but works fine when clicked from inside the app** — the SPA rewrite in `vercel.json` isn't deployed yet, or you're on a different static host without an equivalent catch-all rewrite configured.
+- **`403` on `/broadcasting/auth`** — the bearer token isn't reaching the request; check `localStorage.auth_token` and that `VITE_API_URL` doesn't include a stray `/api` suffix (see the table above).
+- **A game "restarts" after navigating away and back mid-session** — expected for **lobby** games (state isn't persisted beyond the final result, see above); for **couple** sessions this should not happen — if it does, check that the backend's session-resume logic (`CoupleSessionController::invite`) is up to date.
 
-Lobby	
+## Deployment
 
-Leaderboard	
-Tech Stack
-
-Frontend
-
-React + TypeScript + Vite
-
-Tailwind CSS, Framer Motion, lucide-react
-
-Axios, React Router, Laravel Echo (Pusher)
-
-Backend
-
-Laravel 12 (PHP 8.2+)
-
-Sanctum (token auth), Redis, MySQL/Postgres
-
-Broadcasting (Pusher or Laravel WebSockets)
-
-OpenAI (structured outputs)
-
-Architecture
-/frontend        # React app (Vite)
-/api             # Laravel app (REST + Broadcast)
-docs/
-  screenshots/   # images for README
-
-
-High level
-
-Client obtains a PAT (Sanctum) → calls API
-
-Couple sessions: backend creates game_sessions { code }, broadcasts invites → both clients join presence:couple-session.{code} via Echo
-
-AI content generated server-side with structured outputs, cached in Redis
-
-Quick Start
-Backend (Laravel)
-cd api
-cp .env.example .env
-# Edit DB_*, REDIS_*, APP_URL, BROADCAST_DRIVER, PUSHER_*, OPENAI_API_KEY
-composer install
-php artisan key:generate
-php artisan migrate
-php artisan serve  # http://127.0.0.1:8000
-
-
-If using Sanctum with cookies, configure SANCTUM_STATEFUL_DOMAINS.
-If using bearer tokens (recommended for SPA), return a token on login and set it in Authorization: Bearer ....
-
-Frontend (React + Vite)
-cd ../frontend
-cp .env.example .env
-# Set VITE_API_URL and VITE_API_BASE_URL to your API
-# Set VITE_PUSHER_* if using cloud Pusher
-npm i
-npm run dev   # http://localhost:5173
-
-Environment Variables
-
-Frontend (/frontend/.env)
-
-Key	Example	Notes
-VITE_API_URL	http://127.0.0.1:8000	base browser URL to API (no /api)
-VITE_API_BASE_URL	http://127.0.0.1:8000/api	axios base path
-VITE_PUSHER_APP_KEY	xxxx	required for Echo (cloud)
-VITE_PUSHER_APP_CLUSTER	mt1	cloud cluster
-VITE_PUSHER_SCHEME	https	cloud scheme
-
-Backend (/api/.env)
-
-Key	Example
-APP_URL	http://127.0.0.1:8000
-DB_*	…
-REDIS_*	…
-BROADCAST_DRIVER	pusher
-PUSHER_APP_ID / KEY / SECRET	xxxx
-PUSHER_APP_CLUSTER	mt1
-PUSHER_SCHEME	https
-OPENAI_API_KEY	sk-...
-Real-time (Pusher / Echo)
-
-Frontend src/libs/echo.ts (cloud example)
-
-import Echo from 'laravel-echo';
-import Pusher from 'pusher-js';
-(window as any).Pusher = Pusher;
-
-export const echo = new Echo({
-  broadcaster: 'pusher',
-  key: import.meta.env.VITE_PUSHER_APP_KEY,
-  cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER || 'mt1',
-  forceTLS: import.meta.env.VITE_PUSHER_SCHEME === 'https',
-  authorizer: (channel) => ({
-    authorize: (socketId, cb) => {
-      fetch(`${import.meta.env.VITE_API_URL}/broadcasting/auth`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-        body: JSON.stringify({ socket_id: socketId, channel_name: channel.name }),
-      }).then(async r => cb(r.ok, await r.json()))
-        .catch(err => cb(false, err));
-    },
-  }),
-});
-
-OpenAI (Structured Outputs + Cache)
-
-Controllers call OpenAI with JSON schema so the model returns strongly typed prompts (truths/dares, charades cards, etc.)
-
-Redis caches by (kind, difficulty, locale, seed) to avoid repeated calls
-
-Tip: keep generation server-side; clients only request content from your API.
-
-Core Flows
-Partner Linking
-
-User A generates invite code → copies & shares
-
-User B inputs code → API validates and links the pair
-
-Either can request unpair; both must confirm to dissolve
-
-Couple Session (2-player)
-
-User A → “Play now” → POST /api/couple-sessions/start { kind }
-
-Backend creates game_sessions row with code, broadcasts invite to private:user.{partnerId}
-
-Both navigate to /session/{code}, join presence:couple-session.{code}
-
-Turns & moves sync via session.updated broadcast
-
-Group Lobby
-
-Create lobby → friends join → chat & presence → host starts a lobby game
-
-API Overview
-Method & Path	Purpose
-POST /api/auth/register / POST /api/auth/login	returns token
-GET /api/me	current user
-POST /api/partner/invites	create invite code
-POST /api/partner/accept	accept invite { code }
-POST /api/partner/unpair	request to unpair
-GET /api/partner	pair status
-POST /api/couple-sessions/start	create session { kind }
-GET /api/sessions/{code}	fetch session by code
-POST /api/sessions/{code}/action	push state/turn updates
-POST /api/history	save game result (server computes XP)
-GET /api/history/recent	recent games (shared & personal)
-GET /api/daily / POST /api/daily/complete	daily challenge
-`GET /api/leaderboard/couples?range=week	month
-GET /api/streaks	user + couple streak data
-
-All secured endpoints require Authorization: Bearer <token>.
-
-Run & Scripts
-
-Frontend
-
-npm run dev
-npm run build
-npm run preview
-
-
-Backend
-
-php artisan serve
-php artisan migrate
-php artisan queue:work     # if using queued broadcasts or jobs
-
-Deploy
-
-Frontend: Vercel/Netlify
-
-Set all VITE_* variables in project settings
-
-Rebuild after updates
-
-Backend: Forge, Vapor, or any PHP host
-
-Set APP_URL, DB/Redis, OpenAI, Pusher; run php artisan migrate --force
-
-Configure CORS and Sanctum for your frontend domain
-
-Enable queues for broadcasts/jobs (if used)
-
-Troubleshooting
-
-Blank page + “You must pass your app key”
-Missing VITE_PUSHER_APP_KEY in your frontend env or not redeployed.
-
-WebSocket failed (ws://127.0.0.1:6001)
-You pointed Echo to local WS settings but are using cloud Pusher. Remove wsHost/wsPort, set forceTLS and cluster.
-
-403 on /broadcasting/auth
-Ensure you send Authorization: Bearer <token> in Echo authorizer.
-
-CSRF mismatch
-Use token auth (PAT) for SPA; don’t send CSRF.
-
-404 /api/sessions/{code}
-Make sure the GameSession model sets getRouteKeyName() to 'code', and you created the session via /couple-sessions/start.
-
-Timers too fast
-Always compute remaining from fixed endAt = Date.now() + minutes*60*1000; and tick every 1000ms.
-
-Contributing
-
-Fork & branch (feat/...)
-
-Keep PRs focused; include screenshots for UI changes
-
-Follow ESLint/Prettier and Laravel Pint defaults
-
-Add tests where sensible
-
-License
-
-MIT © You.
-Logo, brand names, and example content belong to their respective owners.
-
-Badges (optional)
-
-Add build/test or deploy badges here once you wire CI:
-
-[![CI](https://github.com/you/loveydovey/actions/workflows/ci.yml/badge.svg)](…)
-[![Deploy](https://vercel.com/button)](…)
-
-Image Guide
-
-Place images in docs/screenshots/
-
-Use descriptive names: dashboard.png, session.png, leaderboard.png
-
-Reference via: ![Dashboard](docs/screenshots/dashboard.png)
-
-Happy building & playing! 💜
+Static build, deployable anywhere that serves an SPA with a catch-all rewrite (Vercel config included). Set all `VITE_*` variables in the hosting provider's environment settings and rebuild — they're baked in at build time, not read at runtime.
