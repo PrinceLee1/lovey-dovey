@@ -491,7 +491,9 @@ export default function GamesDashboard() {
                   onClick={handleInvitePartner}
                 />
               )}
-              <DailyChallengeCard onXp={(earned) => setXp((x) => (x ?? 0) + earned)} />
+              {partnerActive && (
+                <DailyChallengeCard onXp={(earned) => setXp((x) => (x ?? 0) + earned)} />
+              )}
             </motion.div>
 
             {/* Free trial banner — every new user gets 14 days of full Plus access */}
