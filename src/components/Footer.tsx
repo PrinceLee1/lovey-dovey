@@ -1,5 +1,5 @@
 import React from "react";
-import { Heart, Twitter, Instagram, Github, Mail } from "lucide-react";
+import { Heart, Twitter, Instagram } from "lucide-react";
 import clsx from "clsx";
 
 type FooterProps = {
@@ -12,24 +12,12 @@ const YEAR = new Date().getFullYear();
 const nav = {
   Product: [
     { label: "Games", href: "/games" },
-    { label: "Create Lobby", href: "/lobby" },
-    { label: "Pricing", href: "/pricing" },
-    { label: "Changelog", href: "/changelog" },
-  ],
-  Company: [
-    { label: "About", href: "/about" },
-    { label: "Careers", href: "/careers" },
-    { label: "Press", href: "/press" },
-  ],
-  Resources: [
-    { label: "Help Center", href: "/help" },
-    { label: "Guides", href: "/guides" },
-    { label: "Status", href: "/status" },
+    { label: "Create Lobby", href: "/games" },
   ],
   Legal: [
-    { label: "Privacy", href: "/privacy" },
-    { label: "Terms", href: "/terms" },
-    { label: "Community Guidelines", href: "/guidelines" },
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Terms of Service", href: "/terms" },
+    { label: "Community Guidelines", href: "/community-guidelines" },
   ],
 };
 
@@ -75,12 +63,6 @@ function Socials() {
       <Item href="https://instagram.com" label="Instagram">
         <Instagram className="w-4 h-4" />
       </Item>
-      <Item href="https://github.com" label="GitHub">
-        <Github className="w-4 h-4" />
-      </Item>
-      <Item href="mailto:hello@lovely.ai" label="Email">
-        <Mail className="w-4 h-4" />
-      </Item>
     </div>
   );
 }
@@ -125,7 +107,7 @@ export default function Footer({ variant = "simple", className }: FooterProps) {
             </div>
 
             {/* right: link columns */}
-            <div className="md:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-6">
+            <div className="md:col-span-7 grid grid-cols-2 gap-6 max-w-xs">
               {Object.entries(nav).map(([group, items]) => (
                 <div key={group}>
                   <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
@@ -161,8 +143,8 @@ export default function Footer({ variant = "simple", className }: FooterProps) {
                   Terms
                 </a>{" "}
                 ·{" "}
-                <a href="/status" className="hover:text-gray-800 dark:hover:text-gray-200">
-                  Status
+                <a href="/community-guidelines" className="hover:text-gray-800 dark:hover:text-gray-200">
+                  Community Guidelines
                 </a>
               </div>
             </div>

@@ -17,6 +17,9 @@ import FriendsPage from './pages/Friends';
 import ProfilePage from './pages/Profile';
 import MobileTabBar from './components/MobileTabBar';
 import InstallPrompt from './components/InstallPrompt';
+import PrivacyPage from './pages/legal/Privacy';
+import TermsPage from './pages/legal/Terms';
+import CommunityGuidelinesPage from './pages/legal/CommunityGuidelines';
 
 // Admin imports
 import AdminLayout from './pages/admin/AdminLayout';
@@ -67,6 +70,9 @@ export default function App() {
             <Route path="/signin" element={<SignIn />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/password-reset/:token" element={<ResetPassword />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/community-guidelines" element={<CommunityGuidelinesPage />} />
 
             <Route element={<AuthenticatedLayout />}>
               <Route path="/games" element={<GamesDashboard />} />
