@@ -383,6 +383,11 @@ export default function Settings() {
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 {avatarUploading ? "Uploading avatar…" : "PNG/JPG up to ~2MB"}
+                <div className="mt-1">
+                  <Link to="/profile/me" className="text-fuchsia-600 dark:text-fuchsia-400 font-medium hover:underline">
+                    View your profile
+                  </Link>
+                </div>
               </div>
             </div>
 

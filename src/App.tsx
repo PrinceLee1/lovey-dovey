@@ -14,6 +14,7 @@ import { useGameInvites } from './hooks/useGameInvites';
 import { PresenceContext } from './context/PresenceContext';
 import { GameInvitesContext } from './context/GameInvitesContext';
 import FriendsPage from './pages/Friends';
+import ProfilePage from './pages/Profile';
 
 // Admin imports
 import AdminLayout from './pages/admin/AdminLayout';
@@ -65,6 +66,7 @@ export default function App() {
               <Route path="/games" element={<GamesDashboard />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/friends" element={<FriendsPage />} />
+              <Route path="/profile/:userId" element={<ProfilePage />} />
               <Route path="/lobby/:code" element={<LobbyRoom />} />
               <Route path="/session/:code" element={<CoupleSession />} />
             </Route>

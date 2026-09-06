@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, ArrowLeft, Users, Gamepad2, X, PlusCircle, Layers } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Heart, ArrowLeft, Users } from 'lucide-react';
 import { api } from '../libs/axios';
 import { echo } from '../libs/echo';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { usePresenceMap } from '../context/PresenceContext';
 import type { PresenceStatus } from '../hooks/usePresence';
-import { useGameInvitesContext } from '../context/GameInvitesContext';
 import { useFriendFeed, type FeedItem } from '../hooks/useFriendFeed';
+import InviteToGameModal from '../components/InviteToGameModal';
+import Avatar from '../components/Avatar';
+import { dotColor, statusLabel } from '../libs/presenceDisplay';
 
 type Friend = {
   id: number;
@@ -26,12 +28,6 @@ type FriendRequest = {
 
 type OnlineOther = { id: number; name: string; avatar_url: string | null };
 
-type PickerGame = { id: number; title: string; category: string; kind: string };
-
-type MyLobby = { id: number; code: string; name: string; status: string; game_kind: string | null };
-
-type InviteStep = 'choice' | 'existing-lobby' | null;
-
 type TabKey = 'friends' | 'activity' | 'requests' | 'find';
 
 const TABS: { key: TabKey; label: string }[] = [
@@ -40,10 +36,6 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: 'requests', label: 'Requests' },
   { key: 'find', label: 'Find Players' },
 ];
-
-function initials(name: string) {
-  return name.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase() || '?';
-}
 
 function timeAgo(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -75,27 +67,6 @@ function activityText(item: FeedItem, myUserId?: number): string {
   }
 }
 
-function Avatar({ name, avatarUrl }: { name: string; avatarUrl: string | null }) {
-  return (
-    <div className="h-11 w-11 shrink-0 rounded-full bg-gradient-to-br from-pink-500 to-fuchsia-600 overflow-hidden grid place-items-center text-white text-sm font-semibold">
-      {avatarUrl ? <img src={avatarUrl} className="h-full w-full object-cover" alt={name} /> : initials(name)}
-    </div>
-  );
-}
-
-function dotColor(status: string) {
-  if (status === 'online') return 'bg-emerald-500';
-  if (status === 'in_game') return 'bg-purple-500';
-  return 'bg-gray-400 dark:bg-gray-600'; // idle or offline
-}
-
-function statusLabel(status: string) {
-  if (status === 'online') return 'Online';
-  if (status === 'in_game') return 'In a game';
-  if (status === 'idle') return 'Idle';
-  return 'Offline';
-}
-
 function EmptyState({ text }: { text: string }) {
   return <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-10">{text}</div>;
 }
@@ -105,7 +76,6 @@ export default function FriendsPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const presenceMap = usePresenceMap();
-  const { sendInvite } = useGameInvitesContext();
   const { feed, loading: loadingFeed } = useFriendFeed();
 
   const [tab, setTab] = useState<TabKey>('friends');
@@ -113,7 +83,6 @@ export default function FriendsPage() {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [requests, setRequests] = useState<FriendRequest[]>([]);
   const [onlineOthers, setOnlineOthers] = useState<OnlineOther[]>([]);
-  const [games, setGames] = useState<PickerGame[]>([]);
 
   const [loadingFriends, setLoadingFriends] = useState(true);
   const [loadingRequests, setLoadingRequests] = useState(true);
@@ -122,11 +91,6 @@ export default function FriendsPage() {
   const [requestActionId, setRequestActionId] = useState<number | null>(null);
   const [addingId, setAddingId] = useState<number | null>(null);
   const [inviteTarget, setInviteTarget] = useState<Friend | null>(null);
-  const [inviteStep, setInviteStep] = useState<InviteStep>(null);
-  const [sendingInvite, setSendingInvite] = useState(false);
-  const [myLobbies, setMyLobbies] = useState<MyLobby[]>([]);
-  const [loadingLobbies, setLoadingLobbies] = useState(false);
-  const [selectedLobbyId, setSelectedLobbyId] = useState<number | null>(null);
 
   async function loadFriends() {
     setLoadingFriends(true);
@@ -168,7 +132,6 @@ export default function FriendsPage() {
     loadFriends();
     loadRequests();
     loadFind();
-    api.get('/games').then(({ data }) => setGames(data.games ?? [])).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -237,63 +200,6 @@ export default function FriendsPage() {
       toast.error(e instanceof Error ? e.message : "Couldn't send request");
     } finally {
       setAddingId(null);
-    }
-  }
-
-  function openInvite(f: Friend) {
-    setInviteTarget(f);
-    setInviteStep('choice');
-  }
-
-  function closeInviteModal() {
-    setInviteTarget(null);
-    setInviteStep(null);
-    setMyLobbies([]);
-    setSelectedLobbyId(null);
-  }
-
-  function chooseNewLobby() {
-    if (!inviteTarget) return;
-    navigate(`/games?createLobby=1&inviteFriendId=${inviteTarget.id}`);
-  }
-
-  async function chooseExistingLobby() {
-    setInviteStep('existing-lobby');
-    setLoadingLobbies(true);
-    try {
-      const { data } = await api.get('/lobbies/mine');
-      const lobbies = ((Array.isArray(data) ? data : data.lobbies ?? []) as MyLobby[]).filter(
-        (l) => l.status !== 'ended'
-      );
-      setMyLobbies(lobbies);
-      setSelectedLobbyId(lobbies[0]?.id ?? null);
-    } catch {
-      toast.error("Couldn't load your lobbies");
-    } finally {
-      setLoadingLobbies(false);
-    }
-  }
-
-  async function sendToExistingLobby() {
-    if (!inviteTarget || !selectedLobbyId) return;
-    const lobby = myLobbies.find((l) => l.id === selectedLobbyId);
-    const catalogIdByKind: Record<string, number> = Object.fromEntries(games.map((g) => [g.kind, g.id]));
-    const gameId = (lobby?.game_kind && catalogIdByKind[lobby.game_kind]) || games[0]?.id;
-
-    if (!gameId) {
-      toast.error('No game available to invite for');
-      return;
-    }
-
-    setSendingInvite(true);
-    try {
-      await sendInvite(inviteTarget.id, gameId, selectedLobbyId);
-      toast.success(`Invite sent to ${inviteTarget.name}`);
-      closeInviteModal();
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : "Couldn't send invite");
-    } finally {
-      setSendingInvite(false);
     }
   }
 
@@ -381,13 +287,13 @@ export default function FriendsPage() {
                       </div>
                       <div className="flex flex-col gap-1.5 shrink-0">
                         <button
-                          onClick={() => openInvite(f)}
+                          onClick={() => setInviteTarget(f)}
                           className="rounded-lg px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white"
                         >
                           Invite to Game
                         </button>
                         <button
-                          onClick={() => toast.info('Profile pages are coming soon')}
+                          onClick={() => navigate(`/profile/${f.id}`)}
                           className="rounded-lg px-3 py-1.5 text-xs font-medium border dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
                         >
                           View Profile
@@ -500,94 +406,7 @@ export default function FriendsPage() {
         </motion.div>
       </div>
 
-      {/* Invite-to-game modal */}
-      <AnimatePresence>
-        {inviteTarget && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4"
-            onClick={(e) => { if (e.target === e.currentTarget) closeInviteModal(); }}
-          >
-            <motion.div
-              initial={{ y: 16, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 16, opacity: 0 }}
-              className="w-full max-w-sm rounded-2xl bg-white dark:bg-gray-900 p-5 shadow-xl"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="font-display text-lg font-semibold text-gray-900 dark:text-gray-100">
-                  Invite {inviteTarget.name}
-                </div>
-                <button onClick={closeInviteModal} aria-label="Close">
-                  <X className="w-5 h-5 text-gray-400" />
-                </button>
-              </div>
-
-              {inviteStep === 'choice' && (
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                    Create a new lobby or invite to an existing one?
-                  </p>
-                  <button
-                    onClick={chooseNewLobby}
-                    className="w-full flex items-center gap-3 rounded-xl border dark:border-gray-700 px-3 py-3 hover:bg-rose-50 dark:hover:bg-gray-800 text-left"
-                  >
-                    <PlusCircle className="w-5 h-5 text-fuchsia-500 shrink-0" />
-                    <div>
-                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">New Lobby</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">Create a lobby and invite them to it</div>
-                    </div>
-                  </button>
-                  <button
-                    onClick={chooseExistingLobby}
-                    className="w-full flex items-center gap-3 rounded-xl border dark:border-gray-700 px-3 py-3 hover:bg-rose-50 dark:hover:bg-gray-800 text-left"
-                  >
-                    <Layers className="w-5 h-5 text-fuchsia-500 shrink-0" />
-                    <div>
-                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">Existing Lobby</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">Invite them to one of your active lobbies</div>
-                    </div>
-                  </button>
-                </div>
-              )}
-
-              {inviteStep === 'existing-lobby' && (
-                loadingLobbies ? (
-                  <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">Loading your lobbies…</div>
-                ) : myLobbies.length === 0 ? (
-                  <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-8">
-                    You don't have any active lobbies — create one instead.
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <select
-                      value={selectedLobbyId ?? ''}
-                      onChange={(e) => setSelectedLobbyId(Number(e.target.value))}
-                      className="w-full rounded-xl border dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 px-3 py-2 outline-none focus:ring-2 focus:ring-fuchsia-500"
-                    >
-                      {myLobbies.map((l) => (
-                        <option key={l.id} value={l.id}>
-                          {l.name} ({l.code}){l.status === 'in_progress' ? ' — in progress' : ''}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      disabled={sendingInvite}
-                      onClick={sendToExistingLobby}
-                      className="w-full rounded-xl px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-pink-500 to-fuchsia-600 disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                      <Gamepad2 className="w-4 h-4" />
-                      {sendingInvite ? 'Sending…' : 'Send Invite'}
-                    </button>
-                  </div>
-                )
-              )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <InviteToGameModal friend={inviteTarget} onClose={() => setInviteTarget(null)} />
     </div>
   );
 }

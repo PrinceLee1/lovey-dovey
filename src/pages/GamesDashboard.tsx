@@ -33,6 +33,7 @@ import LeaderboardCard from "../components/LeaderboardCard";
 import StreakBadge from "../components/StreakBadge";
 import ProgressCard from "../components/ProgressCard";
 import WeeklySummaryCard from "../components/WeeklySummaryCard";
+import Avatar from "../components/Avatar";
 import { echo } from "../libs/echo";
 import FloatingHearts from "../components/FloatingHearts";
 import PlusModal from "../components/PlusModal";
@@ -374,6 +375,14 @@ export default function GamesDashboard() {
             )}
           </div>
           <div className="flex items-center gap-2">
+            <Link
+              to="/profile/me"
+              title="View your profile"
+              className="rounded-xl border dark:border-gray-700 pl-2 pr-3 py-1.5 text-sm flex items-center gap-2 text-gray-800 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-800"
+            >
+              <Avatar name={user?.name ?? '?'} avatarUrl={user?.avatar_url ?? null} size="sm" />
+              <span className="hidden sm:inline">{user?.name}</span>
+            </Link>
             <button
               onClick={() => setShowFeedbackModal(true)}
               title="Send feedback"
