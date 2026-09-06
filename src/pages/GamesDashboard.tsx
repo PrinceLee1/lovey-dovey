@@ -34,6 +34,7 @@ import StreakBadge from "../components/StreakBadge";
 import ProgressCard from "../components/ProgressCard";
 import WeeklySummaryCard from "../components/WeeklySummaryCard";
 import Avatar from "../components/Avatar";
+import DashboardTour from "../components/DashboardTour";
 import { echo } from "../libs/echo";
 import FloatingHearts from "../components/FloatingHearts";
 import PlusModal from "../components/PlusModal";
@@ -106,6 +107,15 @@ export default function GamesDashboard() {
       setSearchParams(searchParams, { replace: true });
     }
   }, []);
+
+  // ─── FIRST-TIME DASHBOARD TOUR ─────────────────────────────────────────────
+  const [tourActive, setTourActive] = useState(false);
+  useEffect(() => {
+    if (!user || user.tour_completed_at) return;
+    // Small delay so cards/games have rendered before we try to spotlight them.
+    const t = setTimeout(() => setTourActive(true), 600);
+    return () => clearTimeout(t);
+  }, [user, user?.tour_completed_at]);
 
   // ─── DETECT "INVITE FRIEND" REDIRECT FROM /friends ────────────────────────
   useEffect(() => {
@@ -315,6 +325,15 @@ export default function GamesDashboard() {
         reason={plusModalReason}
       />
 
+      {/* ── First-time dashboard tour ─────────────────────────────────────── */}
+      <DashboardTour
+        active={tourActive}
+        onDone={() => {
+          setTourActive(false);
+          refreshUser();
+        }}
+      />
+
       {/* ── Share Card (post-game) ────────────────────────────────────────── */}
       <AnimatePresence>
         {shareResult && (
@@ -444,7 +463,7 @@ export default function GamesDashboard() {
                     />
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" data-tour="couple-toggle">
                   <Segmented
                     value={mode}
                     onChange={(v) => setMode(v as never)}
@@ -496,7 +515,9 @@ export default function GamesDashboard() {
                 />
               )}
               {partnerActive && (
-                <DailyChallengeCard onXp={(earned) => setXp((x) => (x ?? 0) + earned)} />
+                <div data-tour="daily-challenge">
+                  <DailyChallengeCard onXp={(earned) => setXp((x) => (x ?? 0) + earned)} />
+                </div>
               )}
             </motion.div>
 
@@ -550,7 +571,7 @@ export default function GamesDashboard() {
 
             {/* Featured games */}
             <SectionTitle icon={<Play className="w-4 h-4" />} title="Featured" />
-            <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4" data-tour="game-cards">
               {loadingGames ? (
                 <div className="col-span-full text-center py-10 text-gray-500 dark:text-gray-400">
                   Loading games…
@@ -938,6 +959,7 @@ function LobbiesSection({ autoOpen, inviteFriendId }: { autoOpen?: boolean; invi
   return (
     <>
       <div
+        data-tour="create-lobby"
         className="rounded-3xl bg-white dark:bg-gray-900 shadow-xl border border-rose-100 dark:border-gray-800 p-4 flex items-center gap-3 cursor-pointer hover:shadow-2xl transition"
         onClick={() => setOpen(true)}
       >
