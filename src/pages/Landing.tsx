@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Heart, Sparkles, Users, Shield, Zap, Crown, ArrowRight, Check, Star, Flame } from "lucide-react";
+import { Heart, Sparkles, Users, UserPlus, Shield, Zap, Crown, ArrowRight, Check, Star, Flame } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 /* ─── Scroll-triggered fade ──────────────────────────────────────────────── */
@@ -113,19 +113,19 @@ export default function Landing() {
               <motion.h1
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.08 }}
                 className="text-5xl md:text-6xl font-black leading-[1.05] tracking-tight text-gray-900 mb-6">
-                Playful games<br />
+                Playful games for<br />
                 <em className="not-italic bg-gradient-to-r from-rose-500 to-fuchsia-600 bg-clip-text text-transparent">
-                  for couples
-                </em><br />
-                & friends.
+                  couples & crews.
+                </em>
               </motion.h1>
 
               <motion.p
                 initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.18 }}
                 className="text-lg text-gray-500 leading-relaxed mb-8 max-w-lg"
                 style={{ fontFamily: "system-ui, sans-serif" }}>
-                Truth or dare, spicy dice, AI charades, live lobbies — curated games that
-                spark deeper conversations and actual laughter. Free forever.
+                Truth or dare, spicy dice, AI charades, live lobbies, and a Friends list to
+                see who's online — curated games that spark deeper conversations and actual
+                laughter. Free forever.
               </motion.p>
 
               <motion.div
@@ -225,7 +225,7 @@ export default function Landing() {
                 className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-lg border border-fuchsia-100 px-4 py-2.5 flex items-center gap-2">
                 <span className="text-lg">👑</span>
                 <div style={{ fontFamily: "system-ui, sans-serif" }}>
-                  <div className="text-xs font-bold text-gray-900">Top couple</div>
+                  <div className="text-xs font-bold text-gray-900">Top of the board</div>
                   <div className="text-[10px] text-gray-400">398 XP this week</div>
                 </div>
               </motion.div>
@@ -240,13 +240,15 @@ export default function Landing() {
           style={{ fontFamily: "system-ui, sans-serif" }}>
           <span className="flex items-center gap-2"><Users className="w-4 h-4 text-rose-400" /> Couples & groups of 2–10</span>
           <span className="w-px h-4 bg-gray-200 hidden sm:block" />
+          <span className="flex items-center gap-2"><UserPlus className="w-4 h-4 text-rose-400" /> Add friends & see who's online</span>
+          <span className="w-px h-4 bg-gray-200 hidden sm:block" />
           <span className="flex items-center gap-2"><Shield className="w-4 h-4 text-rose-400" /> Privacy-first, no ads</span>
           <span className="w-px h-4 bg-gray-200 hidden sm:block" />
           <span className="flex items-center gap-2"><Zap className="w-4 h-4 text-rose-400" /> New games added weekly</span>
           <span className="w-px h-4 bg-gray-200 hidden sm:block" />
           <span className="flex items-center gap-5">
             <span className="flex gap-0.5">{[...Array(5)].map((_,i)=><Star key={i} className="w-3.5 h-3.5 text-amber-400" fill="currentColor"/>)}</span>
-            <span className="font-semibold text-gray-600">4.9 / 5 from couples</span>
+            <span className="font-semibold text-gray-600">4.9 / 5 from players</span>
           </span>
         </div>
       </section>
@@ -265,9 +267,11 @@ export default function Landing() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
               { emoji:"✨", title:"AI-generated prompts",    body:"Fresh Truth-or-Dare, Charades, Emoji Chat — no repeats, personalised to your interests.",  bg:"bg-rose-50",    border:"border-rose-100",    tag:null },
-              { emoji:"👫", title:"Partner linking",          body:"Pair up, share history automatically, and earn couple streaks together.",                   bg:"bg-pink-50",    border:"border-pink-100",    tag:null },
+              { emoji:"🤝", title:"Friends & presence",       body:"Add friends, see who's online in real time, and jump straight into a game or lobby together.", bg:"bg-sky-50",   border:"border-sky-100",     tag:null },
               { emoji:"🎉", title:"Live group lobbies",       body:"Up to 10 players. Real-time chat, reactions, synced gameplay. No lag, no spoilers.",        bg:"bg-fuchsia-50", border:"border-fuchsia-100", tag:null },
-              { emoji:"⚡", title:"XP, streaks & boards",    body:"Daily challenges, weekly targets, and couple leaderboards to stay motivated.",              bg:"bg-amber-50",   border:"border-amber-100",   tag:null },
+              { emoji:"👫", title:"Partner linking",          body:"Pair up with a partner, share history automatically, and earn couple streaks together.",     bg:"bg-pink-50",    border:"border-pink-100",    tag:null },
+              { emoji:"🪪", title:"Player profiles",          body:"A shared profile for XP, streaks and recent games — yours or any friend's.",                bg:"bg-violet-50",  border:"border-violet-100",  tag:null },
+              { emoji:"⚡", title:"XP, streaks & boards",    body:"Daily challenges, weekly targets, and leaderboards to stay motivated.",                      bg:"bg-amber-50",   border:"border-amber-100",   tag:null },
               { emoji:"🔒", title:"Privacy-first",            body:"Private couple mode. Your intimate moments stay between you two — always.",                bg:"bg-emerald-50", border:"border-emerald-100", tag:null },
               { emoji:"🔞", title:"Plus adult games",         body:"Unlock Spicy & Confessions categories. Animated spin wheel, dare gambling, 3× multiplier.", bg:"bg-orange-50",  border:"border-orange-100",  tag:"Plus" },
             ].map((f,i) => (
@@ -299,7 +303,7 @@ export default function Landing() {
             {[
               { n:"01", emoji:"👤", title:"Create your account",    body:"Fast sign-up with email. Set your name, interests, and partner details in 2 minutes." },
               { n:"02", emoji:"🔗", title:"Invite partner or friends", body:"Share your invite code or lobby link. Join from anywhere — no app install required." },
-              { n:"03", emoji:"🏆", title:"Play & earn XP",          body:"Pick a game, keep your streak, and climb the couple leaderboard." },
+              { n:"03", emoji:"🏆", title:"Play & earn XP",          body:"Pick a game, keep your streak, and climb the leaderboard together." },
             ].map((s,i) => (
               <FadeUp key={s.n} delay={i*0.12}>
                 <div className="relative rounded-2xl border border-white/10 bg-white/5 p-8 hover:bg-white/8 transition-all">
@@ -355,6 +359,7 @@ export default function Landing() {
                     "Hot Seat party game",
                     "AI Charades & Trivia",
                     "Live group lobbies (10 players)",
+                    "Friends list & online presence",
                     "Partner linking & streaks",
                     "XP, leaderboards & challenges",
                     "Party chat & emoji reactions",
@@ -568,12 +573,12 @@ export default function Landing() {
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8">
             <p className="text-xs text-white/25" style={{ fontFamily: "system-ui, sans-serif" }}>
-              © {new Date().getFullYear()} LoveyDovey. Built with ❤️ for couples everywhere.
+              © {new Date().getFullYear()} LoveyDovey. Built with ❤️ for couples & friends everywhere.
             </p>
             <div className="flex gap-5 text-xs text-white/25" style={{ fontFamily: "system-ui, sans-serif" }}>
-              <a href="#" className="hover:text-white/60 transition">Privacy Policy</a>
-              <a href="#" className="hover:text-white/60 transition">Terms of Service</a>
-              <a href="#" className="hover:text-white/60 transition">Contact</a>
+              <Link to="/privacy" className="hover:text-white/60 transition">Privacy Policy</Link>
+              <Link to="/terms" className="hover:text-white/60 transition">Terms of Service</Link>
+              <a href="mailto:hello@loveydovey.app" className="hover:text-white/60 transition">Contact</a>
             </div>
           </div>
         </div>
