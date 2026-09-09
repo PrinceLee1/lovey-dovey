@@ -116,9 +116,16 @@ export default function HotSeat({ players, lobbyCode, sessionId, hostId, onFinis
           setGs(prev => ((e.data.rev ?? 0) >= (prev.rev ?? 0) ? e.data : prev));
         }
         if (e.type === "vote" && isHost) {
+          // The backend only relays type/data/by — voter and vote must be
+          // nested under `data` (matching castVote's POST below) or they
+          // never survive the round trip and arrive here as undefined,
+          // which is why votes weren't registering at all.
+          const voter = e.data?.voter;
+          const vote = e.data?.vote;
+          if (!voter || !vote) return;
           // Host receives vote events and merges them, then rebroadcasts
           setGs(prev => {
-            const newVotes = { ...prev.votes, [e.voter]: e.vote };
+            const newVotes = { ...prev.votes, [voter]: vote };
             const next = { ...prev, votes: newVotes };
             broadcastState(next);
             return next;
@@ -229,7 +236,7 @@ export default function HotSeat({ players, lobbyCode, sessionId, hostId, onFinis
     setGs(prev => ({ ...prev, votes: { ...prev.votes, [voterName]: v } }));
     try {
       await api.post(`/lobbies/${lobbyCode}/games/${sessionId}/action`, {
-        type: "vote", voter: voterName, vote: v,
+        type: "vote", data: { voter: voterName, vote: v },
       });
     } catch { /* silent */ }
   }
