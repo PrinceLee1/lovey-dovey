@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Heart, ArrowLeft, Users } from 'lucide-react';
+import { Heart, ArrowLeft, Users, Search } from 'lucide-react';
 import { api } from '../libs/axios';
 import { echo } from '../libs/echo';
 import { useAuth } from '../context/AuthContext';
@@ -27,6 +27,7 @@ type FriendRequest = {
 };
 
 type OnlineOther = { id: number; name: string; avatar_url: string | null };
+type SearchResult = { id: number; name: string; avatar_url: string | null; presence_status: PresenceStatus | null };
 
 type TabKey = 'friends' | 'activity' | 'requests' | 'find';
 
@@ -92,6 +93,11 @@ export default function FriendsPage() {
   const [addingId, setAddingId] = useState<number | null>(null);
   const [inviteTarget, setInviteTarget] = useState<Friend | null>(null);
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const searchSeq = useRef(0);
+
   async function loadFriends() {
     setLoadingFriends(true);
     try {
@@ -134,6 +140,32 @@ export default function FriendsPage() {
     loadFind();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Debounced user search — finds people to add whether they're online or
+  // not, unlike the "online others" list above which only surfaces people
+  // currently online.
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (!q) {
+      setSearchResults([]);
+      setSearching(false);
+      return;
+    }
+    const seq = ++searchSeq.current;
+    setSearching(true);
+    const t = setTimeout(async () => {
+      try {
+        const { data } = await api.get('/users/search', { params: { q } });
+        if (seq === searchSeq.current) setSearchResults(data.users ?? []);
+      } catch {
+        if (seq === searchSeq.current) toast.error("Couldn't search for players");
+      } finally {
+        if (seq === searchSeq.current) setSearching(false);
+      }
+    }, 350);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]);
 
   // Live updates: someone sends me a request, or accepts one I sent — both
   // land on the same per-user channel every other private notification
@@ -196,6 +228,7 @@ export default function FriendsPage() {
       await api.post(`/friends/request/${userId}`);
       toast.success('Friend request sent');
       setOnlineOthers((prev) => prev.filter((u) => u.id !== userId));
+      setSearchResults((prev) => prev.filter((u) => u.id !== userId));
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Couldn't send request");
     } finally {
@@ -376,36 +409,85 @@ export default function FriendsPage() {
 
           {/* Tab: Find Players */}
           {tab === 'find' && (
-            loadingFind ? (
-              <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-10">Loading…</div>
-            ) : onlineOthers.length === 0 ? (
-              <EmptyState text="No other players online right now" />
-            ) : (
-              <div className="grid sm:grid-cols-2 gap-3">
-                {onlineOthers.map((u) => (
-                  <div
-                    key={u.id}
-                    className="rounded-2xl border border-rose-100 dark:border-gray-800 p-4 flex items-center gap-3"
-                  >
-                    <div className="relative shrink-0">
-                      <Avatar name={u.name} avatarUrl={u.avatar_url} />
-                      <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white dark:border-gray-900 bg-emerald-500" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="font-medium text-gray-900 dark:text-gray-100 truncate">{u.name}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">Online</div>
-                    </div>
-                    <button
-                      disabled={addingId === u.id}
-                      onClick={() => addFriend(u.id)}
-                      className="rounded-lg px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white disabled:opacity-50 shrink-0"
-                    >
-                      Add Friend
-                    </button>
-                  </div>
-                ))}
+            <div>
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by name or email — online or not"
+                  className="w-full rounded-xl border dark:border-gray-700 bg-transparent pl-9 pr-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
+                />
               </div>
-            )
+
+              {searchQuery.trim() ? (
+                searching ? (
+                  <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-10">Searching…</div>
+                ) : searchResults.length === 0 ? (
+                  <EmptyState text="No matching players found" />
+                ) : (
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {searchResults.map((u) => (
+                      <div
+                        key={u.id}
+                        className="rounded-2xl border border-rose-100 dark:border-gray-800 p-4 flex items-center gap-3"
+                      >
+                        <div className="relative shrink-0">
+                          <Avatar name={u.name} avatarUrl={u.avatar_url} />
+                          <span
+                            className={`absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white dark:border-gray-900 ${dotColor(u.presence_status ?? 'offline')}`}
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium text-gray-900 dark:text-gray-100 truncate">{u.name}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{statusLabel(u.presence_status ?? 'offline')}</div>
+                        </div>
+                        <button
+                          disabled={addingId === u.id}
+                          onClick={() => addFriend(u.id)}
+                          className="rounded-lg px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white disabled:opacity-50 shrink-0"
+                        >
+                          Add Friend
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : loadingFind ? (
+                <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-10">Loading…</div>
+              ) : onlineOthers.length === 0 ? (
+                <EmptyState text="No other players online right now — search above to find anyone" />
+              ) : (
+                <div>
+                  <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Online now</div>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {onlineOthers.map((u) => (
+                      <div
+                        key={u.id}
+                        className="rounded-2xl border border-rose-100 dark:border-gray-800 p-4 flex items-center gap-3"
+                      >
+                        <div className="relative shrink-0">
+                          <Avatar name={u.name} avatarUrl={u.avatar_url} />
+                          <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white dark:border-gray-900 bg-emerald-500" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium text-gray-900 dark:text-gray-100 truncate">{u.name}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Online</div>
+                        </div>
+                        <button
+                          disabled={addingId === u.id}
+                          onClick={() => addFriend(u.id)}
+                          className="rounded-lg px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white disabled:opacity-50 shrink-0"
+                        >
+                          Add Friend
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </motion.div>
       </div>
