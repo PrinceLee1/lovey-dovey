@@ -89,7 +89,7 @@ export default function HotSeat({ players, lobbyCode, sessionId, hostId, onFinis
       setLoading(true);
       try {
         const { data } = await api.post("/ai/truth-dare", {
-          category, tone: "PG-13",
+          category, tone: "PG-13", mode: "group",
           count_truths: 20, count_dares: 0,
           names: players, personalize: false,
         });

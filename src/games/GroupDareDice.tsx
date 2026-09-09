@@ -24,6 +24,26 @@ type Props = {
   onVote?: (voter: string, v: "up" | "down") => void;
 };
 
+// Used whenever the AI-generated dare pool is empty (slow/rate-limited/
+// failed /ai/truth-dare call) so a turn never stalls waiting on it — the
+// dare card and every action button are gated on having a dare at all, so
+// without this a failed fetch left the host with no way to proceed despite
+// the error message claiming a "backup pool" that didn't actually exist.
+const FALLBACK_DARES = [
+  "Do your best impression of another player in the group",
+  "Let the group pick your profile picture for a week",
+  "Speak in an accent until your next turn",
+  "Do 10 jumping jacks right now",
+  "Let the person to your left give you a new nickname for the rest of the game",
+  "Sing your next sentence instead of saying it",
+  "Attempt to lick your elbow",
+  "Do your best dance move for 10 seconds",
+  "Tell the group your most-used emoji and why",
+  "Let the group rename your phone's contact name for you",
+  "Talk in the third person until your next turn",
+  "Do a dramatic reading of your last text message",
+];
+
 const FACES = [
   { n: 1, label: "Sweet",     color: "from-pink-100 to-rose-100 dark:from-pink-950/40 dark:to-rose-950/40",           text: "text-rose-600 dark:text-rose-300"       },
   { n: 2, label: "Funny",     color: "from-yellow-100 to-amber-100 dark:from-yellow-950/40 dark:to-amber-950/40",     text: "text-amber-600 dark:text-amber-300"     },
@@ -112,7 +132,7 @@ export default function GroupDareDice({
     setLoading(true); setErr(null);
     try {
       const { data } = await api.post("/ai/truth-dare", {
-        category, tone: "PG-13",
+        category, tone: "PG-13", mode: "group",
         count_truths: 0, count_dares: count,
         names: players, personalize: false,
       });
@@ -121,8 +141,11 @@ export default function GroupDareDice({
     finally { setLoading(false); }
   }
 
-  function drawDare(): string | null {
-    if (dares.length === 0) { if (isHost) fetchBatch(12); return null; }
+  function drawDare(): string {
+    if (dares.length === 0) {
+      if (isHost) fetchBatch(12); // top up the AI-generated pool in the background
+      return FALLBACK_DARES[Math.floor(Math.random() * FALLBACK_DARES.length)];
+    }
     const d = dares[0];
     setDares(arr => arr.slice(1));
     if (dares.length < 4 && isHost) fetchBatch(12);
