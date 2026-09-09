@@ -257,6 +257,7 @@ export default function HotSeat({ players, lobbyCode, sessionId, hostId, onFinis
   const isInSeat  = user?.name === hotPlayer;
   const voters    = players.filter(p => p !== hotPlayer);
   const myVote    = gs.votes[user?.name ?? ""];
+  const nameFor   = (p: string) => (p === user?.name ? "You" : p);
 
   return (
     <div className="space-y-4">
@@ -269,7 +270,7 @@ export default function HotSeat({ players, lobbyCode, sessionId, hostId, onFinis
             <div key={name} className={`rounded-full px-3 py-1 text-xs font-semibold border flex items-center gap-1 ${
               i === 0 ? "bg-amber-50 border-amber-300 text-amber-700 dark:bg-amber-950/40 dark:border-amber-900 dark:text-amber-300" : "bg-gray-50 text-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"
             }`}>
-              {i === 0 && <Crown className="w-3 h-3"/>} {name} {pts}pts
+              {i === 0 && <Crown className="w-3 h-3"/>} {nameFor(name)} {pts}pts
             </div>
           ))}
         </div>
@@ -294,7 +295,7 @@ export default function HotSeat({ players, lobbyCode, sessionId, hostId, onFinis
           <motion.div key="intro" initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} exit={{opacity:0}}
             className="rounded-3xl bg-gradient-to-br from-orange-400 to-rose-500 p-6 text-white text-center space-y-3">
             <div className="text-5xl">🔥</div>
-            <div className="text-xl font-bold">{hotPlayer} is in the Hot Seat!</div>
+            <div className="text-xl font-bold">{isInSeat ? "You are" : `${hotPlayer} is`} in the Hot Seat!</div>
             <div className="text-white/80 text-sm">20 seconds to answer. Everyone else votes.</div>
             {isHost
               ? <button onClick={startRound} className="mt-2 rounded-2xl px-6 py-2.5 bg-white text-orange-600 font-semibold text-sm hover:bg-orange-50">Start Round 🎤</button>
@@ -309,7 +310,7 @@ export default function HotSeat({ players, lobbyCode, sessionId, hostId, onFinis
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Flame className="w-5 h-5 text-orange-500 dark:text-orange-400"/>
-                <span className="font-semibold text-gray-900 dark:text-gray-100">{hotPlayer}'s turn</span>
+                <span className="font-semibold text-gray-900 dark:text-gray-100">{isInSeat ? "Your" : `${hotPlayer}'s`} turn</span>
               </div>
               <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full font-mono font-bold text-sm border ${
                 gs.timeLeft <= 5 ? "bg-red-50 text-red-600 border-red-200 animate-pulse dark:bg-red-950/40 dark:text-red-400 dark:border-red-900" : "bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
@@ -322,12 +323,14 @@ export default function HotSeat({ players, lobbyCode, sessionId, hostId, onFinis
                 animate={{ width: `${(gs.timeLeft / SECONDS) * 100}%` }} transition={{ duration: 0 }}/>
             </div>
             <div className="rounded-2xl border-2 border-orange-200 bg-orange-50 p-5 dark:border-orange-900 dark:bg-orange-950/40">
-              <div className="text-xs text-orange-600 mb-2 font-medium dark:text-orange-400">QUESTION FOR {hotPlayer.toUpperCase()}</div>
+              <div className="text-xs text-orange-600 mb-2 font-medium dark:text-orange-400">QUESTION FOR {isInSeat ? "YOU" : hotPlayer.toUpperCase()}</div>
               <div className="text-gray-900 font-medium text-lg leading-relaxed dark:text-gray-100">{gs.question}</div>
             </div>
-            <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-              📱 Pass the phone to <b>{hotPlayer}</b> — everyone listen!
-            </div>
+            {!isInSeat && (
+              <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+                📱 Pass the phone to <b>{hotPlayer}</b> — everyone listen!
+              </div>
+            )}
             {isHost && (
               <button onClick={moveToVote}
                 className="w-full rounded-2xl py-2.5 bg-gradient-to-r from-pink-500 to-fuchsia-600 text-white text-sm font-medium">
@@ -341,7 +344,7 @@ export default function HotSeat({ players, lobbyCode, sessionId, hostId, onFinis
         {gs.phase === "vote" && (
           <motion.div key="vote" initial={{opacity:0,x:20}} animate={{opacity:1,x:0}} exit={{opacity:0}} className="space-y-3">
             <div className="text-center">
-              <div className="font-semibold text-gray-900 dark:text-gray-100">Did {hotPlayer} answer honestly? 🗳️</div>
+              <div className="font-semibold text-gray-900 dark:text-gray-100">Did {isInSeat ? "you" : hotPlayer} answer honestly? 🗳️</div>
               <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{Object.keys(gs.votes).length}/{voters.length} voted</div>
             </div>
             <div className="rounded-2xl border dark:border-gray-800 bg-gray-50 dark:bg-gray-800 p-3 text-sm text-gray-700 dark:text-gray-300 italic">"{gs.question}"</div>
@@ -368,7 +371,7 @@ export default function HotSeat({ players, lobbyCode, sessionId, hostId, onFinis
                   gs.votes[p]==="up" ? "bg-emerald-50 border-emerald-300 text-emerald-700 dark:bg-emerald-950/40 dark:border-emerald-900 dark:text-emerald-300" :
                   gs.votes[p]==="down" ? "bg-red-50 border-red-300 text-red-700 dark:bg-red-950/40 dark:border-red-900 dark:text-red-400" :
                   "bg-gray-50 text-gray-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"}`}>
-                  {p} {gs.votes[p]==="up" ? "✅" : gs.votes[p]==="down" ? "👀" : "⌛"}
+                  {nameFor(p)} {gs.votes[p]==="up" ? "✅" : gs.votes[p]==="down" ? "👀" : "⌛"}
                 </div>
               ))}
             </div>
@@ -391,7 +394,9 @@ export default function HotSeat({ players, lobbyCode, sessionId, hostId, onFinis
                 <div className="text-3xl mb-2">{last?.ups >= last?.downs ? "✅" : "😬"}</div>
                 <div className="font-bold text-gray-900 dark:text-gray-100">{last?.ups} honest • {last?.downs} sus</div>
                 <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  {last?.ups >= last?.downs ? `${hotPlayer} earns ${last?.ups * 10} XP!` : `${hotPlayer} was sus — no XP!`}
+                  {last?.ups >= last?.downs
+                    ? (isInSeat ? `You earn ${last?.ups * 10} XP!` : `${hotPlayer} earns ${last?.ups * 10} XP!`)
+                    : (isInSeat ? "You were sus — no XP!" : `${hotPlayer} was sus — no XP!`)}
                 </div>
               </div>
               {isHost ? (
