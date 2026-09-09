@@ -5,6 +5,30 @@ import { Clock, Eye, EyeOff, SkipForward, RotateCcw, Users, Sparkles } from "luc
 
 type Card = { title: string; hint?: string | null; taboo: string[]; category?: string; difficulty?: string };
 
+// Used whenever the AI-generated pool is empty (slow/rate-limited/failed
+// /ai/charades call) so a round never stalls waiting on it — same role as
+// HotSeat's FALLBACK question list.
+const FALLBACK_CARDS: Card[] = [
+  { title: "Riding a bicycle", taboo: [] },
+  { title: "Brushing your teeth", taboo: [] },
+  { title: "Playing the guitar", taboo: [] },
+  { title: "Walking a dog", taboo: [] },
+  { title: "Baking a cake", taboo: [] },
+  { title: "Taking a selfie", taboo: [] },
+  { title: "Swimming", taboo: [] },
+  { title: "Building a sandcastle", taboo: [] },
+  { title: "Ordering coffee", taboo: [] },
+  { title: "Doing yoga", taboo: [] },
+  { title: "Catching a fish", taboo: [] },
+  { title: "Flying a kite", taboo: [] },
+  { title: "Painting a wall", taboo: [] },
+  { title: "Playing chess", taboo: [] },
+  { title: "Ice skating", taboo: [] },
+  { title: "Blowing out birthday candles", taboo: [] },
+  { title: "Folding laundry", taboo: [] },
+  { title: "Parallel parking", taboo: [] },
+];
+
 /*
   Sync (lobby mode): when `isHost` is passed, the host is the sole authority
   over the round — it draws cards, runs the timer, and computes scores,
@@ -197,8 +221,14 @@ export default function CharadesAI({
   }
   useEffect(()=>{ if (isHost) fetchCards(24); }, [isHost, category, difficulty]);
 
-  function drawCard(): Card | null {
-    if (pool.length === 0) { fetchCards(16); return null; }
+  function drawCard(): Card {
+    if (pool.length === 0) {
+      fetchCards(16); // top up the AI-generated pool in the background
+      // Never leave the round with no card to show — a slow, rate-limited,
+      // or failed AI call would otherwise strand the host on "Fetching a
+      // new card…" with no button anywhere to recover from it.
+      return FALLBACK_CARDS[Math.floor(Math.random() * FALLBACK_CARDS.length)];
+    }
     const c = pool[0];
     setPool((p)=> p.slice(1));
     if (pool.length < 4 && !loading) fetchCards(16);
