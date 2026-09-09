@@ -17,6 +17,7 @@ import FriendsPage from './pages/Friends';
 import ProfilePage from './pages/Profile';
 import MobileTabBar from './components/MobileTabBar';
 import InstallPrompt from './components/InstallPrompt';
+import PullToRefresh from './components/PullToRefresh';
 import PrivacyPage from './pages/legal/Privacy';
 import TermsPage from './pages/legal/Terms';
 import CommunityGuidelinesPage from './pages/legal/CommunityGuidelines';
@@ -64,6 +65,7 @@ export default function App() {
       <ToastProvider>
         <BrowserRouter>
           <InstallPrompt />
+          <PullToRefresh />
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/onboarding" element={<Onboarding />} />

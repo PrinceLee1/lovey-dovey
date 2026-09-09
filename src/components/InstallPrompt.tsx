@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Download, X } from 'lucide-react';
+import { isStandalonePwa } from '../libs/pwa';
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -10,18 +11,6 @@ type BeforeInstallPromptEvent = Event & {
 const VISIT_KEY = 'pwa_visit_count';
 const DISMISSED_KEY = 'pwa_install_dismissed';
 const MIN_VISITS = 2;
-
-function isStandalone() {
-  try {
-    return (
-      window.matchMedia('(display-mode: standalone)').matches ||
-      // iOS Safari's own standalone flag — not covered by the media query above.
-      (navigator as unknown as { standalone?: boolean }).standalone === true
-    );
-  } catch {
-    return false;
-  }
-}
 
 function isIos() {
   return /iphone|ipad|ipod/i.test(navigator.userAgent);
@@ -36,7 +25,7 @@ export default function InstallPrompt() {
     if (countedThisLoad.current) return;
     countedThisLoad.current = true;
 
-    if (isStandalone() || localStorage.getItem(DISMISSED_KEY) === '1') return;
+    if (isStandalonePwa() || localStorage.getItem(DISMISSED_KEY) === '1') return;
 
     let count = 0;
     try {
