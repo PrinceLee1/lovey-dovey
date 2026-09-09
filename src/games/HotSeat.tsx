@@ -30,6 +30,7 @@ type GameState = {
   scores: Record<string, number>;
   roundResults: { player: string; q: string; ups: number; downs: number }[];
   currentPlayer: string; // ← explicit name, not derived from index
+  rev: number; // ← monotonic counter guarding against out-of-order broadcasts
 };
 
 const SECONDS = 20;
@@ -75,8 +76,12 @@ export default function HotSeat({ players, lobbyCode, sessionId, hostId, onFinis
   const [gs, setGs] = useState<GameState>(() => ({
     phase: "intro", seatIdx: 0, qIdx: 0, question: null,
     votes: {}, timeLeft: SECONDS, scores: {}, roundResults: [],
-    currentPlayer: players[0] ?? "",
+    currentPlayer: players[0] ?? "", rev: 0,
   }));
+  // Every host-originated broadcast carries the next value of this counter,
+  // so a delayed/reordered broadcast from an earlier vote can never clobber
+  // a newer one that already arrived (see the "state" listener below).
+  const revRef = useRef(0);
 
   // ── Load AI questions ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -101,11 +106,14 @@ export default function HotSeat({ players, lobbyCode, sessionId, hostId, onFinis
     echo.channel(`lobby-game.${sessionId}`)
       .listen(".LobbyGameUpdate", (e: any) => {
         if (e.type === "state") {
-          setGs(e.data);
-          // If host broadcasted question phase, start local timer display
-          if (e.data.phase === "question" && !isHost) {
-            // non-host just renders the timeLeft from state
-          }
+          // Each vote triggers its own independent host -> server -> Pusher
+          // round trip; with two votes in quick succession, nothing
+          // guarantees those two broadcasts arrive in the order they were
+          // sent. Dropping any broadcast older than what we already have
+          // stops a late, stale snapshot from silently reverting a newer
+          // one (previously visible as a vote "going off" moments after
+          // someone else voted).
+          setGs(prev => ((e.data.rev ?? 0) >= (prev.rev ?? 0) ? e.data : prev));
         }
         if (e.type === "vote" && isHost) {
           // Host receives vote events and merges them, then rebroadcasts
@@ -122,10 +130,11 @@ export default function HotSeat({ players, lobbyCode, sessionId, hostId, onFinis
 
   // ── Broadcast state (host only) ───────────────────────────────────────────
   async function broadcastState(newGs: GameState) {
-    setGs(newGs);
+    const withRev = { ...newGs, rev: ++revRef.current };
+    setGs(withRev);
     try {
       await api.post(`/lobbies/${lobbyCode}/games/${sessionId}/action`, {
-        type: "state", data: newGs,
+        type: "state", data: withRev,
       });
     } catch (e) { console.error("Broadcast failed:", e); }
   }
@@ -203,6 +212,20 @@ export default function HotSeat({ players, lobbyCode, sessionId, hostId, onFinis
   // ── PARTICIPANT VOTE ──────────────────────────────────────────────────────
   async function castVote(v: "up" | "down") {
     const voterName = user?.name ?? "Unknown";
+
+    // The host is the only client listening for "vote" events (to merge and
+    // rebroadcast them) — a "vote" event from the host would never reach
+    // anyone, itself included. The host merges and broadcasts its own vote
+    // directly instead, the same way it handles everyone else's.
+    if (isHost) {
+      setGs(prev => {
+        const next = { ...prev, votes: { ...prev.votes, [voterName]: v } };
+        broadcastState(next);
+        return next;
+      });
+      return;
+    }
+
     setGs(prev => ({ ...prev, votes: { ...prev.votes, [voterName]: v } }));
     try {
       await api.post(`/lobbies/${lobbyCode}/games/${sessionId}/action`, {
@@ -316,8 +339,8 @@ export default function HotSeat({ players, lobbyCode, sessionId, hostId, onFinis
             </div>
             <div className="rounded-2xl border dark:border-gray-800 bg-gray-50 dark:bg-gray-800 p-3 text-sm text-gray-700 dark:text-gray-300 italic">"{gs.question}"</div>
 
-            {/* Non-host voters see buttons */}
-            {!isInSeat && !isHost && (
+            {/* Everyone but whoever's in the seat votes — including the host */}
+            {!isInSeat && (
               <div className="flex gap-3">
                 <button onClick={() => castVote("up")} className={`flex-1 rounded-2xl py-3 text-sm border font-semibold transition ${
                   myVote==="up" ? "bg-emerald-500 text-white border-emerald-500" : "hover:bg-emerald-50 text-emerald-700 dark:border-gray-700 dark:text-emerald-300 dark:hover:bg-emerald-950/40"}`}>
