@@ -146,6 +146,22 @@ export default function HotSeat({ players, lobbyCode, sessionId, hostId, onFinis
     } catch (e) { console.error("Broadcast failed:", e); }
   }
 
+  // ── Heartbeat (host only) ─────────────────────────────────────────────────
+  // moveToVote/revealVotes/nextPlayer are each a single, un-retried
+  // broadcast — a transient Pusher blip (a dropped message, a brief
+  // reconnect) leaves an affected client stuck on the old phase forever,
+  // since nothing else ever re-sends it. The question phase happens to be
+  // resilient to this purely as a side effect of its own timer re-broadcasting
+  // every 3s; every other phase had no such safety net. Re-broadcasting the
+  // current state after a few quiet seconds means any single missed update
+  // self-heals shortly after, in every phase, not just "question".
+  useEffect(() => {
+    if (!isHost) return;
+    const id = setTimeout(() => broadcastState({ ...gs }), 4000);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHost, gs]);
+
   // ── Timer (host only) ─────────────────────────────────────────────────────
   function startTimer(initial: GameState) {
     stopTimer();
