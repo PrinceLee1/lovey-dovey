@@ -3,7 +3,12 @@
 @tailwind utilities;
 
 html, body, #root { height: 100%; }
-body { margin: 0; background: #fff; }
+/* iOS runs the installed PWA under a translucent status bar (see the
+   apple-mobile-web-app-status-bar-style meta tag), so page content needs
+   this padding or it renders partly under the notch/status bar — unreachable
+   to taps there. The background still paints edge-to-edge since padding
+   sits inside the body's background box. */
+body { margin: 0; background: #fff; padding-top: env(safe-area-inset-top); }
 html.dark body { background: #0b0b12; }
 
 @layer base {

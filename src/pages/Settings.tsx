@@ -21,6 +21,7 @@ import {
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../libs/axios";
+import { resizeImageToJpeg } from "../libs/image";
 import Footer from "../components/Footer";
 import { useToast } from "../context/ToastContext";
 /* -------------------------------- Types -------------------------------- */
@@ -181,12 +182,17 @@ export default function Settings() {
   }
 
   async function uploadAvatar(file: File) {
-    const fd = new FormData();
-    fd.append("avatar", file);
     setAvatarUploading(true);
     try {
+      // Phone photos are often 5-15MB (and HEIC on iPhone, which Laravel's
+      // `image` rule rejects outright) — downscale to a JPEG first so the
+      // upload is small and in a format the backend always accepts.
+      const resized = await resizeImageToJpeg(file);
+      const fd = new FormData();
+      fd.append("avatar", resized);
       const { data } = await api.post("/user/avatar", fd, {
         headers: { "Content-Type": "multipart/form-data" },
+        timeout: 30000,
       });
       setAvatarPreview(data.url); // use returned URL
       await fetchMe();
@@ -382,7 +388,7 @@ export default function Settings() {
                 />
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400">
-                {avatarUploading ? "Uploading avatar…" : "PNG/JPG up to ~2MB"}
+                {avatarUploading ? "Uploading avatar…" : "Any photo — we'll resize it automatically"}
                 <div className="mt-1">
                   <Link to="/profile/me" className="text-fuchsia-600 dark:text-fuchsia-400 font-medium hover:underline">
                     View your profile
