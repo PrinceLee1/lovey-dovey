@@ -437,8 +437,8 @@ export default function Onboarding() {
 
               <p className="text-center text-xs text-gray-400 mt-6 leading-relaxed">
                 By continuing you agree to our{" "}
-                <span className="text-gray-600 underline cursor-pointer">Terms</span> &{" "}
-                <span className="text-gray-600 underline cursor-pointer">Privacy Policy</span>
+                <Link to="/terms" className="text-gray-600 underline hover:text-gray-900">Terms</Link> &{" "}
+                <Link to="/privacy" className="text-gray-600 underline hover:text-gray-900">Privacy Policy</Link>
               </p>
 
               <div className="text-center mt-4">
@@ -659,7 +659,9 @@ export default function Onboarding() {
                 </Btn>
 
                 <p className="text-center text-xs text-gray-400 leading-relaxed">
-                  By creating an account you agree to our Terms & Privacy Policy
+                  By creating an account you agree to our{" "}
+                  <Link to="/terms" className="text-gray-600 underline hover:text-gray-900">Terms</Link> &{" "}
+                  <Link to="/privacy" className="text-gray-600 underline hover:text-gray-900">Privacy Policy</Link>
                 </p>
               </form>
             </div>

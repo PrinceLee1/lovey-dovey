@@ -207,8 +207,8 @@ export default function SignIn() {
 
           <p className="text-center text-xs text-gray-400 mt-6">
             By signing in you agree to our{" "}
-            <span className="text-gray-600 underline cursor-pointer">Terms</span> &{" "}
-            <span className="text-gray-600 underline cursor-pointer">Privacy</span>
+            <Link to="/terms" className="text-gray-600 underline hover:text-gray-900">Terms</Link> &{" "}
+            <Link to="/privacy" className="text-gray-600 underline hover:text-gray-900">Privacy</Link>
           </p>
         </motion.div>
       </div>
